@@ -32,10 +32,10 @@
   - 요청/응답 포맷: https://core.telegram.org/bots/api#making-requests
 - 도구:
   - `telegram_send_message` — 텍스트(1–4096자) 전송. chat_id 미지정 시 `TELEGRAM_CHAT_ID`
-  - `telegram_send_photo` / `telegram_send_document` — 사진·문서 전송(URL·file_id, caption ≤1024)
-  - `telegram_edit_message_text` / `telegram_delete_message` — 메시지 편집·삭제
+  - `telegram_send_photo` / `telegram_send_document` — 사진·문서 전송(URL·file_id·**로컬 업로드**, caption ≤1024)
+  - `telegram_edit_message_text` / `telegram_delete_message` — 메시지 편집(chat ⊕ inline)·삭제
   - `telegram_get_me` — 토큰/봇 신원 확인(헬스체크)
-- 스코프: 포함 = 텍스트/사진/문서 전송·편집·삭제·getMe / 제외 = **로컬 파일 업로드(multipart)** → 코어 multipart 동사 추가 후, 인라인 키보드·미디어그룹
+- 스코프: 포함 = 텍스트/사진/문서 전송·편집·삭제·getMe + **로컬 파일 multipart 업로드**(사진≤10MB·파일≤50MB) / 제외 = 인라인 키보드·미디어그룹·기타 미디어(sendVideo 등)
 
 ---
 

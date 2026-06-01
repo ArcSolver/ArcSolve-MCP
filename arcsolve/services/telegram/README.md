@@ -44,9 +44,9 @@ Base: `https://api.telegram.org` · 인증: **봇 토큰을 URL 경로에** (`/b
 |------|------|
 | `telegram_get_me()` | 봇 신원/토큰 유효성 확인(헬스체크). 파라미터 없음 |
 | `telegram_send_message(text, chat_id?, parse_mode?, disable_link_preview?, disable_notification?)` | 텍스트(1-4096자) 전송. `chat_id` 미지정 시 `TELEGRAM_CHAT_ID` 사용 |
-| `telegram_send_photo(photo, caption?, chat_id?, parse_mode?)` | 사진 전송. `photo`는 **URL 또는 file_id 문자열만**. `caption` 0-1024자. `chat_id` 미지정 시 `TELEGRAM_CHAT_ID` 사용 |
-| `telegram_send_document(document, caption?, chat_id?, parse_mode?)` | 문서 전송. `document`는 **URL 또는 file_id 문자열만**. `caption` 0-1024자. `chat_id` 미지정 시 `TELEGRAM_CHAT_ID` 사용 |
-| `telegram_edit_message_text(chat_id, message_id, text, parse_mode?)` | 봇이 보낸 메시지의 텍스트(1-4096자) 편집 |
+| `telegram_send_photo(photo, caption?, chat_id?, parse_mode?)` | 사진 전송. `photo`는 **URL · file_id · 로컬 경로**(로컬이면 multipart 업로드, ≤10MB). `caption` 0-1024자. `chat_id` 미지정 시 `TELEGRAM_CHAT_ID` |
+| `telegram_send_document(document, caption?, chat_id?, parse_mode?)` | 문서 전송. `document`는 **URL · file_id · 로컬 경로**(로컬이면 multipart 업로드, ≤50MB). `caption` 0-1024자. `chat_id` 미지정 시 `TELEGRAM_CHAT_ID` |
+| `telegram_edit_message_text(text, message_id?, chat_id?, inline_message_id?, parse_mode?)` | 메시지 텍스트(1-4096자) 편집. `chat_id`+`message_id` 또는 `inline_message_id` 중 하나 |
 | `telegram_delete_message(chat_id, message_id)` | 메시지 삭제(성공 시 True) |
 
 ## 범위 / 제약
@@ -54,11 +54,13 @@ Base: `https://api.telegram.org` · 인증: **봇 토큰을 URL 경로에** (`/b
   답장(`reply_parameters`), 엔티티(`entities`)는 v2로 분리한다.
 - `text`는 공식 제약대로 **1-4096자**(엔티티 파싱 후 기준). `caption`은 **0-1024자**.
 - `parse_mode`는 `"MarkdownV2"` 또는 `"HTML"`만 노출(legacy `"Markdown"` 제외).
-- **사진/문서 전송은 `photo`/`document`가 URL 또는 file_id 문자열일 때만 지원**한다.
-  로컬 파일 업로드(multipart/form-data)는 **코어에 multipart 동사가 없어 미구현**이며,
-  코어 multipart 동사가 추가된 뒤 별도로 지원할 예정이다.
-- `editMessageText`/`deleteMessage`는 봇 자신이 보낸(또는 접근 가능한) 메시지에만 동작한다.
-  인라인 메시지(`inline_message_id`) 경로는 범위 밖이다.
+- **사진/문서는 `photo`/`document`가 URL·file_id 문자열이면 JSON으로, 로컬 파일 경로이면
+  multipart/form-data로 업로드**한다. 공식 업로드 한도는 **사진 10MB / 파일 50MB**
+  (HTTP URL 전송 시엔 5MB/20MB로 더 작다). ⚠️ **보안**: 로컬 경로를 주면 서버 파일시스템의
+  해당 파일을 읽어 전송하므로, 신뢰할 수 있는 호출자/환경에서만 사용한다.
+- `editMessageText`는 공식대로 **`chat_id`+`message_id`(봇 메시지)** 또는
+  **`inline_message_id`(인라인 메시지)** 중 한 경로를 받는다(상호 배타). `deleteMessage`는
+  봇이 접근 가능한 메시지에 동작한다.
 
 ### sendMessage 필드 (공식 계약, MVP 노출분)
 | 필드 | 필수 | 비고 |
@@ -75,20 +77,21 @@ Base: `https://api.telegram.org` · 인증: **봇 토큰을 URL 경로에** (`/b
 | 필드 | 필수 | 비고 |
 |------|------|------|
 | `chat_id` | 필수 | 정수 ID 또는 `"@channelusername"` |
-| `photo` / `document` | 필수 | **URL 또는 file_id 문자열만** (로컬 업로드 미지원) |
+| `photo` / `document` | 필수 | **URL · file_id · 로컬 경로** (로컬이면 multipart 업로드) |
 | `caption` | 선택 | 0-1024자 |
 | `parse_mode` | 선택 | `MarkdownV2` / `HTML` |
 
 ### editMessageText / deleteMessage 필드 (공식 계약, 노출분)
 | 필드 | 필수 | 비고 |
 |------|------|------|
-| `chat_id` | 필수 | 정수 ID 또는 `"@channelusername"` |
-| `message_id` | 필수 | 편집/삭제할 메시지 ID |
+| `chat_id` | 조건부(편집) | `message_id`와 함께 — `inline_message_id`가 없을 때 |
+| `message_id` | 조건부(편집) | `chat_id`와 함께 |
+| `inline_message_id` | 조건부(편집) | `chat_id`/`message_id`가 없을 때(상호 배타) |
+| `chat_id`(삭제) | 필수 | 삭제는 `chat_id`+`message_id` 모두 필수 |
 | `text` | 필수(편집) | 1-4096자 |
 | `parse_mode` | 선택(편집) | `MarkdownV2` / `HTML` |
 
 ## 확장 포인트
-- 로컬 파일 업로드: `sendPhoto`/`sendDocument`의 multipart/form-data 경로 — 코어 multipart 동사 추가 후.
 - 인라인 버튼: `reply_markup`(InlineKeyboardMarkup) 모델 추가.
 - 답장/엔티티: `reply_parameters`, `entities` 모델 추가.
-- 인라인 메시지 편집: `editMessageText`의 `inline_message_id` 경로.
+- 미디어 그룹/기타 미디어: `sendMediaGroup`, `sendVideo`/`sendAudio` 등(같은 multipart 동사 재사용).

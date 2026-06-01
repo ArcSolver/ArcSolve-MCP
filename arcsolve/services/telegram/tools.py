@@ -7,12 +7,33 @@ oauth.py / make_auth_client 를 쓰지 않는다.
 
 from __future__ import annotations
 
+import mimetypes
+import os
+
 from fastmcp import FastMCP
 from pydantic import ValidationError
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
-from arcsolve.http import UpstreamError, get_json, post_json
+from arcsolve.http import UpstreamError, get_json, post_json, post_multipart
 from arcsolve.services.telegram import contract as t
+
+
+def _build_upload(path: str, field: str, max_bytes: int) -> dict | str:
+    """로컬 파일을 multipart `files` 형식으로 준비한다.
+
+    성공 시 {field: (파일명, 바이트, MIME)} 를, 한도 초과 시 사람이 읽을 오류 문자열을 돌려준다.
+    크기 한도 출처: https://core.telegram.org/bots/api#sending-files
+    """
+    size = os.path.getsize(path)
+    if size > max_bytes:
+        return (
+            f"파일이 너무 큽니다({size // (1024 * 1024)}MB). "
+            f"업로드 한도는 {max_bytes // (1024 * 1024)}MB입니다."
+        )
+    with open(path, "rb") as fh:
+        blob = fh.read()
+    mime = mimetypes.guess_type(path)[0] or "application/octet-stream"
+    return {field: (os.path.basename(path), blob, mime)}
 
 
 class TelegramSettings(BaseSettings):
@@ -127,8 +148,9 @@ def register(mcp: FastMCP) -> None:
         """Telegram 봇으로 사진을 전송한다(sendPhoto).
 
         Args:
-            photo: 사진의 **HTTP URL 또는 file_id 문자열**. 로컬 파일 업로드는 미지원
-                   (코어에 multipart 동사가 없음 — URL/file_id만 지원).
+            photo: 사진의 **HTTP URL · file_id · 또는 로컬 파일 경로**. 로컬 파일이면
+                   multipart로 업로드한다(사진 업로드 한도 10MB). ⚠️ 로컬 경로를 주면
+                   서버 파일시스템의 해당 파일을 읽어 전송한다.
             caption: 사진 캡션. 0-1024자.
             chat_id: 대상 채팅 ID 또는 "@channelusername". 미지정 시 TELEGRAM_CHAT_ID 사용.
             parse_mode: 캡션 서식 모드. "MarkdownV2" 또는 "HTML". 미지정 시 평문.
@@ -140,20 +162,29 @@ def register(mcp: FastMCP) -> None:
         target = chat_id or settings.chat_id
         if not target:
             return "chat_id가 없습니다. 인자로 주거나 TELEGRAM_CHAT_ID를 설정하세요."
-
-        try:
-            req = t.SendPhoto(
-                chat_id=target,
-                photo=photo,
-                caption=caption,
-                parse_mode=parse_mode,
-            )
-        except ValidationError as e:
-            return f"입력 오류: {e.errors()[0]['msg']}"
+        if caption is not None and len(caption) > t.CAPTION_MAX_LENGTH:
+            return f"입력 오류: caption은 최대 {t.CAPTION_MAX_LENGTH}자입니다."
 
         url = t.BASE_URL + t.method_path(settings.bot_token, t.SEND_PHOTO)
         try:
-            raw = await post_json(url, json=req.model_dump(exclude_none=True))
+            if t.is_local_file(photo):
+                files = _build_upload(photo, "photo", t.PHOTO_UPLOAD_MAX_BYTES)
+                if isinstance(files, str):
+                    return files  # 크기 한도 초과 등
+                form = {"chat_id": target}
+                if caption is not None:
+                    form["caption"] = caption
+                if parse_mode is not None:
+                    form["parse_mode"] = parse_mode
+                raw = await post_multipart(url, data=form, files=files)
+            else:
+                # URL 또는 file_id 문자열 → JSON 전송
+                req = t.SendPhoto(
+                    chat_id=target, photo=photo, caption=caption, parse_mode=parse_mode
+                )
+                raw = await post_json(url, json=req.model_dump(exclude_none=True))
+        except ValidationError as e:
+            return f"입력 오류: {e.errors()[0]['msg']}"
         except UpstreamError as e:
             return _explain(e)
 
@@ -173,8 +204,9 @@ def register(mcp: FastMCP) -> None:
         """Telegram 봇으로 문서(파일)를 전송한다(sendDocument).
 
         Args:
-            document: 파일의 **HTTP URL 또는 file_id 문자열**. 로컬 파일 업로드는 미지원
-                      (코어에 multipart 동사가 없음 — URL/file_id만 지원).
+            document: 파일의 **HTTP URL · file_id · 또는 로컬 파일 경로**. 로컬 파일이면
+                      multipart로 업로드한다(파일 업로드 한도 50MB). ⚠️ 로컬 경로를 주면
+                      서버 파일시스템의 해당 파일을 읽어 전송한다.
             caption: 문서 캡션. 0-1024자.
             chat_id: 대상 채팅 ID 또는 "@channelusername". 미지정 시 TELEGRAM_CHAT_ID 사용.
             parse_mode: 캡션 서식 모드. "MarkdownV2" 또는 "HTML". 미지정 시 평문.
@@ -186,20 +218,28 @@ def register(mcp: FastMCP) -> None:
         target = chat_id or settings.chat_id
         if not target:
             return "chat_id가 없습니다. 인자로 주거나 TELEGRAM_CHAT_ID를 설정하세요."
-
-        try:
-            req = t.SendDocument(
-                chat_id=target,
-                document=document,
-                caption=caption,
-                parse_mode=parse_mode,
-            )
-        except ValidationError as e:
-            return f"입력 오류: {e.errors()[0]['msg']}"
+        if caption is not None and len(caption) > t.CAPTION_MAX_LENGTH:
+            return f"입력 오류: caption은 최대 {t.CAPTION_MAX_LENGTH}자입니다."
 
         url = t.BASE_URL + t.method_path(settings.bot_token, t.SEND_DOCUMENT)
         try:
-            raw = await post_json(url, json=req.model_dump(exclude_none=True))
+            if t.is_local_file(document):
+                files = _build_upload(document, "document", t.FILE_UPLOAD_MAX_BYTES)
+                if isinstance(files, str):
+                    return files  # 크기 한도 초과 등
+                form = {"chat_id": target}
+                if caption is not None:
+                    form["caption"] = caption
+                if parse_mode is not None:
+                    form["parse_mode"] = parse_mode
+                raw = await post_multipart(url, data=form, files=files)
+            else:
+                req = t.SendDocument(
+                    chat_id=target, document=document, caption=caption, parse_mode=parse_mode
+                )
+                raw = await post_json(url, json=req.model_dump(exclude_none=True))
+        except ValidationError as e:
+            return f"입력 오류: {e.errors()[0]['msg']}"
         except UpstreamError as e:
             return _explain(e)
 

@@ -3,7 +3,15 @@
 import httpx
 import pytest
 
-from arcsolve.http import UpstreamError, delete_json, get_json, patch_json, post_form, post_json
+from arcsolve.http import (
+    UpstreamError,
+    delete_json,
+    get_json,
+    patch_json,
+    post_form,
+    post_json,
+    post_multipart,
+)
 
 
 def _t(handler):
@@ -62,6 +70,30 @@ async def test_delete_json_returns_empty_dict_on_no_content():
         return httpx.Response(204)
 
     assert await delete_json("https://x/msg/1", transport=_t(handler)) == {}
+
+
+async def test_post_multipart_sends_file_part_and_form_fields():
+    seen = {}
+
+    async def handler(req):
+        seen["method"] = req.method
+        seen["ct"] = req.headers.get("content-type", "")
+        seen["body"] = req.content  # bytes
+        return httpx.Response(200, json={"ok": True})
+
+    out = await post_multipart(
+        "https://x/upload",
+        data={"chat_id": "42"},
+        files={"photo": ("pic.jpg", b"\xff\xd8\xff binary", "image/jpeg")},
+        transport=_t(handler),
+    )
+    assert out == {"ok": True}
+    assert seen["method"] == "POST"
+    assert seen["ct"].startswith("multipart/form-data")  # boundary는 httpx가 자동 설정
+    assert b"binary" in seen["body"]          # 파일 파트 바이트 존재
+    assert b'name="chat_id"' in seen["body"]  # 폼 필드 동시 존재
+    assert b'name="photo"' in seen["body"]
+    assert b"pic.jpg" in seen["body"]
 
 
 async def test_4xx_raises_upstream_error_with_payload():
