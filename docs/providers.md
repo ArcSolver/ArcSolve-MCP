@@ -23,41 +23,51 @@
 
 ---
 
-## telegram — Telegram Bot 메시지 전송
+## telegram — Telegram Bot 메시지 전송/편집/삭제 + 헬스체크
 - 상태: `done`
 - 인증: Bot 토큰 (URL 경로 `/bot<token>/METHOD` — Bearer 아님)
 - 공식 문서:
   - Bot API 레퍼런스: https://core.telegram.org/bots/api
-  - sendMessage: https://core.telegram.org/bots/api#sendmessage
+  - sendMessage / sendPhoto / sendDocument / editMessageText / deleteMessage / getMe (각 앵커)
   - 요청/응답 포맷: https://core.telegram.org/bots/api#making-requests
 - 도구:
   - `telegram_send_message` — 텍스트(1–4096자) 전송. chat_id 미지정 시 `TELEGRAM_CHAT_ID`
-- 스코프(MVP): 포함 = sendMessage(텍스트) / 제외 = 미디어(sendPhoto 등 multipart → 코어 확장 필요), 인라인 키보드
+  - `telegram_send_photo` / `telegram_send_document` — 사진·문서 전송(URL·file_id, caption ≤1024)
+  - `telegram_edit_message_text` / `telegram_delete_message` — 메시지 편집·삭제
+  - `telegram_get_me` — 토큰/봇 신원 확인(헬스체크)
+- 스코프: 포함 = 텍스트/사진/문서 전송·편집·삭제·getMe / 제외 = **로컬 파일 업로드(multipart)** → 코어 multipart 동사 추가 후, 인라인 키보드·미디어그룹
 
 ---
 
-## discord — Discord Webhook 메시지 전송
+## discord — Discord 메시지 전송/편집/삭제(Webhook) + 채널 전송/조회(Bot)
 - 상태: `done`
-- 인증: Webhook URL (URL 자체가 시크릿, 별도 인증 헤더 없음)
+- 인증: Webhook URL(무인증) + (선택) Bot 토큰(`Authorization: Bot` — 채널 직접 전송/조회)
 - 공식 문서:
-  - Execute Webhook: https://discord.com/developers/docs/resources/webhook#execute-webhook
-  - Message Object: https://discord.com/developers/docs/resources/message#message-object
+  - Execute/Edit/Delete Webhook Message: https://discord.com/developers/docs/resources/webhook
+  - Create / Get Channel Messages: https://discord.com/developers/docs/resources/message
+  - Embed 오브젝트: https://discord.com/developers/docs/resources/message#embed-object
 - 도구:
-  - `discord_send_message` — content(≤2000자) 전송, username/avatar_url 덮어쓰기 가능
-- 스코프(MVP): 포함 = Execute Webhook(content) / 제외 = Bot 토큰 경로(create-message), embeds·file·components
+  - `discord_send_message` / `discord_send_embed` — content·리치 임베드 전송(Webhook)
+  - `discord_edit_message` / `discord_delete_message` — 웹후크 메시지 편집·삭제
+  - `discord_create_message` / `discord_list_messages` — Bot 토큰으로 채널 전송·조회
+- 스코프: 포함 = Webhook 전송/임베드/편집/삭제 + Bot 채널 전송/조회 / 제외 = 반응·스레드·첨부파일·components
 
 ---
 
-## line — LINE Messaging API push 전송
+## line — LINE Messaging API 메시지 전송(push/reply/multicast/broadcast) + 프로필
 - 상태: `done`
 - 인증: 채널 액세스 토큰 (Bearer)
 - 공식 문서:
   - Messaging API 레퍼런스: https://developers.line.biz/en/reference/messaging-api/
-  - Send push message: https://developers.line.biz/en/reference/messaging-api/#send-push-message
+  - push / reply / multicast / broadcast / get-profile (각 앵커)
   - 채널 액세스 토큰: https://developers.line.biz/en/docs/messaging-api/channel-access-tokens/
 - 도구:
-  - `line_send_text` — 텍스트(≤5000자) push 1건. to 미지정 시 `LINE_TO`
-- 스코프(MVP): 포함 = push message(text) / 제외 = reply/multicast/broadcast, sticker·image 등 비텍스트 메시지
+  - `line_send_text` — push 1건(≤5000자, UTF-16). to 미지정 시 `LINE_TO`
+  - `line_reply_text` — replyToken으로 회신
+  - `line_multicast_text` — 여러 userId(최대 500)에 동일 텍스트
+  - `line_broadcast_text` — 모든 친구에게 전송
+  - `line_get_profile` — userId로 프로필 조회
+- 스코프: 포함 = 텍스트 push/reply/multicast/broadcast + 프로필 조회 / 제외 = Flex·template·sticker·image 등 비텍스트, rich menu, webhook 수신 서버
 
 ---
 

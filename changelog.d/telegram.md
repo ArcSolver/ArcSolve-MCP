@@ -1,1 +1,2 @@
 - **telegram**: sendMessage 기반 telegram_send_message 추가
+- **telegram**: 코어 도구 확장 — getMe(헬스체크)/sendPhoto/sendDocument(URL·file_id만)/editMessageText/deleteMessage 추가
