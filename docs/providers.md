@@ -72,7 +72,7 @@
 ---
 
 ## zotero — Zotero 라이브러리 읽기 (Web API v3 + 로컬 데스크톱 API, 단일 서비스·백엔드 전환)
-- 상태: `planned`
+- 상태: `done`
 - 구조: **한 서비스 = 두 백엔드.** 로컬 API는 Web API v3를 미러하므로 계약(경로·쿼리·응답 모델)이 거의 동일.
   `ZOTERO_SOURCE=web|local`(미지정 시 API 키 있으면 web, 없으면 local 자동)로 **base URL·인증만** 분기.
 - 인증:

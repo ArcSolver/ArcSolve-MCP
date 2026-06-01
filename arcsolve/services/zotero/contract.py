@@ -138,8 +138,10 @@ MAX_LIMIT = 100
 MAX_ITEMKEYS = 50
 MAX_BIB_ITEMS = 150
 
-# qmode 허용값. titleCreatorYear(기본) / everything(전문 포함).
-# 출처: basics — "qmode" 파라미터 ("titleCreatorYear" 또는 "everything")
+# qmode 허용값 — **아이템 quick search 전용**. titleCreatorYear(기본) / everything(전문 포함).
+# (태그 엔드포인트는 별도 qmode contains/startsWith를 쓴다 — MVP 범위 밖이라 여기서 다루지 않으며,
+#  list_tags는 qmode를 보내지 않는다.)
+# 출처: basics — items "qmode" ("titleCreatorYear" 또는 "everything")
 QMode = Literal["titleCreatorYear", "everything"]
 QMODES: tuple[str, ...] = ("titleCreatorYear", "everything")
 
@@ -164,9 +166,10 @@ def build_search_params(
     limit: int = DEFAULT_LIMIT,
     start: int = 0,
 ) -> dict[str, str | int]:
-    """검색/리스트 쿼리스트링을 만든다. None/빈값은 생략한다.
+    """**아이템 검색/리스트** 쿼리스트링을 만든다. None/빈값은 생략한다.
 
-    공식 파라미터명: q · qmode · itemType · tag · sort · limit · start.
+    공식 파라미터명: q · qmode · itemType · tag · sort · limit · start. qmode는 아이템 전용
+    (titleCreatorYear/everything). 컬렉션 아이템·태그 리스트는 qmode 없이 limit/start만 쓴다.
     출처: https://www.zotero.org/support/dev/web_api/v3/basics
     """
     validate_limit(limit)
@@ -230,9 +233,10 @@ class ZoteroItem(BaseModel):
     공식 최상위 키: key · version · library · links · meta · data.
     출처: https://www.zotero.org/support/dev/web_api/v3/basics (Read Requests / format=json)
 
-    UNVERIFIED: library/links/meta 서브객체의 정확한 키는 공식 산문에서 확정 못 했다.
-    → dict로 느슨히 받는다(extra="ignore"). data는 아이템 타입별 가변 필드 → dict.
-    # TODO(provenance): library/links/meta 서브객체 키를 실 응답으로 확정해 모델 정밀화.
+    참고: 공식에 library(type/id/name) · links(rel별 {href,type}) · meta(numChildren/
+    creatorSummary/parsedDate 등) 일부 서브키가 명시되나 전수 스키마는 미열거 → dict로 느슨히
+    받는다(extra="ignore"). data는 아이템 타입별 가변 필드 → dict.
+    # TODO(provenance): 필요 시 library/links/meta 핵심 서브키를 모델로 승격.
     """
 
     model_config = {"extra": "ignore"}

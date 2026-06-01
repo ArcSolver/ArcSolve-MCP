@@ -60,6 +60,20 @@ async def test_local_backend_uses_users0_and_no_auth(monkeypatch, load_tools, re
     assert http.last["headers"] == {"Zotero-API-Version": "3"}
 
 
+async def test_local_backend_supports_group_prefix(monkeypatch, load_tools, recording_http):
+    # 로컬도 그룹 라이브러리(groups/<id>)를 지원한다(server_localAPI.js 라우트).
+    monkeypatch.setenv("ZOTERO_SOURCE", "local")
+    monkeypatch.delenv("ZOTERO_API_KEY", raising=False)
+    monkeypatch.setenv("ZOTERO_GROUP_ID", "999")
+    tools = load_tools(register)
+    http = recording_http(ret=([], {}))
+    monkeypatch.setattr(f"{MOD}.get_with_headers", http)
+
+    await tools["zotero_search_items"]()
+    assert http.last["url"].startswith("http://localhost:23119/api/groups/999/items")
+    assert http.last["headers"] == {"Zotero-API-Version": "3"}  # 로컬은 무인증
+
+
 async def test_get_item_parse(zt, monkeypatch, recording_http):
     item = {"key": "ABC", "version": 9, "data": {"itemType": "journalArticle", "title": "Paper"}}
     http = recording_http(ret=item)

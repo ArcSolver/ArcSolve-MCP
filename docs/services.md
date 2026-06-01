@@ -2,7 +2,7 @@
 
 > ⚙️ 자동 생성 — 직접 수정하지 마세요. `arcsolve-mcp catalog`로 재생성됩니다.
 
-현재 **4개 서비스 · 총 19개 도구**.
+현재 **5개 서비스 · 총 27개 도구**.
 
 ## discord — Discord — Webhook으로 채널에 메시지 전송
 공식 문서: https://discord.com/developers/docs/resources/webhook
@@ -46,4 +46,18 @@
 | `telegram_send_document` | Telegram 봇으로 문서(파일)를 전송한다(sendDocument). |
 | `telegram_send_message` | Telegram 봇으로 텍스트 메시지를 전송한다(sendMessage). |
 | `telegram_send_photo` | Telegram 봇으로 사진을 전송한다(sendPhoto). |
+
+## zotero — Zotero 라이브러리 읽기(Web API v3 + 로컬 데스크톱 API)
+공식 문서: https://www.zotero.org/support/dev/web_api/v3/basics
+
+| 도구 | 설명 |
+|------|------|
+| `zotero_get_collection_items` | 컬렉션의 아이템을 나열한다(GET /{prefix}/collections/{collectionKey}/items). |
+| `zotero_get_fulltext` | 첨부 아이템의 전문(full-text)을 조회한다(GET /{prefix}/items/{itemKey}/fulltext). |
+| `zotero_get_item` | 단일 아이템을 조회한다(GET /{prefix}/items/{itemKey}). |
+| `zotero_get_item_children` | 아이템의 자식(노트/첨부)을 나열한다(GET /{prefix}/items/{itemKey}/children). |
+| `zotero_health` | 백엔드 연결/설정 상태를 점검한다. |
+| `zotero_list_collections` | 컬렉션을 나열한다(GET /{prefix}/collections, top=True면 /collections/top). |
+| `zotero_list_tags` | 라이브러리의 태그를 나열한다(GET /{prefix}/tags). |
+| `zotero_search_items` | Zotero 라이브러리에서 아이템을 검색/나열한다(GET /{prefix}/items). |
 

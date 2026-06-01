@@ -67,13 +67,10 @@ def _resolve(s: ZoteroSettings) -> tuple[str, str, dict[str, str], str]:
     """
     source = s.resolved_source()
     if source == "local":
-        # 로컬은 무인증·읽기전용·users/0 고정.
-        return (
-            s.local_base.rstrip("/"),
-            z.user_prefix(z.LOCAL_USER_ID),
-            z.base_headers(None),
-            "local",
-        )
+        # 로컬은 무인증·읽기전용. 본인 사용자 데이터는 users/0이지만, 그룹 라이브러리는
+        # groups/<id>도 지원한다(server_localAPI.js가 /api/groups/:groupID/... 라우트 제공).
+        prefix = z.group_prefix(s.group_id) if s.group_id else z.user_prefix(z.LOCAL_USER_ID)
+        return (s.local_base.rstrip("/"), prefix, z.base_headers(None), "local")
     if source == "web":
         if s.group_id:
             prefix = z.group_prefix(s.group_id)
@@ -178,7 +175,8 @@ def register(mcp: FastMCP) -> None:
         """Zotero 라이브러리에서 아이템을 검색/나열한다(GET /{prefix}/items).
 
         Args:
-            q: 검색어. 미지정 시 라이브러리의 상위 아이템을 나열한다.
+            q: 검색어(기본은 제목·저자 quick search). 전문까지 포함하려면 qmode='everything'.
+               미지정 시 라이브러리 아이템을 나열한다.
             item_type: itemType 필터(예: book, journalArticle). 부정은 '-' 접두(예: -attachment).
             tag: 태그 필터.
             limit: 페이지 크기. 기본 25, 최대 100.
