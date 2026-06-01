@@ -15,7 +15,7 @@ from __future__ import annotations
 
 from typing import Literal
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 
 # ─── 인증 ───────────────────────────────────────────────────
 # 채널 액세스 토큰을 Bearer 헤더로 전달한다. 인터랙티브 OAuth(authcode)가 아니므로
@@ -35,13 +35,30 @@ MAX_TEXT_LENGTH = 5000  # text 필드 최대 5000자(UTF-16 코드 유닛 기준
 class TextMessage(BaseModel):
     """텍스트 메시지 오브젝트.
 
-    공식 필드: type("text" 고정) · text(필수, ≤5000자). emojis/quoteToken 등
+    공식 필드: type("text" 고정) · text(필수). emojis/quoteToken 등
     선택 필드는 MVP에서 모델링하지 않는다(아래 동일 패턴으로 확장 가능).
     출처: https://developers.line.biz/en/reference/messaging-api/#text-message
     """
 
     type: Literal["text"] = "text"
-    text: str = Field(max_length=MAX_TEXT_LENGTH)
+    text: str = Field(min_length=1)
+
+    @field_validator("text")
+    @classmethod
+    def _within_utf16_limit(cls, v: str) -> str:
+        """text 길이는 **UTF-16 코드 유닛** 기준 ≤5000.
+
+        공식 카운팅 규칙: 길이를 UTF-16 코드 유닛으로 센다(BMP 밖 문자, 예: 이모지는 2로
+        계산). pydantic의 max_length는 유니코드 코드포인트를 세므로 이모지 다수 포함 시
+        과소계산되어 상류 400을 유발할 수 있다 → 정확히 UTF-16으로 검증한다.
+        출처: https://developers.line.biz/en/docs/messaging-api/text-character-count/
+        """
+        units = len(v.encode("utf-16-le")) // 2
+        if units > MAX_TEXT_LENGTH:
+            raise ValueError(
+                f"text는 UTF-16 코드 유닛 기준 최대 {MAX_TEXT_LENGTH}자입니다(현재 {units})."
+            )
+        return v
 
 
 class PushRequest(BaseModel):
@@ -58,15 +75,32 @@ class PushRequest(BaseModel):
     notificationDisabled: bool | None = None  # noqa: N815 (공식 카멜케이스 필드명)
 
 
-class PushResult(BaseModel):
-    """push message 응답.
+class SentMessage(BaseModel):
+    """push 응답의 sentMessages 배열 항목.
 
-    성공 시 HTTP 200 + 본문은 빈 객체 `{}`이다(sentMessages는 멀티캐스트/브로드캐스트 등
-    일부 엔드포인트에서만 제공되며 push에는 없다). 실패는 코어 http가 UpstreamError로 매핑.
+    공식 필드: id(전송된 메시지 ID) · quoteToken(인용 토큰, 항상 제공되진 않음).
+    id는 JSON에서 문자열로 직렬화된다(예: "461230966842064897").
     출처: https://developers.line.biz/en/reference/messaging-api/#send-push-message
     """
 
-    # push는 빈 객체를 반환하므로 모든 필드 선택. extra는 무시(상류 추가 필드 대비).
+    model_config = {"extra": "ignore"}
+
+    id: str
+    quoteToken: str | None = None  # noqa: N815 (공식 카멜케이스 필드명)
+
+
+class PushResult(BaseModel):
+    """push message 응답.
+
+    성공 시 HTTP 200 + 본문은 `{"sentMessages": [{"id": "...", "quoteToken": "..."}]}`.
+    (이전 주석의 "빈 객체"는 오류 — 공식은 sentMessages 배열을 반환한다.)
+    실패는 코어 http가 UpstreamError로 매핑.
+    출처: https://developers.line.biz/en/reference/messaging-api/#send-push-message
+    """
+
+    model_config = {"extra": "ignore"}
+
+    sentMessages: list[SentMessage] = Field(default_factory=list)  # noqa: N815 (공식 필드명)
 
 
 class ErrorResponse(BaseModel):

@@ -78,12 +78,10 @@ class SendMessage(BaseModel):
     # 선택: 전달/저장 방지.
     protect_content: bool | None = None
 
-    # TODO(provenance): chat_id/parse_mode/message_thread_id 등 개별 행의 "Optional/Required"
-    # 라벨은 sendMessage 메서드 표를 직접(행 단위) 렌더해 재확인하지 못했다(공식 페이지가 매우 커
-    # WebFetch markdown 변환에서 methods 섹션이 잘림). 필드의 *존재*와 chat_id/text 필수,
-    # text 1..4096, parse_mode 값, link_preview_options 도입은 공식 도메인(core.telegram.org)에서
-    # 교차 확인했다. 추가 선택 필드(entities, reply_parameters, reply_markup, message_effect_id 등)는
-    # MVP 범위 밖이라 의도적으로 생략.
+    # provenance(검증 완료): sendMessage의 required 필드는 chat_id, text 둘뿐이며 나머지는 전부
+    # Optional임을 공식 스펙(Bot API 10.0)으로 행 단위 확인했다. 위 필드 이름·타입·필수성·제약
+    # (text 1..4096, parse_mode 값, link_preview_options)이 공식과 일치한다. 그 외 선택 필드
+    # (entities, reply_parameters, reply_markup, message_effect_id 등)는 MVP 범위 밖이라 의도적으로 생략.
 
 
 class User(BaseModel):
