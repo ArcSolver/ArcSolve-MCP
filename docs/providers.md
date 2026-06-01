@@ -98,6 +98,26 @@
 
 ---
 
+## openalex — OpenAlex 학술 그래프 읽기 (works/authors 검색·조회)
+- 상태: `done`
+- 인증: **API 키 선택(권장)** — env `OPENALEX_API_KEY` → 쿼리 `api_key=`. 키 없이도 동작(무료 일일 크레딧, 라이브 확인됨). polite pool은 `mailto=`(env `OPENALEX_MAILTO`, 선택). base `https://api.openalex.org`
+- 공식 문서:
+  - API 개요: https://developers.openalex.org/how-to-use-the-api/api-overview
+  - 리스트/검색(search·filter·sort·per-page·page·cursor·select): https://developers.openalex.org/how-to-use-the-api/get-lists-of-entities
+  - Work 오브젝트: https://developers.openalex.org/api-entities/works/work-object
+  - 인증/요금: https://developers.openalex.org/guides/authentication
+- 도구(MVP, 전부 GET·읽기):
+  - `openalex_search_works(query?, filter?, sort?, per_page?, page?)` — `/works?search=&filter=`
+  - `openalex_get_work(id)` — `/works/{id}` (OpenAlex ID `W…` 또는 DOI)
+  - `openalex_search_authors(query?, per_page?, page?)` — `/authors?search=`
+  - `openalex_get_author(id)` — `/authors/{id}` (OpenAlex ID `A…` 또는 ORCID)
+- 응답: `{meta:{count,page,per_page,next_cursor?,cost_usd}, results:[...]}` — 페이지네이션·건수는 **본문 meta**(헤더 아님 → `get_json`으로 충분). **쿼리 파라미터는 `per-page`(하이픈)**, 응답 필드는 `per_page`. 에러는 `{error,message}`.
+- 제약(라이브 확인): `per-page` **1–200**, page 기반은 최대 10,000건(이후 cursor), 무료 키 일일 크레딧($1). filter는 `attr:value`(콤마=AND, `|`=OR, `!`=NOT).
+- 스코프(MVP): 포함 = works/authors 검색·단건 조회 / 제외 = sources·institutions·topics·publishers·funders, group_by 집계, cursor 딥페이지네이션, ngrams/autocomplete
+- 코어 의존: `get_json`만으로 충분(키/mailto는 쿼리 파라미터, 페이지네이션은 본문). 새 코어 동사 불필요.
+
+---
+
 ## 블록 템플릿 (복사해서 새 대상 추가)
 
 ```markdown

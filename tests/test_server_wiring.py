@@ -6,6 +6,7 @@ FakeMCP로 등록만 수행(무거운 FastMCP 서버 빌드 없이). build_serve
 from arcsolve.services.discord.tools import register as discord_register
 from arcsolve.services.kakao.tools import register as kakao_register
 from arcsolve.services.line.tools import register as line_register
+from arcsolve.services.openalex.tools import register as openalex_register
 from arcsolve.services.telegram.tools import register as telegram_register
 from arcsolve.services.zotero.tools import register as zotero_register
 
@@ -25,13 +26,17 @@ EXPECTED = {
     "zotero_search_items", "zotero_get_item", "zotero_get_item_children",
     "zotero_list_collections", "zotero_get_collection_items", "zotero_list_tags",
     "zotero_get_fulltext", "zotero_health",
+    # openalex (4)
+    "openalex_search_works", "openalex_get_work",
+    "openalex_search_authors", "openalex_get_author",
 }
 
 
 def test_all_services_register_expected_tools(load_tools):
     names: set[str] = set()
     for register in (
-        telegram_register, discord_register, line_register, kakao_register, zotero_register
+        telegram_register, discord_register, line_register, kakao_register,
+        zotero_register, openalex_register,
     ):
         tools = load_tools(register)
         # 도구 이름 prefix가 서비스명과 일치하고, 서비스 내 중복이 없어야 한다.
@@ -39,4 +44,4 @@ def test_all_services_register_expected_tools(load_tools):
         names |= set(tools)
 
     assert names == EXPECTED
-    assert len(EXPECTED) == 27  # 카탈로그(5서비스·27도구)와 일치
+    assert len(EXPECTED) == 31  # 카탈로그(6서비스·31도구)와 일치
