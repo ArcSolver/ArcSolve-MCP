@@ -56,6 +56,8 @@ SERVICE = Service(
 
 ### 마무리
 - `tests/test_<name>_contract.py` → 계약 모델 검증(네트워크 없이)
+- `tests/test_<name>_tools.py` → 도구 런타임 검증(요청 조립·응답 파싱·에러 매핑). `tests/conftest.py`의
+  `FakeMCP`(register가 등록한 `@mcp.tool`을 수집)·`RecordingHTTP`(http 동사 mock) 픽스처를 쓴다(네트워크 없이).
 - `changelog.d/<name>.md` → 한 줄 변경 요약 (예: `- **example**: 도구 X 추가`)
 - 통합 단계(개별 에이전트 아님)에서 `arcsolve-mcp catalog` + `arcsolve-mcp changelog` 실행
 
