@@ -9,11 +9,12 @@ OAuth가 필요한 서비스는 `make_auth_client`를 노출하면 `arcsolve-mcp
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Callable
-
-from fastmcp import FastMCP
+from typing import TYPE_CHECKING, Callable
 
 from arcsolve.oauth import OAuthClient
+
+if TYPE_CHECKING:
+    from fastmcp import FastMCP  # 타입힌트 전용 — 런타임 import 회피(서버만 fastmcp가 필요)
 
 
 @dataclass(frozen=True)
