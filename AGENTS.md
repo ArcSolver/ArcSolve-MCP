@@ -16,7 +16,7 @@
 ## 입력과 산출물
 
 - **입력**: [docs/providers.md](docs/providers.md)에서 네가 맡은 서비스의 블록(공식 문서 링크·스코프·계획 도구).
-- **산출물**: `arcsolve/services/<name>/` 폴더 하나 + 네 changelog 조각 + 네 테스트. **그 밖은 건드리지 않는다.**
+- **산출물**: `arcsolve/services/<name>/` 폴더 하나 + 네 changelog 조각 + 네 테스트 **2종**(계약·도구). **그 밖은 건드리지 않는다.**
 
 ```
 arcsolve/services/<name>/
@@ -24,7 +24,9 @@ arcsolve/services/<name>/
 ├── tools.py        # MCP 도구: register(mcp)에서 @mcp.tool, 공통 http/oauth 재사용
 ├── __init__.py     # SERVICE = Service(...)  ← 자동 발견됨
 └── README.md       # 고정 템플릿 (docs/adding-a-service.md)
-tests/test_<name>_contract.py    # 네트워크 없는 계약 검증
+tests/test_<name>_contract.py    # 계약 모델 검증 (네트워크 없음)
+tests/test_<name>_tools.py       # 도구 런타임 검증 (요청 조립·응답 파싱·에러 매핑)
+                                 #   — tests/conftest.py의 FakeMCP/RecordingHTTP 픽스처 사용, 네트워크 없음
 changelog.d/<name>.md            # 한 줄 변경 요약
 ```
 
@@ -69,7 +71,8 @@ changelog.d/<name>.md            # 한 줄 변경 요약
 - [ ] `tools.py`: `register(mcp)` + `@mcp.tool`, prefix 1단, 공통 `http`/`oauth` 사용, 에러 매핑
 - [ ] `__init__.py`: `SERVICE = Service(name, register, docs_url, summary, make_auth_client?)` — **`docs_url` 필수**(빈값 금지), OAuth면 `make_auth_client` 지정
 - [ ] `README.md`: 템플릿 + "계약 출처" 공식 문서 링크(provenance 테스트가 검사)
-- [ ] `tests/test_<name>_contract.py`: 네트워크 없이 통과
+- [ ] `tests/test_<name>_contract.py`: 계약 모델 검증, 네트워크 없이 통과
+- [ ] `tests/test_<name>_tools.py`: 도구 런타임 검증(요청 조립·응답 파싱·에러 매핑·자격증명 누락) — `conftest.py`의 FakeMCP/RecordingHTTP 사용, 네트워크 없이 통과
 - [ ] `changelog.d/<name>.md`: 변경 요약
 - [ ] 서비스 폴더에 새 서드파티 의존 추가 안 함
 - [ ] `uv run pytest -q` 통과 · `uv run ruff check .` 통과

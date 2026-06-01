@@ -62,18 +62,8 @@ TEXT_MAX_LENGTH = 4096
 # 출처: https://core.telegram.org/bots/api#sending-files
 PHOTO_UPLOAD_MAX_BYTES = 10 * 1024 * 1024
 FILE_UPLOAD_MAX_BYTES = 50 * 1024 * 1024
-
-
-def is_local_file(value: str) -> bool:
-    """입력이 로컬 파일 경로면 True(→ multipart 업로드), 아니면 False(→ URL/file_id로 JSON 전송).
-
-    Telegram은 사진/문서를 file_id·HTTP URL·multipart 업로드 3가지로 받는다. 도구는 입력
-    문자열이 실제 존재하는 로컬 파일일 때만 업로드 경로를 택한다.
-    출처(3가지 방식): https://core.telegram.org/bots/api#sending-files
-    """
-    import os
-
-    return bool(value) and os.path.isfile(value)
+# 참고: 입력이 로컬 파일인지(→ multipart) URL/file_id인지(→ JSON) 판별하는 것은 런타임
+# 동작이므로 tools.py(is_local_file)에 둔다. contract.py는 순수 상수·모델만 담는다.
 
 
 class LinkPreviewOptions(BaseModel):

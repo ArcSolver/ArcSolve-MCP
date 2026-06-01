@@ -21,6 +21,15 @@ if TYPE_CHECKING:
     from fastmcp import FastMCP  # 타입힌트 전용 — 런타임 fastmcp import 회피
 
 
+def is_local_file(value: str) -> bool:
+    """입력이 로컬 파일 경로면 True(→ multipart 업로드), 아니면 False(→ URL/file_id로 JSON).
+
+    Telegram은 사진/문서를 file_id·HTTP URL·multipart 3가지로 받는다(공식 #sending-files).
+    문자열이 실제 존재하는 로컬 파일일 때만 업로드 경로를 택한다.
+    """
+    return bool(value) and os.path.isfile(value)
+
+
 def _build_upload(path: str, field: str, max_bytes: int) -> dict | str:
     """로컬 파일을 multipart `files` 형식으로 준비한다.
 
@@ -170,7 +179,7 @@ def register(mcp: FastMCP) -> None:
 
         url = t.BASE_URL + t.method_path(settings.bot_token, t.SEND_PHOTO)
         try:
-            if t.is_local_file(photo):
+            if is_local_file(photo):
                 files = _build_upload(photo, "photo", t.PHOTO_UPLOAD_MAX_BYTES)
                 if isinstance(files, str):
                     return files  # 크기 한도 초과 등
@@ -226,7 +235,7 @@ def register(mcp: FastMCP) -> None:
 
         url = t.BASE_URL + t.method_path(settings.bot_token, t.SEND_DOCUMENT)
         try:
-            if t.is_local_file(document):
+            if is_local_file(document):
                 files = _build_upload(document, "document", t.FILE_UPLOAD_MAX_BYTES)
                 if isinstance(files, str):
                     return files  # 크기 한도 초과 등
