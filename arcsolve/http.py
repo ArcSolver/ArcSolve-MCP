@@ -1,7 +1,8 @@
 """모든 서비스가 공유하는 HTTP 호출 + 에러 매핑.
 
-서비스는 여기 동사(post_form / get_json / post_json / patch_json / delete_json)를 재사용하고,
-직접 httpx 세션을 만들지 않는다. 새 인증 방식(Bearer/API-key 등)은 헤더로 주입한다.
+서비스는 여기 동사(post_form / get_json / post_json / patch_json / delete_json /
+post_multipart)를 재사용하고, 직접 httpx 세션을 만들지 않는다.
+새 인증 방식(Bearer/API-key 등)은 헤더로 주입한다.
 """
 
 from __future__ import annotations
@@ -33,11 +34,14 @@ async def _request(
     params: dict | None = None,
     data: dict | None = None,
     json: dict | None = None,
+    files: dict | None = None,
     timeout: float = DEFAULT_TIMEOUT,
     transport: httpx.BaseTransport | None = None,
 ) -> dict:
     async with httpx.AsyncClient(timeout=timeout, transport=transport) as client:
-        r = await client.request(method, url, headers=headers, params=params, data=data, json=json)
+        r = await client.request(
+            method, url, headers=headers, params=params, data=data, json=json, files=files
+        )
     if r.status_code >= 400:
         try:
             payload: dict | str = r.json()
@@ -95,6 +99,29 @@ async def post_json(
     """application/json POST → JSON."""
     return await _request(
         "POST", url, headers=headers, json=json, timeout=timeout, transport=transport
+    )
+
+
+MULTIPART_TIMEOUT = 30.0
+
+
+async def post_multipart(
+    url: str,
+    *,
+    data: dict | None = None,
+    files: dict | None = None,
+    headers: dict | None = None,
+    timeout: float = MULTIPART_TIMEOUT,
+    transport: httpx.BaseTransport | None = None,
+) -> dict:
+    """multipart/form-data POST → JSON. (로컬 파일 업로드)
+
+    `files`는 httpx 형식: {"<필드명>": (파일명, 바이트/파일객체, MIME)}.
+    `data`는 함께 보낼 폼 필드(문자열 값). Content-Type/boundary는 httpx가 자동 설정하므로
+    직접 지정하지 않는다. 업로드는 느릴 수 있어 기본 timeout을 늘렸다.
+    """
+    return await _request(
+        "POST", url, headers=headers, data=data, files=files, timeout=timeout, transport=transport
     )
 
 
