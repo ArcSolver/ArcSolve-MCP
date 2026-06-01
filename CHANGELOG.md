@@ -13,7 +13,8 @@
 - **core**: LICENSE(Apache-2.0)·CONTRIBUTING 추가
 - **discord**: Webhook 메시지 전송 MCP 추가 — `discord_send_message`
 - **kakao**: '나에게 보내기' MCP 추가 — `kakao_send_text_to_me`, `kakao_send_link_to_me`
-- **line**: LINE Messaging API push 텍스트 MCP 추가 — `line_send_text`
+- **line**: LINE Messaging API push 텍스트 MCP 추가 — `line_send_text`(전송 메시지 id 반환)
+- **line**: push 응답 계약을 공식 스펙(`sentMessages[]`)에 맞게 수정, text 길이를 UTF-16 코드 유닛으로 검증
 - **repo**: README 상단 배지(CI · License · Python) 추가, 저장소 public 공개
 - **telegram**: sendMessage 기반 telegram_send_message 추가
 <!-- END UNRELEASED -->

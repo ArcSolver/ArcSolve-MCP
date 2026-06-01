@@ -1,1 +1,2 @@
-- **line**: LINE Messaging API push 텍스트 MCP 추가 — `line_send_text`
+- **line**: LINE Messaging API push 텍스트 MCP 추가 — `line_send_text`(전송 메시지 id 반환)
+- **line**: push 응답 계약을 공식 스펙(`sentMessages[]`)에 맞게 수정, text 길이를 UTF-16 코드 유닛으로 검증
