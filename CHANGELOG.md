@@ -12,9 +12,12 @@
 - **core**: provenance 강제 테스트 + GitHub Actions CI(pytest·ruff·카탈로그/체인지로그 drift)
 - **core**: LICENSE(Apache-2.0)·CONTRIBUTING 추가
 - **discord**: Webhook 메시지 전송 MCP 추가 — `discord_send_message`
+- **discord**: 핵심 도구 확장 — Webhook 임베드/편집/삭제(`discord_send_embed`·`discord_edit_message`·`discord_delete_message`) + Bot 토큰 경로(`discord_create_message`·`discord_list_messages`, `DISCORD_BOT_TOKEN`)
 - **kakao**: '나에게 보내기' MCP 추가 — `kakao_send_text_to_me`, `kakao_send_link_to_me`
 - **line**: LINE Messaging API push 텍스트 MCP 추가 — `line_send_text`(전송 메시지 id 반환)
 - **line**: push 응답 계약을 공식 스펙(`sentMessages[]`)에 맞게 수정, text 길이를 UTF-16 코드 유닛으로 검증
+- **line**: 코어 도구 확장 — `line_reply_text`(reply, sentMessages), `line_multicast_text`(userId 최대 500, 빈 응답), `line_broadcast_text`(빈 응답), `line_get_profile`(Profile 조회) 추가
 - **repo**: README 상단 배지(CI · License · Python) 추가, 저장소 public 공개
 - **telegram**: sendMessage 기반 telegram_send_message 추가
+- **telegram**: 코어 도구 확장 — getMe(헬스체크)/sendPhoto/sendDocument(URL·file_id만)/editMessageText/deleteMessage 추가
 <!-- END UNRELEASED -->

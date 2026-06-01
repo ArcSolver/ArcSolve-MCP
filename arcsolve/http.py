@@ -1,7 +1,7 @@
 """모든 서비스가 공유하는 HTTP 호출 + 에러 매핑.
 
-서비스는 여기 동사(post_form / get_json / post_json)를 재사용하고, 직접 httpx 세션을
-만들지 않는다. 새 인증 방식(Bearer/API-key 등)은 헤더로 주입한다.
+서비스는 여기 동사(post_form / get_json / post_json / patch_json / delete_json)를 재사용하고,
+직접 httpx 세션을 만들지 않는다. 새 인증 방식(Bearer/API-key 등)은 헤더로 주입한다.
 """
 
 from __future__ import annotations
@@ -95,4 +95,32 @@ async def post_json(
     """application/json POST → JSON."""
     return await _request(
         "POST", url, headers=headers, json=json, timeout=timeout, transport=transport
+    )
+
+
+async def patch_json(
+    url: str,
+    *,
+    headers: dict | None = None,
+    json: dict | None = None,
+    timeout: float = DEFAULT_TIMEOUT,
+    transport: httpx.BaseTransport | None = None,
+) -> dict:
+    """application/json PATCH → JSON. (리소스 부분 수정, 예: 메시지 편집)"""
+    return await _request(
+        "PATCH", url, headers=headers, json=json, timeout=timeout, transport=transport
+    )
+
+
+async def delete_json(
+    url: str,
+    *,
+    headers: dict | None = None,
+    params: dict | None = None,
+    timeout: float = DEFAULT_TIMEOUT,
+    transport: httpx.BaseTransport | None = None,
+) -> dict:
+    """DELETE → JSON(또는 본문 없으면 빈 dict). (리소스 삭제, 예: 메시지 삭제)"""
+    return await _request(
+        "DELETE", url, headers=headers, params=params, timeout=timeout, transport=transport
     )
