@@ -7,6 +7,8 @@ from arcsolve.http import (
     UpstreamError,
     delete_json,
     get_json,
+    get_with_headers,
+    parse_link_header,
     patch_json,
     post_form,
     post_json,
@@ -94,6 +96,42 @@ async def test_post_multipart_sends_file_part_and_form_fields():
     assert b'name="chat_id"' in seen["body"]  # 폼 필드 동시 존재
     assert b'name="photo"' in seen["body"]
     assert b"pic.jpg" in seen["body"]
+
+
+async def test_get_with_headers_returns_body_and_headers():
+    async def handler(req):
+        return httpx.Response(
+            200,
+            json=[{"key": "AAA"}],
+            headers={
+                "Total-Results": "37",
+                "Link": '<https://api.zotero.org/users/1/items?start=25>; rel="next"',
+                "Last-Modified-Version": "1234",
+            },
+        )
+
+    body, headers = await get_with_headers("https://api.zotero.org/x", transport=_t(handler))
+    assert body == [{"key": "AAA"}]
+    # 헤더 키는 소문자로 정규화된다.
+    assert headers["total-results"] == "37"
+    assert headers["last-modified-version"] == "1234"
+    assert "rel=" in headers["link"]
+
+
+def test_parse_link_header_extracts_rels():
+    # URL 안에 콤마(itemKey 목록 등)가 있어도 <...> 경계로 안전 분리.
+    value = (
+        '<https://api.zotero.org/users/1/items?itemKey=A,B&start=25>; rel="next", '
+        '<https://api.zotero.org/users/1/items?start=300>; rel="last"'
+    )
+    links = parse_link_header(value)
+    assert links["next"] == "https://api.zotero.org/users/1/items?itemKey=A,B&start=25"
+    assert links["last"] == "https://api.zotero.org/users/1/items?start=300"
+
+
+def test_parse_link_header_empty():
+    assert parse_link_header(None) == {}
+    assert parse_link_header("") == {}
 
 
 async def test_4xx_raises_upstream_error_with_payload():

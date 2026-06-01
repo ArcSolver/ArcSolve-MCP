@@ -71,6 +71,33 @@
 
 ---
 
+## zotero — Zotero 라이브러리 읽기 (Web API v3 + 로컬 데스크톱 API, 단일 서비스·백엔드 전환)
+- 상태: `planned`
+- 구조: **한 서비스 = 두 백엔드.** 로컬 API는 Web API v3를 미러하므로 계약(경로·쿼리·응답 모델)이 거의 동일.
+  `ZOTERO_SOURCE=web|local`(미지정 시 API 키 있으면 web, 없으면 local 자동)로 **base URL·인증만** 분기.
+- 인증:
+  - web: `Zotero-API-Key: <키>` 헤더(권장) · 공개 라이브러리 무인증 · base `https://api.zotero.org`
+  - local: **무인증**(`/users/0/...`만) · base `http://localhost:23119/api`(pref `httpServer.localAPI.enabled` 활성 필요) · **읽기 전용**
+  - 공통 요청 헤더 `Zotero-API-Version: 3`
+- 공식 문서:
+  - Web API v3 basics(엔드포인트/쿼리/페이지네이션/백오프): https://www.zotero.org/support/dev/web_api/v3/basics
+  - 아이템 타입·필드: https://www.zotero.org/support/dev/web_api/v3/types_and_fields
+  - 전문(Full-Text) 포맷: https://www.zotero.org/support/dev/web_api/v3/fulltext_content
+  - 로컬 API 1차 출처(공식 레포 소스 주석 — 전용 산문 문서 없음): https://github.com/zotero/zotero/blob/main/chrome/content/zotero/xpcom/server/server_localAPI.js
+- 도구(MVP, 전부 GET·읽기):
+  - `zotero_search_items` — `/{prefix}/items?q=&qmode=&itemType=&tag=&sort=&limit=&start=` (qmode=everything → 전문 포함)
+  - `zotero_get_item` / `zotero_get_item_children` — `/{prefix}/items/<key>`(+`/children`), `include=data,bib,citation`
+  - `zotero_list_collections` / `zotero_get_collection_items` — `/{prefix}/collections`(+`/top`), `/collections/<key>/items`
+  - `zotero_list_tags` — `/{prefix}/tags`
+  - `zotero_get_fulltext` — `/{prefix}/items/<key>/fulltext`
+  - `zotero_health` — `/api/`(로컬 활성/버전 확인) 또는 키 유효성
+  - (`prefix` = `users/<id>` | `groups/<id>`; 로컬은 `users/0`)
+- 제약(공식): limit 기본 25·최대 100, itemKey ≤50, bib ≤150, 동시요청 ≤4. 페이지네이션은 `Total-Results`/`Link: rel=next` **헤더**, 버전 `Last-Modified-Version`, 백오프 `Backoff`/`Retry-After`(429/503). → **코어에 응답 헤더 노출 추가 필요**(아래).
+- 스코프(MVP): 포함 = 라이브러리 읽기(items/collections/tags/fulltext/검색) + 헬스 / 제외 = write(로컬 미지원·web v2), 파일 바이너리 다운로드, 비-JSON 포맷(bib/ris 등은 v2), groups 상세
+- 코어 의존: `get_json` + (신규) **응답 헤더 노출 동사**(페이지네이션·버전). API-key/버전 헤더 주입은 기존 헤더 인자로 충분.
+
+---
+
 ## 블록 템플릿 (복사해서 새 대상 추가)
 
 ```markdown

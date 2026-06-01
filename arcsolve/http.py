@@ -1,11 +1,13 @@
 """모든 서비스가 공유하는 HTTP 호출 + 에러 매핑.
 
-서비스는 여기 동사(post_form / get_json / post_json / patch_json / delete_json /
-post_multipart)를 재사용하고, 직접 httpx 세션을 만들지 않는다.
+서비스는 여기 동사(post_form / get_json / get_with_headers / post_json / patch_json /
+delete_json / post_multipart)를 재사용하고, 직접 httpx 세션을 만들지 않는다.
 새 인증 방식(Bearer/API-key 등)은 헤더로 주입한다.
 """
 
 from __future__ import annotations
+
+import re
 
 import httpx
 
@@ -26,6 +28,41 @@ def bearer(token: str) -> dict[str, str]:
     return {"Authorization": f"Bearer {token}"}
 
 
+async def _request_raw(
+    method: str,
+    url: str,
+    *,
+    headers: dict | None = None,
+    params: dict | None = None,
+    data: dict | None = None,
+    json: dict | None = None,
+    files: dict | None = None,
+    timeout: float = DEFAULT_TIMEOUT,
+    transport: httpx.BaseTransport | None = None,
+) -> tuple[dict | list, dict[str, str]]:
+    """공통 호출. (JSON 본문, 응답 헤더 dict) 튜플 반환. 4xx/5xx면 UpstreamError.
+
+    헤더 dict의 키는 httpx가 소문자로 정규화한다(예: "total-results", "link").
+    """
+    async with httpx.AsyncClient(timeout=timeout, transport=transport) as client:
+        r = await client.request(
+            method, url, headers=headers, params=params, data=data, json=json, files=files
+        )
+    if r.status_code >= 400:
+        try:
+            payload: dict | str = r.json()
+        except Exception:
+            payload = r.text
+        raise UpstreamError(r.status_code, payload)
+    resp_headers = dict(r.headers)
+    if not r.content:
+        return {}, resp_headers
+    try:
+        return r.json(), resp_headers
+    except Exception:
+        return {"raw": r.text}, resp_headers
+
+
 async def _request(
     method: str,
     url: str,
@@ -38,22 +75,18 @@ async def _request(
     timeout: float = DEFAULT_TIMEOUT,
     transport: httpx.BaseTransport | None = None,
 ) -> dict:
-    async with httpx.AsyncClient(timeout=timeout, transport=transport) as client:
-        r = await client.request(
-            method, url, headers=headers, params=params, data=data, json=json, files=files
-        )
-    if r.status_code >= 400:
-        try:
-            payload: dict | str = r.json()
-        except Exception:
-            payload = r.text
-        raise UpstreamError(r.status_code, payload)
-    if not r.content:
-        return {}
-    try:
-        return r.json()
-    except Exception:
-        return {"raw": r.text}
+    body, _ = await _request_raw(
+        method,
+        url,
+        headers=headers,
+        params=params,
+        data=data,
+        json=json,
+        files=files,
+        timeout=timeout,
+        transport=transport,
+    )
+    return body
 
 
 async def post_form(
@@ -86,6 +119,40 @@ async def get_json(
     return await _request(
         "GET", url, headers=headers, params=params, timeout=timeout, transport=transport
     )
+
+
+async def get_with_headers(
+    url: str,
+    *,
+    headers: dict | None = None,
+    params: dict | None = None,
+    timeout: float = DEFAULT_TIMEOUT,
+    transport: httpx.BaseTransport | None = None,
+) -> tuple[dict | list, dict[str, str]]:
+    """GET → (JSON 본문, 응답 헤더 dict).
+
+    페이지네이션/버전/백오프가 **본문이 아니라 응답 헤더**에 실리는 API(예: Zotero의
+    `Total-Results`/`Link`/`Last-Modified-Version`/`Backoff`)에서 사용한다. 헤더 키는 소문자.
+    """
+    return await _request_raw(
+        "GET", url, headers=headers, params=params, timeout=timeout, transport=transport
+    )
+
+
+_LINK_RE = re.compile(r'<([^>]*)>\s*;\s*rel="?([^",;]+)"?')
+
+
+def parse_link_header(value: str | None) -> dict[str, str]:
+    """RFC 5988 `Link` 헤더를 {rel: url} 로 파싱한다(예: 다음 페이지 `next`).
+
+    URL 안에 콤마(쿼리 파라미터 등)가 있어도 `<...>` 경계로 안전하게 분리한다. 값이 없으면 {}.
+    """
+    result: dict[str, str] = {}
+    if not value:
+        return result
+    for m in _LINK_RE.finditer(value):
+        result[m.group(2).strip()] = m.group(1).strip()
+    return result
 
 
 async def post_json(
