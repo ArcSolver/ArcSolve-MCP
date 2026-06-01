@@ -6,12 +6,16 @@ contract.py의 계약을 실제 MCP 도구로 노출하는 얇은 층.
 
 from __future__ import annotations
 
-from fastmcp import FastMCP
+from typing import TYPE_CHECKING
+
 from pydantic import ValidationError
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 from arcsolve.http import UpstreamError, bearer, get_json, post_json
 from arcsolve.services.line import contract as l
+
+if TYPE_CHECKING:
+    from fastmcp import FastMCP  # 타입힌트 전용 — 런타임 fastmcp import 회피
 
 
 class LineSettings(BaseSettings):
