@@ -9,13 +9,16 @@ from __future__ import annotations
 
 import mimetypes
 import os
+from typing import TYPE_CHECKING
 
-from fastmcp import FastMCP
 from pydantic import ValidationError
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 from arcsolve.http import UpstreamError, get_json, post_json, post_multipart
 from arcsolve.services.telegram import contract as t
+
+if TYPE_CHECKING:
+    from fastmcp import FastMCP  # 타입힌트 전용 — 런타임 fastmcp import 회피
 
 
 def _build_upload(path: str, field: str, max_bytes: int) -> dict | str:
