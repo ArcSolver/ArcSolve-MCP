@@ -22,4 +22,5 @@
 - **telegram**: sendMessage 기반 telegram_send_message 추가
 - **telegram**: 코어 도구 확장 — getMe(헬스체크)/sendPhoto/sendDocument/editMessageText/deleteMessage 추가
 - **telegram**: sendPhoto/sendDocument 로컬 파일 multipart 업로드 지원(사진≤10MB·파일≤50MB), editMessageText inline_message_id 경로 추가
+- **zotero**: Zotero 라이브러리 읽기 서비스 추가(Web API v3 + 로컬 데스크톱 API 단일 서비스·백엔드 전환) — 검색/아이템/자식/컬렉션/컬렉션 아이템/태그/전문/헬스 8개 GET 도구, 응답 헤더 기반 페이지네이션 안내
 <!-- END UNRELEASED -->

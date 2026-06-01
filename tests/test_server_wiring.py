@@ -7,6 +7,7 @@ from arcsolve.services.discord.tools import register as discord_register
 from arcsolve.services.kakao.tools import register as kakao_register
 from arcsolve.services.line.tools import register as line_register
 from arcsolve.services.telegram.tools import register as telegram_register
+from arcsolve.services.zotero.tools import register as zotero_register
 
 EXPECTED = {
     # telegram (6)
@@ -20,16 +21,22 @@ EXPECTED = {
     "line_broadcast_text", "line_get_profile",
     # kakao (2)
     "kakao_send_text_to_me", "kakao_send_link_to_me",
+    # zotero (8)
+    "zotero_search_items", "zotero_get_item", "zotero_get_item_children",
+    "zotero_list_collections", "zotero_get_collection_items", "zotero_list_tags",
+    "zotero_get_fulltext", "zotero_health",
 }
 
 
 def test_all_services_register_expected_tools(load_tools):
     names: set[str] = set()
-    for register in (telegram_register, discord_register, line_register, kakao_register):
+    for register in (
+        telegram_register, discord_register, line_register, kakao_register, zotero_register
+    ):
         tools = load_tools(register)
         # 도구 이름 prefix가 서비스명과 일치하고, 서비스 내 중복이 없어야 한다.
         assert tools, f"{register.__module__}이 도구를 하나도 등록하지 않음"
         names |= set(tools)
 
     assert names == EXPECTED
-    assert len(EXPECTED) == 19  # 카탈로그(4서비스·19도구)와 일치
+    assert len(EXPECTED) == 27  # 카탈로그(5서비스·27도구)와 일치
