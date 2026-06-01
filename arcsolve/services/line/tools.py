@@ -29,10 +29,14 @@ def _explain(e: UpstreamError) -> str:
     """
     err = l.ErrorResponse.model_validate(e.payload) if isinstance(e.payload, dict) else None
     detail = err.message if err and err.message else e.payload
+    if e.status == 400:
+        return f"요청 오류(400): 수신자(to)/메시지 형식을 확인하세요. {detail}"
     if e.status == 401:
         return "LINE 채널 액세스 토큰이 없거나 무효입니다. LINE_CHANNEL_ACCESS_TOKEN을 확인하세요."
     if e.status == 403:
         return f"권한 없음(403): 채널 설정/플랜을 확인하세요. {detail}"
+    if e.status == 409:
+        return f"중복 요청(409): 동일 retry-key가 이미 처리되었을 수 있습니다. {detail}"
     if e.status == 429:
         return f"요청 한도 초과(429). 잠시 후 재시도하세요. {detail}"
     return f"LINE API 오류 {e.status}: {detail}"
@@ -64,7 +68,7 @@ def register(mcp: FastMCP) -> None:
             return f"입력 오류: {e.errors()[0]['msg']}"
 
         try:
-            await post_json(
+            raw = await post_json(
                 l.BASE_URL + l.PUSH_MESSAGE,
                 headers=bearer(token),
                 json=req.model_dump(exclude_none=True),
@@ -72,4 +76,6 @@ def register(mcp: FastMCP) -> None:
         except UpstreamError as e:
             return _explain(e)
 
-        return "전송 완료"
+        result = l.PushResult.model_validate(raw if isinstance(raw, dict) else {})
+        sent_id = result.sentMessages[0].id if result.sentMessages else None
+        return f"전송 완료 (id={sent_id})" if sent_id else "전송 완료"

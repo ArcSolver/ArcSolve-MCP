@@ -12,6 +12,7 @@ from arcsolve.services.line.contract import (
     PUSH_MESSAGE,
     ErrorResponse,
     PushRequest,
+    PushResult,
     TextMessage,
 )
 
@@ -24,9 +25,17 @@ def test_text_message_serialization():
 
 
 def test_text_max_length_enforced():
-    TextMessage(text="가" * MAX_TEXT_LENGTH)  # 5000자는 허용
+    TextMessage(text="가" * MAX_TEXT_LENGTH)  # 5000자(각 UTF-16 1유닛)는 허용
     with pytest.raises(ValidationError):
         TextMessage(text="가" * (MAX_TEXT_LENGTH + 1))  # 5001자는 거부
+
+
+def test_text_length_counts_utf16_code_units():
+    # LINE은 UTF-16 코드 유닛으로 센다 — BMP 밖 이모지는 2유닛.
+    half = MAX_TEXT_LENGTH // 2  # 2500
+    TextMessage(text="🍎" * half)  # 2500자 * 2유닛 = 5000유닛 → 허용
+    with pytest.raises(ValidationError):
+        TextMessage(text="🍎" * (half + 1))  # 2501자 * 2유닛 = 5002유닛 → 거부
 
 
 def test_push_request_serialization_omits_optional():
@@ -47,6 +56,21 @@ def test_push_request_messages_max_five_enforced():
 def test_push_request_messages_min_one_enforced():
     with pytest.raises(ValidationError):
         PushRequest(to="U1", messages=[])  # 빈 배열 거부
+
+
+def test_push_result_parses_sent_messages():
+    # 공식 push 응답: {"sentMessages": [{"id": "...", "quoteToken": "..."}]}
+    res = PushResult.model_validate(
+        {"sentMessages": [{"id": "461230966842064897", "quoteToken": "IStG5h1Tz7b"}]}
+    )
+    assert res.sentMessages[0].id == "461230966842064897"
+    assert res.sentMessages[0].quoteToken == "IStG5h1Tz7b"
+
+
+def test_push_result_quote_token_optional():
+    res = PushResult.model_validate({"sentMessages": [{"id": "123"}]})
+    assert res.sentMessages[0].id == "123"
+    assert res.sentMessages[0].quoteToken is None
 
 
 def test_error_response_parsing():
