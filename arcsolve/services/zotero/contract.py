@@ -130,13 +130,10 @@ def tags_path(prefix: str) -> str:
 
 
 # ─── 쿼리 파라미터 제약(공식) ───────────────────────────────
-# 출처: https://www.zotero.org/support/dev/web_api/v3/basics
-#   limit "default 25, max 100" · "Up to 50 items can be specified in a single request"
-#   · bib "limited to a maximum of 150 items"
+# 출처: https://www.zotero.org/support/dev/web_api/v3/basics — limit "default 25, max 100".
+# (itemKey 최대 50·bib 최대 150 제약은 해당 도구를 추가할 때 상수화 — 현재 MVP 미사용.)
 DEFAULT_LIMIT = 25
 MAX_LIMIT = 100
-MAX_ITEMKEYS = 50
-MAX_BIB_ITEMS = 150
 
 # qmode 허용값 — **아이템 quick search 전용**. titleCreatorYear(기본) / everything(전문 포함).
 # (태그 엔드포인트는 별도 qmode contains/startsWith를 쓴다 — MVP 범위 밖이라 여기서 다루지 않으며,

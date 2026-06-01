@@ -14,8 +14,6 @@ from arcsolve.services.zotero.contract import (
     DEFAULT_LIMIT,
     DEFAULT_LOCAL_BASE,
     LOCAL_USER_ID,
-    MAX_BIB_ITEMS,
-    MAX_ITEMKEYS,
     MAX_LIMIT,
     QMODES,
     WEB_BASE_URL,
@@ -51,8 +49,6 @@ def test_constants_match_official():
     assert API_VERSION_HEADER == "Zotero-API-Version"
     assert DEFAULT_LIMIT == 25
     assert MAX_LIMIT == 100
-    assert MAX_ITEMKEYS == 50
-    assert MAX_BIB_ITEMS == 150
     assert LOCAL_USER_ID == "0"
     assert QMODES == ("titleCreatorYear", "everything")
 
