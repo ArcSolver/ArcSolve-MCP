@@ -1,5 +1,9 @@
 # ArcSolve MCP
 
+[![CI](https://github.com/ArcSolver/ArcSolve-MCP/actions/workflows/ci.yml/badge.svg)](https://github.com/ArcSolver/ArcSolve-MCP/actions/workflows/ci.yml)
+[![License](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](LICENSE)
+[![Python](https://img.shields.io/badge/python-3.11%2B-blue.svg)](pyproject.toml)
+
 인기 서비스의 **공개 API를 MCP 도구로 묶는** 오픈소스 모음.
 하나의 MCP 서버가 여러 서비스를 합성해 노출한다. 각 서비스는 **폴더 하나 = 계약 + 도구**로 끝난다.
 
@@ -116,4 +120,4 @@ SERVICE.register(mcp)   # kakao 도구만 내 서버에 추가
 
 ## 라이선스
 
-[MIT](LICENSE) · 기여 방법은 [CONTRIBUTING.md](CONTRIBUTING.md)
+[Apache-2.0](LICENSE) · 기여 방법은 [CONTRIBUTING.md](CONTRIBUTING.md)
