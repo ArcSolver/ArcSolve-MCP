@@ -1,0 +1,1 @@
+- **discord**: Webhook 메시지 전송 MCP 추가 — `discord_send_message`
