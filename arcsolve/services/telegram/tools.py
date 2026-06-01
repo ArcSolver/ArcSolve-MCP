@@ -11,7 +11,7 @@ from fastmcp import FastMCP
 from pydantic import ValidationError
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
-from arcsolve.http import UpstreamError, post_json
+from arcsolve.http import UpstreamError, get_json, post_json
 from arcsolve.services.telegram import contract as t
 
 
@@ -93,3 +93,199 @@ def register(mcp: FastMCP) -> None:
             return f"전송 실패: {resp.description or raw}"
         msg = t.Message.model_validate(resp.result)
         return f"전송 완료 (message_id={msg.message_id})"
+
+    @mcp.tool
+    async def telegram_get_me() -> str:
+        """봇 신원/토큰 유효성을 확인한다(getMe). 헬스체크용. 파라미터 없음.
+
+        성공 시 봇의 User 정보(id / username / first_name / is_bot)를 돌려준다.
+        """
+        settings = TelegramSettings()
+        if not settings.bot_token:
+            return "TELEGRAM_BOT_TOKEN이 설정되지 않았습니다."
+
+        url = t.BASE_URL + t.method_path(settings.bot_token, t.GET_ME)
+        try:
+            raw = await get_json(url)
+        except UpstreamError as e:
+            return _explain(e)
+
+        resp = t.ApiResponse.model_validate(raw)
+        if not resp.ok or not isinstance(resp.result, dict):
+            return f"조회 실패: {resp.description or raw}"
+        me = t.User.model_validate(resp.result)
+        handle = f"@{me.username}" if me.username else me.first_name
+        return f"봇 OK: {handle} (id={me.id}, is_bot={me.is_bot})"
+
+    @mcp.tool
+    async def telegram_send_photo(
+        photo: str,
+        caption: str | None = None,
+        chat_id: str | None = None,
+        parse_mode: str | None = None,
+    ) -> str:
+        """Telegram 봇으로 사진을 전송한다(sendPhoto).
+
+        Args:
+            photo: 사진의 **HTTP URL 또는 file_id 문자열**. 로컬 파일 업로드는 미지원
+                   (코어에 multipart 동사가 없음 — URL/file_id만 지원).
+            caption: 사진 캡션. 0-1024자.
+            chat_id: 대상 채팅 ID 또는 "@channelusername". 미지정 시 TELEGRAM_CHAT_ID 사용.
+            parse_mode: 캡션 서식 모드. "MarkdownV2" 또는 "HTML". 미지정 시 평문.
+        """
+        settings = TelegramSettings()
+        if not settings.bot_token:
+            return "TELEGRAM_BOT_TOKEN이 설정되지 않았습니다."
+
+        target = chat_id or settings.chat_id
+        if not target:
+            return "chat_id가 없습니다. 인자로 주거나 TELEGRAM_CHAT_ID를 설정하세요."
+
+        try:
+            req = t.SendPhoto(
+                chat_id=target,
+                photo=photo,
+                caption=caption,
+                parse_mode=parse_mode,
+            )
+        except ValidationError as e:
+            return f"입력 오류: {e.errors()[0]['msg']}"
+
+        url = t.BASE_URL + t.method_path(settings.bot_token, t.SEND_PHOTO)
+        try:
+            raw = await post_json(url, json=req.model_dump(exclude_none=True))
+        except UpstreamError as e:
+            return _explain(e)
+
+        resp = t.ApiResponse.model_validate(raw)
+        if not resp.ok or not isinstance(resp.result, dict):
+            return f"전송 실패: {resp.description or raw}"
+        msg = t.Message.model_validate(resp.result)
+        return f"사진 전송 완료 (message_id={msg.message_id})"
+
+    @mcp.tool
+    async def telegram_send_document(
+        document: str,
+        caption: str | None = None,
+        chat_id: str | None = None,
+        parse_mode: str | None = None,
+    ) -> str:
+        """Telegram 봇으로 문서(파일)를 전송한다(sendDocument).
+
+        Args:
+            document: 파일의 **HTTP URL 또는 file_id 문자열**. 로컬 파일 업로드는 미지원
+                      (코어에 multipart 동사가 없음 — URL/file_id만 지원).
+            caption: 문서 캡션. 0-1024자.
+            chat_id: 대상 채팅 ID 또는 "@channelusername". 미지정 시 TELEGRAM_CHAT_ID 사용.
+            parse_mode: 캡션 서식 모드. "MarkdownV2" 또는 "HTML". 미지정 시 평문.
+        """
+        settings = TelegramSettings()
+        if not settings.bot_token:
+            return "TELEGRAM_BOT_TOKEN이 설정되지 않았습니다."
+
+        target = chat_id or settings.chat_id
+        if not target:
+            return "chat_id가 없습니다. 인자로 주거나 TELEGRAM_CHAT_ID를 설정하세요."
+
+        try:
+            req = t.SendDocument(
+                chat_id=target,
+                document=document,
+                caption=caption,
+                parse_mode=parse_mode,
+            )
+        except ValidationError as e:
+            return f"입력 오류: {e.errors()[0]['msg']}"
+
+        url = t.BASE_URL + t.method_path(settings.bot_token, t.SEND_DOCUMENT)
+        try:
+            raw = await post_json(url, json=req.model_dump(exclude_none=True))
+        except UpstreamError as e:
+            return _explain(e)
+
+        resp = t.ApiResponse.model_validate(raw)
+        if not resp.ok or not isinstance(resp.result, dict):
+            return f"전송 실패: {resp.description or raw}"
+        msg = t.Message.model_validate(resp.result)
+        return f"문서 전송 완료 (message_id={msg.message_id})"
+
+    @mcp.tool
+    async def telegram_edit_message_text(
+        text: str,
+        message_id: int | None = None,
+        chat_id: str | None = None,
+        inline_message_id: str | None = None,
+        parse_mode: str | None = None,
+    ) -> str:
+        """메시지의 텍스트를 편집한다(editMessageText).
+
+        대상 지정은 공식 계약에 따라 둘 중 하나(상호 배타):
+        - chat_id + message_id : 일반 채팅 메시지 편집(chat_id 미지정 시 TELEGRAM_CHAT_ID).
+        - inline_message_id    : 인라인 모드로 보낸 메시지 편집.
+
+        Args:
+            text: 새 본문. 1-4096자.
+            message_id: 편집할 메시지 ID(chat 경로).
+            chat_id: 대상 채팅 ID 또는 "@channelusername". 미지정 시 TELEGRAM_CHAT_ID.
+            inline_message_id: 인라인 메시지 ID(지정 시 chat_id/message_id는 생략).
+            parse_mode: 서식 모드. "MarkdownV2" 또는 "HTML". 미지정 시 평문.
+        """
+        settings = TelegramSettings()
+        if not settings.bot_token:
+            return "TELEGRAM_BOT_TOKEN이 설정되지 않았습니다."
+
+        target_chat = None if inline_message_id else (chat_id or settings.chat_id)
+        try:
+            req = t.EditMessageText(
+                chat_id=target_chat,
+                message_id=message_id,
+                inline_message_id=inline_message_id,
+                text=text,
+                parse_mode=parse_mode,
+            )
+        except ValidationError as e:
+            return f"입력 오류: {e.errors()[0]['msg']}"
+
+        url = t.BASE_URL + t.method_path(settings.bot_token, t.EDIT_MESSAGE_TEXT)
+        try:
+            raw = await post_json(url, json=req.model_dump(exclude_none=True))
+        except UpstreamError as e:
+            return _explain(e)
+
+        resp = t.ApiResponse.model_validate(raw)
+        if not resp.ok:
+            return f"편집 실패: {resp.description or raw}"
+        # editMessageText는 편집된 Message(dict) 또는 인라인의 경우 True를 반환한다.
+        if isinstance(resp.result, dict):
+            msg = t.Message.model_validate(resp.result)
+            return f"편집 완료 (message_id={msg.message_id})"
+        return "편집 완료"
+
+    @mcp.tool
+    async def telegram_delete_message(chat_id: str, message_id: int) -> str:
+        """봇이 접근 가능한 메시지를 삭제한다(deleteMessage).
+
+        Args:
+            chat_id: 대상 채팅 ID 또는 "@channelusername".
+            message_id: 삭제할 메시지의 ID.
+        """
+        settings = TelegramSettings()
+        if not settings.bot_token:
+            return "TELEGRAM_BOT_TOKEN이 설정되지 않았습니다."
+
+        try:
+            req = t.DeleteMessage(chat_id=chat_id, message_id=message_id)
+        except ValidationError as e:
+            return f"입력 오류: {e.errors()[0]['msg']}"
+
+        url = t.BASE_URL + t.method_path(settings.bot_token, t.DELETE_MESSAGE)
+        try:
+            raw = await post_json(url, json=req.model_dump(exclude_none=True))
+        except UpstreamError as e:
+            return _explain(e)
+
+        resp = t.ApiResponse.model_validate(raw)
+        # deleteMessage는 성공 시 result=True를 반환한다.
+        if not resp.ok or resp.result is not True:
+            return f"삭제 실패: {resp.description or raw}"
+        return f"삭제 완료 (message_id={message_id})"
