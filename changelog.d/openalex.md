@@ -1,0 +1,1 @@
+- **openalex**: OpenAlex 학술 그래프 읽기 서비스 추가 — works/authors 검색·단건 조회 4개 GET 도구(`openalex_search_works`/`openalex_get_work`/`openalex_search_authors`/`openalex_get_author`), API 키·mailto는 선택 쿼리 파라미터(키 없이도 동작), 본문 meta 기반 건수 안내
