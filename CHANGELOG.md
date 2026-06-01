@@ -10,6 +10,7 @@
 - **core**: OAuth PKCE(S256) + 토큰 파일 0600/디렉토리 0700
 - **core**: 공통 HTTP 동사 추가(`get_json`/`post_json`) + 의존성 격리 규칙
 - **core**: provenance 강제 테스트 + GitHub Actions CI(pytest·ruff·카탈로그/체인지로그 drift)
-- **core**: LICENSE(MIT)·CONTRIBUTING 추가
+- **core**: LICENSE(Apache-2.0)·CONTRIBUTING 추가
 - **kakao**: '나에게 보내기' MCP 추가 — `kakao_send_text_to_me`, `kakao_send_link_to_me`
+- **repo**: README 상단 배지(CI · License · Python) 추가, 저장소 public 공개
 <!-- END UNRELEASED -->

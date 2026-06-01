@@ -1,0 +1,1 @@
+- **repo**: README 상단 배지(CI · License · Python) 추가, 저장소 public 공개
