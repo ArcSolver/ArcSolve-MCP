@@ -2,7 +2,7 @@
 
 > ⚙️ 자동 생성 — 직접 수정하지 마세요. `arcsolve-mcp catalog`로 재생성됩니다.
 
-현재 **5개 서비스 · 총 27개 도구**.
+현재 **6개 서비스 · 총 31개 도구**.
 
 ## discord — Discord — Webhook으로 채널에 메시지 전송
 공식 문서: https://discord.com/developers/docs/resources/webhook
@@ -34,6 +34,16 @@
 | `line_multicast_text` | LINE Messaging API multicast로 동일 텍스트를 여러 userId에게 전송한다. |
 | `line_reply_text` | LINE Messaging API reply로 텍스트 메시지 1건을 회신한다. |
 | `line_send_text` | LINE Messaging API push로 텍스트 메시지 1건을 전송한다. |
+
+## openalex — OpenAlex 학술 그래프 읽기(works/authors 검색·조회)
+공식 문서: https://developers.openalex.org/how-to-use-the-api/api-overview
+
+| 도구 | 설명 |
+|------|------|
+| `openalex_get_author` | 단일 author를 조회한다(GET /authors/{id}). |
+| `openalex_get_work` | 단일 work를 조회한다(GET /works/{id}). |
+| `openalex_search_authors` | OpenAlex에서 저자(authors)를 검색/나열한다(GET /authors). |
+| `openalex_search_works` | OpenAlex에서 학술 논문(works)을 검색/나열한다(GET /works). |
 
 ## telegram — Telegram Bot API — 텍스트/사진/문서 전송, 메시지 편집·삭제, getMe 헬스체크
 공식 문서: https://core.telegram.org/bots/api
