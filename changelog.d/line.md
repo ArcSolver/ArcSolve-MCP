@@ -1,0 +1,1 @@
+- **line**: LINE Messaging API push 텍스트 MCP 추가 — `line_send_text`

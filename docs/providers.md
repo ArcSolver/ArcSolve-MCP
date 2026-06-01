@@ -23,6 +23,44 @@
 
 ---
 
+## telegram — Telegram Bot 메시지 전송
+- 상태: `done`
+- 인증: Bot 토큰 (URL 경로 `/bot<token>/METHOD` — Bearer 아님)
+- 공식 문서:
+  - Bot API 레퍼런스: https://core.telegram.org/bots/api
+  - sendMessage: https://core.telegram.org/bots/api#sendmessage
+  - 요청/응답 포맷: https://core.telegram.org/bots/api#making-requests
+- 도구:
+  - `telegram_send_message` — 텍스트(1–4096자) 전송. chat_id 미지정 시 `TELEGRAM_CHAT_ID`
+- 스코프(MVP): 포함 = sendMessage(텍스트) / 제외 = 미디어(sendPhoto 등 multipart → 코어 확장 필요), 인라인 키보드
+
+---
+
+## discord — Discord Webhook 메시지 전송
+- 상태: `done`
+- 인증: Webhook URL (URL 자체가 시크릿, 별도 인증 헤더 없음)
+- 공식 문서:
+  - Execute Webhook: https://discord.com/developers/docs/resources/webhook#execute-webhook
+  - Message Object: https://discord.com/developers/docs/resources/message#message-object
+- 도구:
+  - `discord_send_message` — content(≤2000자) 전송, username/avatar_url 덮어쓰기 가능
+- 스코프(MVP): 포함 = Execute Webhook(content) / 제외 = Bot 토큰 경로(create-message), embeds·file·components
+
+---
+
+## line — LINE Messaging API push 전송
+- 상태: `done`
+- 인증: 채널 액세스 토큰 (Bearer)
+- 공식 문서:
+  - Messaging API 레퍼런스: https://developers.line.biz/en/reference/messaging-api/
+  - Send push message: https://developers.line.biz/en/reference/messaging-api/#send-push-message
+  - 채널 액세스 토큰: https://developers.line.biz/en/docs/messaging-api/channel-access-tokens/
+- 도구:
+  - `line_send_text` — 텍스트(≤5000자) push 1건. to 미지정 시 `LINE_TO`
+- 스코프(MVP): 포함 = push message(text) / 제외 = reply/multicast/broadcast, sticker·image 등 비텍스트 메시지
+
+---
+
 ## 블록 템플릿 (복사해서 새 대상 추가)
 
 ```markdown
