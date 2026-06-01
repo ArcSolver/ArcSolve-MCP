@@ -56,6 +56,25 @@ CAPTION_MAX_LENGTH = 1024
 # text 길이 제약 (출처: sendMessage/editMessageText 공식 표 "1-4096 characters")
 TEXT_MAX_LENGTH = 4096
 
+# multipart/form-data 업로드 크기 한도.
+# 공식 "Sending files": "post the file using multipart/form-data ... 10 MB max for photos,
+# 50 MB for other files." (HTTP URL 전송 시엔 5MB/20MB로 더 작다.)
+# 출처: https://core.telegram.org/bots/api#sending-files
+PHOTO_UPLOAD_MAX_BYTES = 10 * 1024 * 1024
+FILE_UPLOAD_MAX_BYTES = 50 * 1024 * 1024
+
+
+def is_local_file(value: str) -> bool:
+    """입력이 로컬 파일 경로면 True(→ multipart 업로드), 아니면 False(→ URL/file_id로 JSON 전송).
+
+    Telegram은 사진/문서를 file_id·HTTP URL·multipart 업로드 3가지로 받는다. 도구는 입력
+    문자열이 실제 존재하는 로컬 파일일 때만 업로드 경로를 택한다.
+    출처(3가지 방식): https://core.telegram.org/bots/api#sending-files
+    """
+    import os
+
+    return bool(value) and os.path.isfile(value)
+
 
 class LinkPreviewOptions(BaseModel):
     """발신 메시지의 링크 미리보기 옵션.
@@ -106,13 +125,13 @@ class SendPhoto(BaseModel):
     공식 표의 필수 필드는 chat_id, photo이며 나머지는 선택.
     `photo`는 InputFile 또는 String이며, String일 때 **file_id 또는 HTTP URL**을 의미한다
     ("Pass a file_id ... Pass an HTTP URL ... or upload a new photo").
-    이 계약은 JSON(post_json) 전송만 다루므로 photo는 **문자열(URL/file_id)만** 허용한다.
-    로컬 파일 업로드(multipart/form-data)는 코어에 multipart 동사가 없어 미지원.
+    이 **JSON 경로용 모델**은 photo가 문자열(URL/file_id)인 경우만 다룬다. 로컬 파일
+    업로드(multipart)는 tools.py가 `post_multipart`로 별도 처리한다(이 모델을 쓰지 않음).
     출처: https://core.telegram.org/bots/api#sendphoto
     """
 
     chat_id: int | str
-    # photo: URL 또는 file_id 문자열만(로컬 업로드 미지원 — 코어 multipart 동사 추가 후).
+    # photo: URL 또는 file_id 문자열(로컬 파일은 tools.py의 multipart 경로에서 처리).
     photo: str = Field(min_length=1)
     # 선택: 캡션. "0-1024 characters after entities parsing."
     caption: str | None = Field(default=None, max_length=CAPTION_MAX_LENGTH)
@@ -128,12 +147,13 @@ class SendDocument(BaseModel):
     """sendDocument 요청 본문.
 
     필수 필드는 chat_id, document. `document`는 sendPhoto의 photo와 동일하게
-    String일 때 file_id 또는 HTTP URL을 의미하며, 본 계약은 문자열만 허용(로컬 업로드 미지원).
+    String일 때 file_id 또는 HTTP URL을 의미한다. 이 **JSON 경로용 모델**은 문자열만 다루며,
+    로컬 파일 업로드(multipart)는 tools.py가 `post_multipart`로 처리한다.
     출처: https://core.telegram.org/bots/api#senddocument
     """
 
     chat_id: int | str
-    # document: URL 또는 file_id 문자열만(로컬 업로드 미지원 — 코어 multipart 동사 추가 후).
+    # document: URL 또는 file_id 문자열(로컬 파일은 tools.py의 multipart 경로에서 처리).
     document: str = Field(min_length=1)
     # 선택: 캡션. "0-1024 characters after entities parsing."(sendPhoto와 동일 제약)
     caption: str | None = Field(default=None, max_length=CAPTION_MAX_LENGTH)

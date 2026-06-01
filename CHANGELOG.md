@@ -8,7 +8,7 @@
 - **core**: 레지스트리 지연·격리 로딩(한 서비스 오류가 전체를 죽이지 않음, 선택 서비스만 import)
 - **core**: auth 레지스트리 일반화(`Service.make_auth_client`) — 새 OAuth 서비스가 코어 수정 없이 인증
 - **core**: OAuth PKCE(S256) + 토큰 파일 0600/디렉토리 0700
-- **core**: 공통 HTTP 동사 추가(`get_json`/`post_json`) + 의존성 격리 규칙
+- **core**: 공통 HTTP 동사 추가(`get_json`/`post_json`/`patch_json`/`delete_json`/`post_multipart`) + 의존성 격리 규칙
 - **core**: provenance 강제 테스트 + GitHub Actions CI(pytest·ruff·카탈로그/체인지로그 drift)
 - **core**: LICENSE(Apache-2.0)·CONTRIBUTING 추가
 - **discord**: Webhook 메시지 전송 MCP 추가 — `discord_send_message`
@@ -19,5 +19,6 @@
 - **line**: 코어 도구 확장 — `line_reply_text`(reply, sentMessages), `line_multicast_text`(userId 최대 500, 빈 응답), `line_broadcast_text`(빈 응답), `line_get_profile`(Profile 조회) 추가
 - **repo**: README 상단 배지(CI · License · Python) 추가, 저장소 public 공개
 - **telegram**: sendMessage 기반 telegram_send_message 추가
-- **telegram**: 코어 도구 확장 — getMe(헬스체크)/sendPhoto/sendDocument(URL·file_id만)/editMessageText/deleteMessage 추가
+- **telegram**: 코어 도구 확장 — getMe(헬스체크)/sendPhoto/sendDocument/editMessageText/deleteMessage 추가
+- **telegram**: sendPhoto/sendDocument 로컬 파일 multipart 업로드 지원(사진≤10MB·파일≤50MB), editMessageText inline_message_id 경로 추가
 <!-- END UNRELEASED -->

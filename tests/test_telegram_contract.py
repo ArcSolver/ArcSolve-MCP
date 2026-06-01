@@ -1,4 +1,4 @@
-"""Telegram 계약 검증 — 네트워크 없이 contract.py만 테스트."""
+"""Telegram 계약 검증 — 네트워크 없이 contract.py(+업로드 헬퍼)만 테스트."""
 
 import json
 
@@ -10,8 +10,10 @@ from arcsolve.services.telegram.contract import (
     CAPTION_MAX_LENGTH,
     DELETE_MESSAGE,
     EDIT_MESSAGE_TEXT,
+    FILE_UPLOAD_MAX_BYTES,
     GET_ME,
     PARSE_MODES,
+    PHOTO_UPLOAD_MAX_BYTES,
     SEND_DOCUMENT,
     SEND_MESSAGE,
     SEND_PHOTO,
@@ -27,8 +29,10 @@ from arcsolve.services.telegram.contract import (
     SendMessage,
     SendPhoto,
     User,
+    is_local_file,
     method_path,
 )
+from arcsolve.services.telegram.tools import _build_upload
 
 
 def test_send_message_serialization():
@@ -97,6 +101,39 @@ def test_message_ignores_extra_fields():
         {"message_id": 7, "date": 1, "chat": {"id": 1, "type": "private"}, "from": {"id": 9}}
     )
     assert msg.message_id == 7
+
+
+def test_upload_size_constants():
+    assert PHOTO_UPLOAD_MAX_BYTES == 10 * 1024 * 1024  # 공식 multipart 사진 한도 10MB
+    assert FILE_UPLOAD_MAX_BYTES == 50 * 1024 * 1024  # 공식 multipart 파일 한도 50MB
+
+
+def test_is_local_file_detects_path_vs_url_or_file_id(tmp_path):
+    f = tmp_path / "pic.jpg"
+    f.write_bytes(b"data")
+    assert is_local_file(str(f)) is True
+    assert is_local_file("https://example.com/a.jpg") is False
+    assert is_local_file("AgACAgID-some-file-id") is False
+    assert is_local_file("") is False
+
+
+def test_build_upload_packs_filename_bytes_and_mime(tmp_path):
+    f = tmp_path / "pic.jpg"
+    f.write_bytes(b"\xff\xd8\xffdata")
+    files = _build_upload(str(f), "photo", PHOTO_UPLOAD_MAX_BYTES)
+    assert isinstance(files, dict)
+    name, blob, mime = files["photo"]
+    assert name == "pic.jpg"
+    assert blob == b"\xff\xd8\xffdata"
+    assert mime == "image/jpeg"
+
+
+def test_build_upload_size_guard_returns_error(tmp_path):
+    f = tmp_path / "big.bin"
+    f.write_bytes(b"0123456789")  # 10 bytes
+    out = _build_upload(str(f), "document", 5)  # 한도 5바이트
+    assert isinstance(out, str)
+    assert "한도" in out
 
 
 def test_contract_constants():
