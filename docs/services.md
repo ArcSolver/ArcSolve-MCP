@@ -2,7 +2,7 @@
 
 > ⚙️ 자동 생성 — 직접 수정하지 마세요. `arcsolve-mcp catalog`로 재생성됩니다.
 
-현재 **6개 서비스 · 총 31개 도구**.
+현재 **7개 서비스 · 총 37개 도구**.
 
 ## discord — Discord — Webhook으로 채널에 메시지 전송
 공식 문서: https://discord.com/developers/docs/resources/webhook
@@ -34,6 +34,18 @@
 | `line_multicast_text` | LINE Messaging API multicast로 동일 텍스트를 여러 userId에게 전송한다. |
 | `line_reply_text` | LINE Messaging API reply로 텍스트 메시지 1건을 회신한다. |
 | `line_send_text` | LINE Messaging API push로 텍스트 메시지 1건을 전송한다. |
+
+## notion — Notion 워크스페이스 읽기(search·pages·blocks·databases·data sources)
+공식 문서: https://developers.notion.com/reference/intro
+
+| 도구 | 설명 |
+|------|------|
+| `notion_get_block_children` | 블록(또는 페이지)의 자식 블록을 나열해 본문을 읽는다(GET /blocks/{id}/children). |
+| `notion_get_data_source` | data source의 스키마(프로퍼티)를 조회한다(GET /data_sources/{id}). |
+| `notion_get_database` | database를 조회해 자식 data source 목록을 얻는다(GET /databases/{id}). |
+| `notion_get_page` | 단일 페이지의 메타데이터를 조회한다(GET /pages/{id}). |
+| `notion_query_data_source` | data source의 행(page)을 쿼리한다(POST /data_sources/{id}/query). |
+| `notion_search` | Notion 워크스페이스에서 page/data source를 제목으로 검색한다(POST /search). |
 
 ## openalex — OpenAlex 학술 그래프 읽기(works/authors 검색·조회)
 공식 문서: https://developers.openalex.org/how-to-use-the-api/api-overview
