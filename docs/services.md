@@ -2,7 +2,7 @@
 
 > ⚙️ 자동 생성 — 직접 수정하지 마세요. `arcsolve-mcp catalog`로 재생성됩니다.
 
-현재 **17개 서비스 · 총 65개 도구**.
+현재 **18개 서비스 · 총 72개 도구**.
 
 ## airkorea — 에어코리아 대기오염정보 읽기(시도·측정소 실시간 측정 + 예보)
 공식 문서: https://www.data.go.kr/data/15073861/openapi.do
@@ -136,6 +136,19 @@
 |------|------|
 | `seoul_bike_status` | 서울 따릉이 대여소의 실시간 현황을 조회한다(GET bikeList). |
 | `seoul_subway_arrivals` | 서울 지하철 역의 실시간 도착정보를 조회한다(GET realtimeStationArrival). |
+
+## tago_transit — TAGO 전국 대중교통 통합 읽기(버스 도착·정류소·노선 + 고속/시외버스 + 열차)
+공식 문서: https://www.data.go.kr/data/15098530/openapi.do
+
+| 도구 | 설명 |
+|------|------|
+| `tago_bus_arrivals` | 정류소별 버스 실시간 도착예정을 조회한다(GET /ArvlInfoInqireService/…ArvlPrearngeInfoList). |
+| `tago_bus_route` | 노선의 경유정류소 목록을 조회한다(GET /BusRouteInfoInqireService/…ThrghSttnList). |
+| `tago_city_codes` | 전국 도시코드 목록을 조회한다(GET /ArvlInfoInqireService/getCtyCodeList). |
+| `tago_express_bus` | 고속버스 운행을 조회한다(GET /ExpBusInfoService/getStrtpntAlocFndExpbusInfo). |
+| `tago_intercity_bus` | 시외버스 운행을 조회한다(GET /SuburbsBusInfoService/getStrtpntAlocFndSuberbsBusInfo). |
+| `tago_search_bus_stops` | 정류소명으로 정류소를 검색한다(GET /BusSttnInfoInqireService/getSttnNoList). |
+| `tago_train` | 도시간 열차 운행을 조회한다(GET /TrainInfoService/getStrtpntAlocFndTrainInfo). |
 
 ## telegram — Telegram Bot API — 텍스트/사진/문서 전송, 메시지 편집·삭제, getMe 헬스체크
 공식 문서: https://core.telegram.org/bots/api
