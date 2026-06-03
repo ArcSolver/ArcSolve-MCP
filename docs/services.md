@@ -2,7 +2,7 @@
 
 > ⚙️ 자동 생성 — 직접 수정하지 마세요. `arcsolve-mcp catalog`로 재생성됩니다.
 
-현재 **12개 서비스 · 총 52개 도구**.
+현재 **13개 서비스 · 총 54개 도구**.
 
 ## arxiv — arXiv 학술 프리프린트 읽기(검색·id 조회, Atom XML)
 공식 문서: https://info.arxiv.org/help/api/user-manual.html
@@ -113,6 +113,14 @@
 | `telegram_send_document` | Telegram 봇으로 문서(파일)를 전송한다(sendDocument). |
 | `telegram_send_message` | Telegram 봇으로 텍스트 메시지를 전송한다(sendMessage). |
 | `telegram_send_photo` | Telegram 봇으로 사진을 전송한다(sendPhoto). |
+
+## usgs_quake — USGS 지진 정보 읽기(FDSN Event API — 검색·건수, GeoJSON)
+공식 문서: https://earthquake.usgs.gov/fdsnws/event/1/
+
+| 도구 | 설명 |
+|------|------|
+| `usgs_count_earthquakes` | 조건에 매칭되는 지진 건수만 센다(GET /count?format=geojson). |
+| `usgs_search_earthquakes` | USGS에서 지진 이벤트를 검색/나열한다(GET /query?format=geojson). |
 
 ## zotero — Zotero 라이브러리 읽기(Web API v3 + 로컬 데스크톱 API)
 공식 문서: https://www.zotero.org/support/dev/web_api/v3/basics

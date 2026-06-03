@@ -30,5 +30,6 @@
 - **telegram**: sendMessage 기반 telegram_send_message 추가
 - **telegram**: 코어 도구 확장 — getMe(헬스체크)/sendPhoto/sendDocument/editMessageText/deleteMessage 추가
 - **telegram**: sendPhoto/sendDocument 로컬 파일 multipart 업로드 지원(사진≤10MB·파일≤50MB), editMessageText inline_message_id 경로 추가
+- **usgs_quake**: USGS 지진 정보 읽기 서비스 추가 — FDSN Event API 검색·건수 2개 GET 도구(`usgs_search_earthquakes`/`usgs_count_earthquakes`), 무인증·`format=geojson` 고정, 시간 ISO8601·`orderby`(time/magnitude)·원형 위치(`latitude`+`longitude`+`maxradiuskm`)·`limit` 1–20000(기본 20), GeoJSON FeatureCollection 파싱(time ms→UTC, coordinates[lon,lat,depth])·`{count,maxAllowed}` 건수
 - **zotero**: Zotero 라이브러리 읽기 서비스 추가(Web API v3 + 로컬 데스크톱 API 단일 서비스·백엔드 전환) — 검색/아이템/자식/컬렉션/컬렉션 아이템/태그/전문/헬스 8개 GET 도구, 응답 헤더 기반 페이지네이션 안내
 <!-- END UNRELEASED -->
