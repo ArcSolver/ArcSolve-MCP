@@ -16,6 +16,7 @@ from arcsolve.services.airport.contract import (
     OP_DEPARTURES,
     RESULT_CODE_OK,
     SERVICE_PASSENGER_FLIGHTS,
+    TERMINAL_NAMES,
     TYPE_JSON,
     Body,
     Header,
@@ -45,6 +46,13 @@ def test_base_and_institution_code():
 def test_operation_paths_match_official():
     assert OP_ARRIVALS == "/getPassengerArrivalsDeOdp"
     assert OP_DEPARTURES == "/getPassengerDeparturesDeOdp"
+
+
+def test_terminal_names_map_codes():
+    # 상류는 표시명이 아니라 코드(P01/P02/P03)를 준다.
+    assert TERMINAL_NAMES["P01"] == "T1"
+    assert TERMINAL_NAMES["P02"] == "탑승동"
+    assert TERMINAL_NAMES["P03"] == "T2"
 
 
 # ─── 쿼리 빌더 ──────────────────────────────────────────────
@@ -176,11 +184,22 @@ def test_passenger_flight_departure_fields():
             "chkinrange": "A~C",
             "gatenumber": 24,
             "remark": "탑승중",
+            "terminalid": "P03",
         }
     )
     assert f.chkinrange == "A~C"
     assert f.gatenumber == "24"
     assert f.remark == "탑승중"
+    assert f.terminalid == "P03"  # 코드 원문 보존(표시 환산은 tools에서)
+
+
+def test_passenger_flight_codeshare_fields():
+    # 공동운항 필드(codeshare/masterflightid) — 다수 외부 구현으로 확정.
+    f = PassengerFlight.model_validate(
+        {"flightId": "DL7861", "codeshare": "Slave", "masterflightid": "KE081"}
+    )
+    assert f.codeshare == "Slave"
+    assert f.masterflightid == "KE081"
 
 
 def test_response_envelope_full_direct_list_items():

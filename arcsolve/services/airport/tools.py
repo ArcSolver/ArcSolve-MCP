@@ -164,6 +164,18 @@ def _fmt_time(dt: str | None) -> str:
     return dt
 
 
+def _fmt_terminal(tid: str | None) -> str:
+    """terminalid 코드(P01/P02/P03)를 표시 접미사로 환산한다.
+
+    상류는 표시명이 아니라 코드를 준다(P01=T1·P02=탑승동·P03=T2). 매핑에 없으면 코드 원문을
+    그대로 보여준다(미래 코드 방어). 결측이면 빈 문자열. 출처: contract.TERMINAL_NAMES.
+    """
+    if not tid:
+        return ""
+    name = c.TERMINAL_NAMES.get(tid, tid)
+    return f" · {name}"
+
+
 def _page_note(b: c.Body | None) -> str:
     """body 페이지네이션으로 '총 N건 · page P' 안내 문자열을 만든다."""
     if b is None:
@@ -242,8 +254,12 @@ def register(mcp: FastMCP) -> None:
             place = _v(f.airport)
             if f.airportCode:
                 place += f"({f.airportCode})"
-            terminal = f" · T{f.terminalid}" if f.terminalid else ""
+            terminal = _fmt_terminal(f.terminalid)
             status = f" [{f.remark}]" if f.remark else ""
+            # 공동운항(codeshare)이고 주 편명이 따로 있으면 부기.
+            share = ""
+            if f.masterflightid and f.masterflightid not in ("", "-"):
+                share = f" (공동운항·주 {f.masterflightid})"
             # 방향별 부가 정보.
             if direction == "도착":
                 extra = ""
@@ -258,7 +274,8 @@ def register(mcp: FastMCP) -> None:
                 if f.gatenumber and f.gatenumber not in ("", "-"):
                     extra += f" · 탑승구 {f.gatenumber}"
             lines.append(
-                f"- {_v(f.flightId)} {_v(f.airline)} · {place} · {time_part}{terminal}{extra}{status}"
+                f"- {_v(f.flightId)}{share} {_v(f.airline)} · {place} · "
+                f"{time_part}{terminal}{extra}{status}"
             )
         return "\n".join(lines)
 

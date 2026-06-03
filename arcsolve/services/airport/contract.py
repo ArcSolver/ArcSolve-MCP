@@ -78,6 +78,16 @@ DEFAULT_TO_TIME = "2400"
 # 정상 응답 결과코드. 출처: data.go.kr 공통 OpenAPI 에러코드 규약 + 응답 header.
 RESULT_CODE_OK = "00"
 
+# terminalid 코드 → 표시명. 상류는 표시명이 아니라 코드(P01/P02/P03)를 준다.
+#   P01=제1여객터미널(T1) · P02=탑승동(concourse) · P03=제2여객터미널(T2).
+# 출처: 외부 구현(eyjs/convention C# MapTerminal: P01→T1, P02→탑승동, P03→T2;
+#   airscreen iOS Swift: 도착/출발 필터가 P01/P02/P03로 분기).
+TERMINAL_NAMES = {
+    "P01": "T1",
+    "P02": "탑승동",
+    "P03": "T2",
+}
+
 
 def _base(service_key: str) -> dict[str, str | int]:
     """모든 운항현황 요청의 공통 베이스 파라미터(serviceKey·type=json)."""
@@ -154,17 +164,22 @@ class PassengerFlight(BaseModel):
     공통 필드(실응답 교차확인):
       - airline(항공사명) · flightId(편명) · airport(출발지/도착지 공항명) ·
         airportCode(출발지/도착지 공항코드) · scheduleDateTime(예정시각 YYYYMMDDHHMM) ·
-        estimatedDateTime(변경/예상시각) · terminalid(터미널) · gatenumber(탑승구) ·
-        remark(운항상태: 출발/도착/지연/결항 등) · fid(공항 내부 항공편 식별자).
+        estimatedDateTime(변경/예상시각) · terminalid(터미널 코드 **P01/P02/P03**) ·
+        gatenumber(탑승구) · remark(운항상태: 출발/도착/지연/결항 등) ·
+        fid(공항 내부 항공편 식별자) · codeshare(단독/공동운항 구분: Master/Slave 등) ·
+        masterflightid(공동운항 시 주 편명).
     도착 전용: carousel(수하물 수취대) · exitnumber(출구).
     출발 전용: chkinrange(체크인 카운터 범위).
+    ⚠️ terminalid는 표시명(T1/T2)이 아니라 **코드(P01=제1터미널·P02=탑승동·P03=제2터미널)**다 —
+      tools._fmt_terminal로 표시명 환산. 출처: 외부 구현(airscreen iOS·convention C#: P01/P02/P03).
     출처: https://www.data.go.kr/data/15140153/openapi.do +
       외부 구현(item.get('airline'/'flightId'/'scheduleDateTime'/'estimatedDateTime'/
-      'terminalid'/'gatenumber'/'remark'/'fid'/'airportCode'); 도착 carousel/exitnumber;
-      출발 chkinrange)으로 다중 교차확인.
-    TODO(provenance): 일부 필드(codeshare/city 등)는 상세 페이지가 JS 렌더라 인라인 스키마를
-      정적으로 못 봤다. 다중 외부 구현으로 확인된 위 필드만 모델에 두고, extra="ignore"로 나머지
-      변형을 흡수한다.
+      'terminalid'/'gatenumber'/'remark'/'fid'/'airportCode'/'codeshare'/'masterflightid');
+      도착 carousel/exitnumber; 출발 chkinrange)으로 다중 교차확인(aivle ICN-AI-chatbot Python,
+      eyjs/convention C#, airscreen iOS Swift·Android Kotlin, TaeHyun77 Java).
+    TODO(provenance): `city`/`typeOfFlight`/`fstandposition` 등 일부 변형은 상세 페이지가 JS
+      렌더라 인라인 스키마를 정적으로 못 봤고 단일 구현에서만 보여 모델에 두지 않는다. 다중 외부
+      구현으로 확인된 위 필드만 모델에 두고, extra="ignore"로 나머지 변형을 흡수한다.
     """
 
     model_config = {"extra": "ignore"}
@@ -179,6 +194,8 @@ class PassengerFlight(BaseModel):
     gatenumber: str | None = None
     remark: str | None = None
     fid: str | None = None
+    codeshare: str | None = None  # 단독/공동운항 구분(Master/Slave 등)
+    masterflightid: str | None = None  # 공동운항 시 주 편명
     # 도착 전용
     carousel: str | None = None
     exitnumber: str | None = None
@@ -196,6 +213,8 @@ class PassengerFlight(BaseModel):
         "exitnumber",
         "chkinrange",
         "fid",
+        "codeshare",
+        "masterflightid",
         mode="before",
     )
     @classmethod

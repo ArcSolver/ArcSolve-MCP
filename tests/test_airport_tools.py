@@ -54,7 +54,7 @@ async def test_arrivals_request_and_output(tools, monkeypatch, recording_http):
                 "airline": "대한항공", "flightId": "KE001",
                 "airport": "나리타", "airportCode": "NRT",
                 "scheduleDateTime": "202401151230", "estimatedDateTime": "202401151245",
-                "terminalid": "2", "carousel": "7", "exitnumber": "A", "remark": "도착",
+                "terminalid": "P03", "carousel": "7", "exitnumber": "A", "remark": "도착",
             }
         ],
         total=1, page=1,
@@ -78,7 +78,8 @@ async def test_arrivals_request_and_output(tools, monkeypatch, recording_http):
     assert "KE001" in out and "대한항공" in out
     assert "나리타(NRT)" in out
     assert "12:30→12:45" in out  # 예정→변경 시각 환산
-    assert "T2" in out
+    assert "T2" in out  # terminalid 코드 P03 → 표시명 T2 환산
+    assert "TP03" not in out  # 코드를 그대로 노출하지 않는다
     assert "수취대 7" in out and "출구 A" in out
     assert "[도착]" in out
 
@@ -131,7 +132,7 @@ async def test_departures_request_and_output(tools, monkeypatch, recording_http)
                 "airline": "아시아나", "flightId": "OZ102",
                 "airport": "로스앤젤레스", "airportCode": "LAX",
                 "scheduleDateTime": "202401151400",
-                "terminalid": "1", "chkinrange": "A~C", "gatenumber": "24", "remark": "탑승중",
+                "terminalid": "P01", "chkinrange": "A~C", "gatenumber": "24", "remark": "탑승중",
             }
         ],
         total=1,
@@ -150,6 +151,46 @@ async def test_departures_request_and_output(tools, monkeypatch, recording_http)
     assert "T1" in out
     assert "카운터 A~C" in out and "탑승구 24" in out
     assert "[탑승중]" in out
+
+
+async def test_terminal_code_p02_maps_to_concourse(tools, monkeypatch, recording_http):
+    # terminalid 코드 P02 → 탑승동(concourse). 코드를 그대로 노출하지 않는다.
+    body = _wrap(
+        {"resultCode": "00"},
+        {"flightId": "KE111", "scheduleDateTime": "202401150800", "terminalid": "P02"},
+        total=1,
+    )
+    monkeypatch.setattr(f"{MOD}.get_json", recording_http(ret=body))
+    out = await tools["airport_arrivals"]()
+    assert "탑승동" in out and "TP02" not in out
+
+
+async def test_unknown_terminal_code_passthrough(tools, monkeypatch, recording_http):
+    # 매핑에 없는 코드는 원문 그대로(미래 코드 방어), `T` 접두 강제 안 함.
+    body = _wrap(
+        {"resultCode": "00"},
+        {"flightId": "KE222", "scheduleDateTime": "202401150800", "terminalid": "P09"},
+        total=1,
+    )
+    monkeypatch.setattr(f"{MOD}.get_json", recording_http(ret=body))
+    out = await tools["airport_arrivals"]()
+    assert "P09" in out and "TP09" not in out
+
+
+async def test_codeshare_master_flight_annotated(tools, monkeypatch, recording_http):
+    # 공동운항(codeshare=Slave)이고 주 편명(masterflightid)이 있으면 부기.
+    body = _wrap(
+        {"resultCode": "00"},
+        {
+            "flightId": "DL7861", "airline": "델타항공",
+            "scheduleDateTime": "202401151500",
+            "codeshare": "Slave", "masterflightid": "KE081",
+        },
+        total=1,
+    )
+    monkeypatch.setattr(f"{MOD}.get_json", recording_http(ret=body))
+    out = await tools["airport_departures"]()
+    assert "DL7861" in out and "KE081" in out and "공동운항" in out
 
 
 # ─── 키 누락(HTTP 전 차단) ──────────────────────────────────
