@@ -181,7 +181,7 @@ def test_list_response_envelope():
             "results": [{"id": "p1"}],
             "next_cursor": "cur",
             "has_more": True,
-            "type": "page_or_database",
+            "type": "page_or_data_source",
             "extra": "ign",
         }
     )
