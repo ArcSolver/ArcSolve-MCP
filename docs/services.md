@@ -2,7 +2,7 @@
 
 > ⚙️ 자동 생성 — 직접 수정하지 마세요. `arcsolve-mcp catalog`로 재생성됩니다.
 
-현재 **10개 서비스 · 총 47개 도구**.
+현재 **11개 서비스 · 총 49개 도구**.
 
 ## arxiv — arXiv 학술 프리프린트 읽기(검색·id 조회, Atom XML)
 공식 문서: https://info.arxiv.org/help/api/user-manual.html
@@ -74,6 +74,14 @@
 | `openalex_get_work` | 단일 work를 조회한다(GET /works/{id}). |
 | `openalex_search_authors` | OpenAlex에서 저자(authors)를 검색/나열한다(GET /authors). |
 | `openalex_search_works` | OpenAlex에서 학술 논문(works)을 검색/나열한다(GET /works). |
+
+## openmeteo — Open-Meteo 날씨·기후 읽기(예보·지오코딩)
+공식 문서: https://open-meteo.com/en/docs
+
+| 도구 | 설명 |
+|------|------|
+| `openmeteo_forecast` | 좌표의 날씨 예보를 조회한다(GET api /v1/forecast). |
+| `openmeteo_geocode` | 지명을 좌표·국가·시간대로 변환한다(GET geocoding-api /v1/search). |
 
 ## semanticscholar — Semantic Scholar 학술 그래프 읽기(papers/authors 검색·조회)
 공식 문서: https://api.semanticscholar.org/api-docs/graph
