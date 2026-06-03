@@ -229,6 +229,22 @@
 - 제약(공식): `sidoName`=전국·서울·…·세종(18), `dataTerm`=DAILY/MONTH/3MONTH, `ver` 기본 1.3(PM2.5 포함, 1.4=24시간 예측이동농도). 레이트리밋 **개발계정 500/일**.
 - 스코프(MVP): 포함 = 시도/측정소 실시간 측정 + 예보통보 / 제외 = 측정소 목록(별도 `MsrstnInfoInqireSvc`), CAI 상세, 통계, 주간예보
 - 코어 의존: `get_json`만으로 충분(키는 쿼리 파라미터, 페이지네이션은 본문). 새 코어 동사 불필요.
+## pubmed — PubMed(NCBI E-utilities) 생의학 문헌 읽기 (검색·요약·abstract)
+- 상태: `done`
+- 인증: **API 키 선택** — env `NCBI_API_KEY` → `api_key` **쿼리 파라미터**(OpenAlex처럼 헤더 아님). 식별용 `tool`/`email`도 쿼리 파라미터(권장). 키 없이도 동작(초당 3건). base `https://eutils.ncbi.nlm.nih.gov/entrez/eutils/`, `db=pubmed`
+- 공식 문서:
+  - E-utilities Quick Start(개요·base URL·esearch/esummary/efetch 흐름): https://www.ncbi.nlm.nih.gov/books/NBK25500/
+  - E-utilities In-Depth(전 파라미터·`retmode`·`sort`·`api_key`·JSON 출력 구조·efetch는 XML만): https://www.ncbi.nlm.nih.gov/books/NBK25499/
+  - General Introduction(레이트리밋 3/s·10/s·`api_key`·`tool`/`email` 등록 요구): https://www.ncbi.nlm.nih.gov/books/NBK25497/
+- 도구(MVP, 전부 GET·읽기):
+  - `pubmed_search(query, retmax?=20, retstart?=0, sort?)` — `esearch.fcgi?db=pubmed&term=&retmode=json` → `{count, idlist:[PMID]}` (**get_json**)
+  - `pubmed_get_summary(ids)` — `esummary.fcgi?db=pubmed&id=&retmode=json` → 제목·저자·저널·날짜·DOI (**get_json**)
+  - `pubmed_fetch_abstract(ids)` — `efetch.fcgi?db=pubmed&id=&rettype=abstract&retmode=xml` → 초록 텍스트 (**get_text + xml.etree**)
+- 응답: esearch JSON 봉투 `{esearchresult:{count, retmax, retstart, idlist:[...]}}`(count 등 라이브에선 문자열 → int 변환), esummary `{result:{uids:[...], "<uid>":{title, authors:[{name,authtype}], source, fulljournalname, pubdate, articleids:[{idtype,value}]}}}`(DOI는 `idtype='doi'`), efetch는 **XML만**(JSON 미지원) `PubmedArticleSet/PubmedArticle/.../Abstract/AbstractText`(구조화 초록 `Label` 속성).
+- 제약(공식): esearch `retmax` 기본 20·**최대 10000**, `sort` ∈ relevance/pub_date/Author/JournalName, id 1회 **≤200개**(이상 POST 권장 — 범위 밖). 잘못된 검색식은 HTTP 200 + `{esearchresult:{ERROR}}`.
+- 레이트리밋: 키 없으면 **초당 3건**(초과 429), 키 있으면 **초당 10건**.
+- 스코프(MVP): 포함 = esearch(검색)·esummary(요약)·efetch(초록) / 제외 = WebEnv/history 체이닝(`usehistory`), pubmed 외 db, MeSH 상세, `elink`/`einfo`/`espell`
+- 코어 의존: `get_json`(esearch/esummary) + `get_text`(efetch XML, arxiv가 추가) — 둘 다 기존 코어. 키·tool·email은 쿼리 파라미터. 새 코어 동사 불필요.
 
 ---
 
