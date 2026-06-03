@@ -6,6 +6,7 @@
 ## [Unreleased]
 
 - **airkorea**: 에어코리아(한국환경공단) 대기오염정보 읽기 서비스 추가 — 시도별·측정소별 실시간 측정정보와 대기질 예보통보 3개 GET 도구(`airkorea_realtime_by_region`/`airkorea_realtime_by_station`/`airkorea_forecast`), data.go.kr 서비스키는 쿼리 파라미터 `serviceKey`(필수, **Decoding 키** — 이중 인코딩 방지), `returnType=json` 명시, 봉투 `resultCode != "00"` 에러 매핑(서비스키/트래픽), 측정값은 문자열·결측 '-' 처리
+- **airport**: 인천국제공항(IIAC) 여객편 운항현황 읽기 서비스 추가 — 기관코드 `B551177`의 운항현황 상세조회 서비스(`StatusOfPassengerFlightsDeOdp`)를 **하나의 data.go.kr 서비스키**로 커버하는 2개 GET 도구. `airport_arrivals`(여객편 도착현황 ⭐ — 편명·항공사·출발지·예정/변경시각·터미널·수하물수취대·출구·운항상태)·`airport_departures`(여객편 출발현황 ⭐ — 편명·항공사·목적지·예정/변경시각·터미널·체크인카운터·탑승구·운항상태). `searchday`(YYYYMMDD, D-3~D+6)·`from_time`/`to_time`(HHMM)·`airport_code`/`flight_id`(선택 필터)·`lang`(K/E)·페이지네이션 지원. 서비스키는 쿼리 파라미터 `serviceKey`(필수, **Decoding 키** — 이중 인코딩 방지), ⚠️ 인천공항은 `_type`이 아니라 **`type=json`** 명시. 봉투 `resultCode != "00"`(+게이트웨이 `cmmMsgHeader.returnReasonCode`) 에러 매핑, items quirk(`body.items`가 곧장 리스트/단일 객체/빈 문자열) 정규화, 편명·시각·터미널·게이트는 문자열 보존. ⚠️ 개발계정 일 500건 트래픽 제한. 범위: 인천공항 여객편만(화물편·주차/혼잡도·KAC 타 공항 제외)
 - **arxiv**: arXiv 학술 프리프린트 읽기 서비스 추가 — 검색·id 조회 2개 GET 도구(`arxiv_search`/`arxiv_get`), 무인증, **Atom 1.0 XML** 응답을 표준 라이브러리 `xml.etree.ElementTree`로 파싱(외부 의존 없음), HTTP 200 error-entry(title='Error') 감지·매핑, max_results 기본 10·총 ≤30000(초과 HTTP 400)
 - **core**: `get_text` HTTP 동사 추가 — 비-JSON 본문(arXiv Atom XML 등)을 raw str로 반환(get_json과 동형, 4xx/5xx UpstreamError 매핑)
 - **core**: 레지스트리 지연·격리 로딩(한 서비스 오류가 전체를 죽이지 않음, 선택 서비스만 import)
