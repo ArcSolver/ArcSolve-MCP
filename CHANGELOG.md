@@ -5,6 +5,8 @@
 <!-- BEGIN UNRELEASED -->
 ## [Unreleased]
 
+- **arxiv**: arXiv 학술 프리프린트 읽기 서비스 추가 — 검색·id 조회 2개 GET 도구(`arxiv_search`/`arxiv_get`), 무인증, **Atom 1.0 XML** 응답을 표준 라이브러리 `xml.etree.ElementTree`로 파싱(외부 의존 없음), HTTP 200 error-entry(title='Error') 감지·매핑, max_results 기본 10·총 ≤30000(초과 HTTP 400)
+- **core**: `get_text` HTTP 동사 추가 — 비-JSON 본문(arXiv Atom XML 등)을 raw str로 반환(get_json과 동형, 4xx/5xx UpstreamError 매핑)
 - **core**: 레지스트리 지연·격리 로딩(한 서비스 오류가 전체를 죽이지 않음, 선택 서비스만 import)
 - **core**: auth 레지스트리 일반화(`Service.make_auth_client`) — 새 OAuth 서비스가 코어 수정 없이 인증
 - **core**: OAuth PKCE(S256) + 토큰 파일 0600/디렉토리 0700
