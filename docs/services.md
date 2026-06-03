@@ -2,7 +2,7 @@
 
 > ⚙️ 자동 생성 — 직접 수정하지 마세요. `arcsolve-mcp catalog`로 재생성됩니다.
 
-현재 **9개 서비스 · 총 43개 도구**.
+현재 **10개 서비스 · 총 47개 도구**.
 
 ## arxiv — arXiv 학술 프리프린트 읽기(검색·id 조회, Atom XML)
 공식 문서: https://info.arxiv.org/help/api/user-manual.html
@@ -74,6 +74,16 @@
 | `openalex_get_work` | 단일 work를 조회한다(GET /works/{id}). |
 | `openalex_search_authors` | OpenAlex에서 저자(authors)를 검색/나열한다(GET /authors). |
 | `openalex_search_works` | OpenAlex에서 학술 논문(works)을 검색/나열한다(GET /works). |
+
+## semanticscholar — Semantic Scholar 학술 그래프 읽기(papers/authors 검색·조회)
+공식 문서: https://api.semanticscholar.org/api-docs/graph
+
+| 도구 | 설명 |
+|------|------|
+| `s2_get_author` | 단일 author를 조회한다(GET /author/{id}). |
+| `s2_get_paper` | 단일 paper를 조회한다(GET /paper/{id}). |
+| `s2_search_authors` | Semantic Scholar에서 저자(authors)를 검색한다(GET /author/search). |
+| `s2_search_papers` | Semantic Scholar에서 논문(papers)을 relevance 검색한다(GET /paper/search). |
 
 ## telegram — Telegram Bot API — 텍스트/사진/문서 전송, 메시지 편집·삭제, getMe 헬스체크
 공식 문서: https://core.telegram.org/bots/api
