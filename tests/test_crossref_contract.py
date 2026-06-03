@@ -75,6 +75,16 @@ def test_validate_offset_bounds():
         validate_offset(MAX_OFFSET + 1)
 
 
+def test_validate_offset_plus_rows_boundary():
+    # 서버 실제 규칙은 offset+rows ≤ 10000 (라이브 확인). 경계 OK / 초과 거부.
+    assert validate_offset(MAX_OFFSET - 20, 20) == MAX_OFFSET - 20  # 합 10000 OK
+    with pytest.raises(ValueError):
+        validate_offset(MAX_OFFSET - 19, 20)  # 합 10001
+    # build_params 경로에서도 rows와 함께 사전 차단된다.
+    with pytest.raises(ValueError):
+        build_params(rows=20, offset=MAX_OFFSET - 10)  # 합 10010
+
+
 def test_validate_order():
     assert validate_order("asc") == "asc"
     assert validate_order("desc") == "desc"

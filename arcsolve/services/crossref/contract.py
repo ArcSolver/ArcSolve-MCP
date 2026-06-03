@@ -84,15 +84,24 @@ def validate_rows(rows: int) -> int:
     return rows
 
 
-def validate_offset(offset: int) -> int:
-    """offset을 0..10000 범위로 검증한다(공식 deep-paging 한계).
+def validate_offset(offset: int, rows: int = 0) -> int:
+    """offset을 검증한다: 단독 0..10000 + (rows 동반 시) offset+rows ≤ 10000.
 
-    이 한계를 넘으려면 cursor 페이지네이션이 필요하나 MVP 범위 밖이다.
-    출처: README ("Offsets for /works are limited to 10K")
+    서버 실제 규칙은 단순 10K 상한이 아니라 `offset + rows ≤ 10000`이다
+    (라이브: rows=1·offset=10000 → 400 "...less than or equal to 9999...",
+    rows=20·offset=9981 → 400). 이 한계를 넘으려면 cursor 페이지네이션이
+    필요하나 MVP 범위 밖이다.
+    출처: README ("Offsets for /works are limited to 10K") + 라이브 경계 확인.
     """
     if offset < 0 or offset > MAX_OFFSET:
         raise ValueError(
             f"offset은 0..{MAX_OFFSET} 범위여야 합니다(현재 {offset}). "
+            "그 이상은 cursor 페이지네이션이 필요합니다(범위 밖)."
+        )
+    if rows and offset + rows > MAX_OFFSET:
+        raise ValueError(
+            f"offset+rows는 {MAX_OFFSET} 이하여야 합니다"
+            f"(현재 offset={offset}, rows={rows}). "
             "그 이상은 cursor 페이지네이션이 필요합니다(범위 밖)."
         )
     return offset
@@ -122,7 +131,7 @@ def build_params(
     - sort → `sort`(예: `is-referenced-by-count`, `published`, `relevance`, `score`)
     - order → `order`(asc/desc 검증)
     - rows → `rows`(0..1000 검증)
-    - offset → `offset`(0..10000 검증)
+    - offset → `offset`(0..10000, rows 동반 시 offset+rows ≤ 10000 검증)
     - mailto → `mailto`(polite pool, 선택)
     출처: README (query·filter·sort·order·rows·offset·mailto)
     """
@@ -138,7 +147,7 @@ def build_params(
     if rows is not None:
         params[PARAM_ROWS] = validate_rows(rows)
     if offset is not None:
-        params[PARAM_OFFSET] = validate_offset(offset)
+        params[PARAM_OFFSET] = validate_offset(offset, rows or 0)
     if mailto:
         params[PARAM_MAILTO] = mailto
     return params
@@ -156,10 +165,11 @@ class Work(BaseModel):
 
     공식 필드(api_format.md): DOI · title(Array of String) · author(Array of Contributor:
     given/family/ORCID/sequence) · type(String) · is-referenced-by-count(Number) ·
-    container-title(Array of String) · publisher(String) · published(Partial Date:
-    {date-parts:[[Y,M,D]]}) · URL · references-count.
+    container-title(Array of String) · publisher(String) · URL · references-count.
+    `published`는 api_format.md엔 미기재(issued·published-print·published-online으로 표기)이나
+    라이브 응답엔 항상 존재하며 `issued`와 동일 값이라 라이브 근거로 모델링한다.
     대문자/하이픈 필드명은 alias로 매핑한다(populate_by_name로 양쪽 다 허용).
-    출처: https://github.com/CrossRef/rest-api-doc/blob/master/api_format.md
+    출처: api_format.md + 라이브(/works) — https://github.com/CrossRef/rest-api-doc/blob/master/api_format.md
     """
 
     model_config = {"extra": "ignore", "populate_by_name": True}
@@ -171,7 +181,7 @@ class Work(BaseModel):
     is_referenced_by_count: int | None = Field(default=None, alias="is-referenced-by-count")
     container_title: list[str] | None = Field(default=None, alias="container-title")
     publisher: str | None = None
-    published: dict | None = None  # {date-parts:[[Y,M,D]]} (Partial Date)
+    published: dict | None = None  # {date-parts:[[Y,M,D]]} — 라이브: issued와 동일(api_format.md 미기재)
 
 
 class Journal(BaseModel):
