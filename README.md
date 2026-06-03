@@ -1,6 +1,6 @@
-# ArcSolve
+# ArcSolve-Kit
 
-[![CI](https://github.com/ArcSolver/ArcSolve-MCP/actions/workflows/ci.yml/badge.svg)](https://github.com/ArcSolver/ArcSolve-MCP/actions/workflows/ci.yml)
+[![CI](https://github.com/ArcSolver/ArcSolve-Kit/actions/workflows/ci.yml/badge.svg)](https://github.com/ArcSolver/ArcSolve-Kit/actions/workflows/ci.yml)
 [![License](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](LICENSE)
 [![Python](https://img.shields.io/badge/python-3.11%2B-blue.svg)](pyproject.toml)
 
@@ -14,7 +14,7 @@
 ## 구조
 
 ```
-arcsolve-mcp/
+ArcSolve-Kit/
 ├── pyproject.toml
 ├── AGENTS.md                 # 모든 에이전트 공통 작업 규칙 (단일 출처)
 ├── CHANGELOG.md              # changelog.d/ 조각에서 합본

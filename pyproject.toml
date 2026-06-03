@@ -1,7 +1,7 @@
 [project]
 name = "arcsolve-mcp"
 version = "0.1.0"
-description = "ArcSolve MCP — 인기 서비스의 공개 API를 MCP로 묶는 오픈소스 모음"
+description = "ArcSolve-Kit — 인기 서비스를 MCP 서버와 Claude Skill 두 포맷으로 묶는 오픈소스 모음"
 readme = "README.md"
 requires-python = ">=3.11"
 license = { text = "Apache-2.0" }

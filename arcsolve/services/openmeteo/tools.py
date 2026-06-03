@@ -20,7 +20,7 @@ if TYPE_CHECKING:
 
 def _user_agent() -> dict[str, str]:
     """식별용 User-Agent 헤더(무인증이라 인증 헤더는 없음)."""
-    return {"User-Agent": "ArcSolve-MCP/openmeteo (https://github.com/ArcSolver/ArcSolve-MCP)"}
+    return {"User-Agent": "ArcSolve-MCP/openmeteo (https://github.com/ArcSolver/ArcSolve-Kit)"}
 
 
 def _explain(e: UpstreamError) -> str:
