@@ -1,0 +1,1 @@
+- **academic-discovery** (skill): 학술 다중 출처(arXiv·Crossref·OpenAlex·PubMed·Semantic Scholar)를 가로지르는 탐색·교차검증 스킬 추가 — MCP 도구 오케스트레이션(계약 import 없음), 정적 테스트 + eval 시나리오.

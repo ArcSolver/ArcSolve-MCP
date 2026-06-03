@@ -32,7 +32,7 @@ def test_constants_match_official():
     assert BASE_URL == "https://api.weather.gov"
     assert ALERTS_ACTIVE == "/alerts/active"
     assert "ArcSolve-MCP" in DEFAULT_USER_AGENT
-    assert "ArcSolver/ArcSolve-MCP" in DEFAULT_USER_AGENT
+    assert "ArcSolver/ArcSolve-Kit" in DEFAULT_USER_AGENT
 
 
 def test_valid_state_areas_cover_states_and_territories():

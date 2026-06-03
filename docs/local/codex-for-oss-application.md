@@ -14,7 +14,7 @@
 | Field | Value |
 |------|-------|
 | Project | **ArcSolve MCP** |
-| Repository | https://github.com/ArcSolver/ArcSolve-MCP |
+| Repository | https://github.com/ArcSolver/ArcSolve-Kit |
 | License | Apache-2.0 (OSI-approved) |
 | Language / stack | Python 3.11+, FastMCP (Model Context Protocol) |
 | Your role | Core maintainer (write access / project lead) |
