@@ -173,6 +173,22 @@
 
 ---
 
+## openmeteo — Open-Meteo 날씨·기후 읽기 (예보·지오코딩)
+- 상태: `done`
+- 인증: **무인증**(키 없음·env 불필요·`.env.example` 무변경). 식별용 User-Agent만 전송. `apikey`는 상업용 도메인 전용(범위 밖). base 예보 `https://api.open-meteo.com/v1`, 지오코딩 `https://geocoding-api.open-meteo.com/v1`
+- 공식 문서:
+  - 예보 API(엔드포인트·파라미터·`forecast_days` 0–16·hourly/daily/current·응답 구조·에러 봉투): https://open-meteo.com/en/docs
+  - 지오코딩 API(엔드포인트·`name`/`count`/`language`/`countryCode`·`results` 필드): https://open-meteo.com/en/docs/geocoding-api
+- 도구(MVP, 전부 GET·읽기):
+  - `openmeteo_geocode(name, count?, language?)` — `geocoding-api/v1/search?name=`(좌표·국가·시간대 → 다른 도구 입력 보조)
+  - `openmeteo_forecast(latitude, longitude, hourly?, daily?, current?, timezone?, forecast_days?)` — `api/v1/forecast`(hourly/daily/current는 콤마 구분 변수명 문자열, 예 `temperature_2m,precipitation`)
+- 응답: 예보 `{latitude, longitude, elevation, timezone, hourly:{time:[],<변수>:[]}, hourly_units, daily:{...}, daily_units, current:{time, interval, <변수>:value}, current_units}`(본문 → `get_json`으로 충분). 지오코딩 `{results:[{id,name,latitude,longitude,country,country_code,timezone,admin1,...}]}`. **변수 카탈로그가 동적**이라 시계열/단위 블록은 dict로 수신(변수명 검증은 상류 위임).
+- 제약(라이브 확인): `forecast_days` **0–16**(기본 7), `count` **1–100**(기본 10), `timezone`=IANA 또는 `auto`. ⚠️ 지오코딩 무매칭 시 `results` 키가 **아예 없다**(빈 배열 아님) → 기본값 `[]`로 안전 처리. 에러는 `{"error":true,"reason":"..."}`(HTTP 400).
+- 스코프(MVP): 포함 = 예보 + 지오코딩 검색 / 제외 = air-quality·marine·flood 별도 엔드포인트, 상업용 도메인·`apikey`, `models` 수동선택, `past_days`·단위 파라미터·`timeformat`·Historical(ERA5) API
+- 코어 의존: `get_json`만으로 충분(무인증·단발 조회). 새 코어 동사 불필요.
+
+---
+
 ## 블록 템플릿 (복사해서 새 대상 추가)
 
 ```markdown
