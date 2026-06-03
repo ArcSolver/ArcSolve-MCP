@@ -28,4 +28,4 @@ jobs:
         run: |
           uv run arcsolve-mcp catalog
           uv run arcsolve-mcp changelog
-          git diff --exit-code docs/services.md CHANGELOG.md
+          git diff --exit-code docs/services.md docs/skills.md CHANGELOG.md

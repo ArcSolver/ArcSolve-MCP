@@ -3,8 +3,9 @@
   arcsolve-mcp                  # 전체(또는 ARCSOLVE_SERVICES) 서비스로 서버 실행 (stdio)
   arcsolve-mcp serve kakao      # 지정한 서비스만 노출
   arcsolve-mcp list             # 사용 가능한 서비스 목록
+  arcsolve-mcp skills           # 사용 가능한 스킬 목록
   arcsolve-mcp auth kakao       # 카카오 최초 1회 인증 → refresh_token 저장
-  arcsolve-mcp catalog          # docs/services.md 재생성 (레지스트리에서 자동)
+  arcsolve-mcp catalog          # docs/services.md + docs/skills.md 재생성 (자동)
   arcsolve-mcp changelog        # changelog.d/ 조각 → CHANGELOG.md 합본
 """
 
@@ -47,10 +48,11 @@ def _auth(name: str) -> None:
 
 
 def _catalog() -> None:
-    from arcsolve.catalog import write_catalog
+    from arcsolve.catalog import write_catalog, write_skills_catalog
 
-    path = asyncio.run(write_catalog())
-    print(f"카탈로그 생성: {path}")
+    spath = asyncio.run(write_catalog())
+    kpath = write_skills_catalog()
+    print(f"카탈로그 생성: {spath} · {kpath}")
 
 
 def _changelog() -> None:
@@ -81,11 +83,16 @@ def main() -> None:
         from arcsolve.services import available
 
         print("사용 가능한 서비스:", ", ".join(available()))
+    elif cmd == "skills":
+        from arcsolve.skill import available as skills_available
+
+        names = skills_available()
+        print("사용 가능한 스킬:", ", ".join(names) if names else "(없음)")
     elif cmd == "serve":
         _serve(argv[1:])
     else:
         raise SystemExit(
-            f"알 수 없는 명령: {cmd} (serve | list | auth | catalog | changelog)"
+            f"알 수 없는 명령: {cmd} (serve | list | skills | auth | catalog | changelog)"
         )
 
 
