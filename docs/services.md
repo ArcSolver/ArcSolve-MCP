@@ -2,7 +2,15 @@
 
 > ⚙️ 자동 생성 — 직접 수정하지 마세요. `arcsolve-mcp catalog`로 재생성됩니다.
 
-현재 **8개 서비스 · 총 41개 도구**.
+현재 **9개 서비스 · 총 43개 도구**.
+
+## arxiv — arXiv 학술 프리프린트 읽기(검색·id 조회, Atom XML)
+공식 문서: https://info.arxiv.org/help/api/user-manual.html
+
+| 도구 | 설명 |
+|------|------|
+| `arxiv_get` | arXiv id로 프리프린트 메타데이터를 조회한다(GET /api/query, id_list). |
+| `arxiv_search` | arXiv에서 학술 프리프린트를 검색한다(GET /api/query, search_query). |
 
 ## crossref — Crossref 학술 메타데이터 읽기(works/journals 검색·조회)
 공식 문서: https://github.com/CrossRef/rest-api-doc/blob/master/README.md
