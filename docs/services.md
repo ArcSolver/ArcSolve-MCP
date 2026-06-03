@@ -2,7 +2,17 @@
 
 > ⚙️ 자동 생성 — 직접 수정하지 마세요. `arcsolve-mcp catalog`로 재생성됩니다.
 
-현재 **7개 서비스 · 총 37개 도구**.
+현재 **8개 서비스 · 총 41개 도구**.
+
+## crossref — Crossref 학술 메타데이터 읽기(works/journals 검색·조회)
+공식 문서: https://github.com/CrossRef/rest-api-doc/blob/master/README.md
+
+| 도구 | 설명 |
+|------|------|
+| `crossref_get_journal` | 단일 journal을 ISSN으로 조회한다(GET /journals/{issn}). |
+| `crossref_get_work` | 단일 work를 DOI로 조회한다(GET /works/{doi}). |
+| `crossref_search_journals` | Crossref에서 저널(journals)을 검색/나열한다(GET /journals). |
+| `crossref_search_works` | Crossref에서 학술 출판물(works)을 검색/나열한다(GET /works). |
 
 ## discord — Discord — Webhook으로 채널에 메시지 전송
 공식 문서: https://discord.com/developers/docs/resources/webhook
