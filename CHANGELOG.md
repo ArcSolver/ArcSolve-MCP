@@ -12,6 +12,7 @@
 - **core**: provenance 강제 테스트 + GitHub Actions CI(pytest·ruff·카탈로그/체인지로그 drift)
 - **core**: 도구 런타임 기능 테스트(요청 조립·응답 파싱·에러 매핑) + MCP 배선 스모크 추가; tools/service의 fastmcp import를 TYPE_CHECKING으로 이동(도구 모듈 런타임 의존 제거)
 - **core**: LICENSE(Apache-2.0)·CONTRIBUTING 추가
+- **crossref**: Crossref 학술 메타데이터 읽기 서비스 추가 — works/journals 검색·단건 조회 4개 GET 도구(`crossref_search_works`/`crossref_get_work`/`crossref_search_journals`/`crossref_get_journal`), 무인증·polite pool 이메일(`CROSSREF_MAILTO`)은 선택 쿼리 파라미터+User-Agent, 본문 message 기반 건수 안내(rows 0–1000·offset 0–10000)
 - **discord**: Webhook 메시지 전송 MCP 추가 — `discord_send_message`
 - **discord**: 핵심 도구 확장 — Webhook 임베드/편집/삭제(`discord_send_embed`·`discord_edit_message`·`discord_delete_message`) + Bot 토큰 경로(`discord_create_message`·`discord_list_messages`, `DISCORD_BOT_TOKEN`)
 - **kakao**: '나에게 보내기' MCP 추가 — `kakao_send_text_to_me`, `kakao_send_link_to_me`
