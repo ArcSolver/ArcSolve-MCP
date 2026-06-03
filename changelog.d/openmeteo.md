@@ -1,0 +1,1 @@
+- **openmeteo**: Open-Meteo 날씨·기후 읽기 서비스 추가 — 예보·지오코딩 2개 GET 도구(`openmeteo_geocode`/`openmeteo_forecast`), 무인증(키·env 불필요·식별 User-Agent만), hourly/daily/current는 콤마 구분 변수명 문자열 그대로 전달(검증 상류 위임), 동적 변수 블록은 dict로 수신(`forecast_days` 0–16·`count` 1–100), 지오코딩 무매칭 시 `results` 키 부재 안전 처리, 에러 봉투 `{error,reason}`(400) 매핑
