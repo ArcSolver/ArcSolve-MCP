@@ -11,3 +11,5 @@ build/
 # 로컬 토큰 저장소(실수로 커밋되지 않도록)
 .arcsolve/
 credentials.json
+# 커밋하지 않는 로컬 전용 문서(그랜트 신청서·초안 등)
+docs/local/
