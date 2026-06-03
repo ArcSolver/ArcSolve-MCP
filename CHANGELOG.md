@@ -24,6 +24,7 @@
 - **notion**: Notion 워크스페이스 읽기 서비스 추가 — search·page·block children·database·data source 조회/쿼리 6개 도구(`notion_search`/`notion_get_page`/`notion_get_block_children`/`notion_get_database`/`notion_get_data_source`/`notion_query_data_source`), 필수 Bearer 토큰(`NOTION_TOKEN`), API 버전 2026-03-11 핀 고정(data source 모델)
 - **openalex**: OpenAlex 학술 그래프 읽기 서비스 추가 — works/authors 검색·단건 조회 4개 GET 도구(`openalex_search_works`/`openalex_get_work`/`openalex_search_authors`/`openalex_get_author`), API 키·mailto는 선택 쿼리 파라미터(키 없이도 동작), 본문 meta 기반 건수 안내
 - **repo**: README 상단 배지(CI · License · Python) 추가, 저장소 public 공개
+- **semanticscholar**: Semantic Scholar 학술 그래프 읽기 서비스 추가 — papers/authors 검색·단건 조회 4개 GET 도구(`s2_search_papers`/`s2_get_paper`/`s2_search_authors`/`s2_get_author`), API 키는 선택 `x-api-key` 헤더(키 없이 공유 풀로 동작·전용 풀 1 RPS), `fields` 콤마 구분 필드 선택, 본문 `total`/`offset`/`next` 기반 건수 안내(paper limit≤100·offset+limit<1000, author limit≤1000)
 - **telegram**: sendMessage 기반 telegram_send_message 추가
 - **telegram**: 코어 도구 확장 — getMe(헬스체크)/sendPhoto/sendDocument/editMessageText/deleteMessage 추가
 - **telegram**: sendPhoto/sendDocument 로컬 파일 multipart 업로드 지원(사진≤10MB·파일≤50MB), editMessageText inline_message_id 경로 추가
