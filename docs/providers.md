@@ -154,6 +154,25 @@
 
 ---
 
+## semanticscholar — Semantic Scholar 학술 그래프 읽기 (papers/authors 검색·조회)
+- 상태: `done`
+- 인증: **API 키 선택** — env `SEMANTICSCHOLAR_API_KEY` → `x-api-key` **헤더**(OpenAlex의 쿼리 파라미터와 달리 헤더). 키 없이도 동작(공유 풀, 라이브 확인됨). base `https://api.semanticscholar.org/graph/v1`
+- 공식 문서:
+  - OpenAPI(Swagger) 스펙(엔드포인트·쿼리·limit/offset·fields·응답 스키마): https://api.semanticscholar.org/api-docs/graph (원본 JSON: https://api.semanticscholar.org/graph/v1/swagger.json)
+  - 공식 튜토리얼(base URL·fields·rate limit·x-api-key): https://www.semanticscholar.org/product/api/tutorial
+- 도구(MVP, 전부 GET·읽기):
+  - `s2_search_papers(query, fields?, limit?, offset?, year?)` — `/paper/search?query=&fields=`
+  - `s2_get_paper(id, fields?)` — `/paper/{id}` (paperId 또는 `DOI:`·`ARXIV:`·`CorpusId:`·`MAG:`·`ACL:`·`PMID:`·`PMCID:`·`URL:`)
+  - `s2_search_authors(query, fields?, limit?, offset?)` — `/author/search?query=`
+  - `s2_get_author(id, fields?)` — `/author/{id}` (S2 authorId)
+- 응답: 검색 봉투 `{total, offset, next?, data:[...]}`(본문 → `get_json`으로 충분), 단건은 entity가 곧 최상위. **`fields`**(콤마 구분, 중첩 `.`)로 반환 필드 선택 — 미지정 시 상류 기본 최소 필드(`paperId,title`/`authorId,name`). 에러는 `{error}`(검증/404) 또는 `{message,code}`(429).
+- 제약(라이브 확인): paper search `limit` **1–100**(기본 10) + relevance **offset+limit<1000**(이상은 bulk/Datasets — 범위 밖), author search `limit` **1–1000**. 응답 ≤10MB. 없는 id는 404 `{error:"... not found"}`.
+- 레이트리밋: 키 없으면 **공유 풀**(혼잡 시 429↑), 키 있으면 **전 엔드포인트 합산 1 RPS**(검토 후 상향 가능).
+- 스코프(MVP): 포함 = papers/authors 검색·단건 조회 / 제외 = bulk search(`/paper/search/bulk` cursor), citations/references 그래프 확장, recommendations·datasets API
+- 코어 의존: `get_json`만으로 충분(키는 `x-api-key` 헤더, 페이지네이션은 본문). 새 코어 동사 불필요.
+
+---
+
 ## 블록 템플릿 (복사해서 새 대상 추가)
 
 ```markdown
