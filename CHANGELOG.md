@@ -5,6 +5,7 @@
 <!-- BEGIN UNRELEASED -->
 ## [Unreleased]
 
+- **airkorea**: 에어코리아(한국환경공단) 대기오염정보 읽기 서비스 추가 — 시도별·측정소별 실시간 측정정보와 대기질 예보통보 3개 GET 도구(`airkorea_realtime_by_region`/`airkorea_realtime_by_station`/`airkorea_forecast`), data.go.kr 서비스키는 쿼리 파라미터 `serviceKey`(필수, **Decoding 키** — 이중 인코딩 방지), `returnType=json` 명시, 봉투 `resultCode != "00"` 에러 매핑(서비스키/트래픽), 측정값은 문자열·결측 '-' 처리
 - **arxiv**: arXiv 학술 프리프린트 읽기 서비스 추가 — 검색·id 조회 2개 GET 도구(`arxiv_search`/`arxiv_get`), 무인증, **Atom 1.0 XML** 응답을 표준 라이브러리 `xml.etree.ElementTree`로 파싱(외부 의존 없음), HTTP 200 error-entry(title='Error') 감지·매핑, max_results 기본 10·총 ≤30000(초과 HTTP 400)
 - **core**: `get_text` HTTP 동사 추가 — 비-JSON 본문(arXiv Atom XML 등)을 raw str로 반환(get_json과 동형, 4xx/5xx UpstreamError 매핑)
 - **core**: 레지스트리 지연·격리 로딩(한 서비스 오류가 전체를 죽이지 않음, 선택 서비스만 import)
