@@ -357,6 +357,28 @@
 
 ---
 
+## wikipedia — 위키백과 읽기 (검색·요약·본문·링크)
+- 상태: `done`
+- 인증: **무인증**(전체 읽기 동작). 단 **`User-Agent` 헤더 요구**(없거나 약하면 403/스로틀) → 기본값 상수(`contract.DEFAULT_USER_AGENT`)를 항상 전송하고 `WIKIPEDIA_USER_AGENT`로 덮어쓴다(연락처 권장). (선택) `WIKIPEDIA_API_TOKEN` → `Authorization: Bearer`(UA와 함께) 전송 시 레이트리밋 완화. base **언어판별** `https://{lang}.wikipedia.org`.
+- 공식 문서:
+  - per-wiki REST(검색) 레퍼런스: https://www.mediawiki.org/wiki/API:REST_API/Reference
+  - Wikimedia REST API(rest_v1 summary): https://www.mediawiki.org/wiki/Wikimedia_REST_API (per-wiki 명세: https://en.wikipedia.org/api/rest_v1/)
+  - TextExtracts(`prop=extracts`·`exintro`·`explaintext`·`exchars`): https://www.mediawiki.org/wiki/Extension:TextExtracts
+  - Action API Query(`prop=links|categories`·`formatversion=2`·`redirects`): https://www.mediawiki.org/wiki/API:Query
+- 도구(MVP 4개, 전부 GET·읽기 · `https://{lang}.wikipedia.org<path>`):
+  - `wikipedia_search(query, lang="en", limit=10)` — 클린 REST `/w/rest.php/v1/search/page?q=&limit=`(구식 Action `list=search` 아님). 제목·요약·스니펫(HTML 태그 제거)
+  - `wikipedia_summary(title, lang="en")` — rest_v1 `/api/rest_v1/page/summary/{title}`(path segment 인코딩). lead extract·문서 URL·**Wikidata Q-id**(`wikibase_item`)·좌표(지리)·동음이의 안내
+  - `wikipedia_extract(title, lang="en", intro_only=True, max_chars=None)` — TextExtracts `/w/api.php?action=query&prop=extracts&explaintext=1&formatversion=2`. 도입부/전체·`exchars`
+  - `wikipedia_links(title, lang="en", limit=50)` — Action API `prop=links|categories&plnamespace=0&formatversion=2`. 나가는 문서 링크 + 분류
+- 특수성: 세 종류 엔드포인트 혼합(per-wiki REST 검색 · rest_v1 요약 · Action API 본문/링크). ⚠️ `api.wikimedia.org/core/v1/*`(통합 REST)는 2026-07 deprecation 예정·후속 없음 → 사용하지 않는다. Action API는 `formatversion=2`로 `query.pages`를 **깨끗한 배열**(pageid-keyed 객체 아님)로 받고 `redirects=1`로 리다이렉트를 추적한다. rest_v1 요약은 리다이렉트를 자동 추적한다.
+- 응답: REST 검색 `{"pages":[{id,key,title,excerpt(HTML),description,thumbnail?}]}`(**total 없음**, 라이브 확인). rest_v1 요약 최상위 `{type,title,description,extract,content_urls.desktop.page,thumbnail.source,lang,wikibase_item,coordinates?}`. TextExtracts `{"query":{"pages":[{pageid,title,extract}|{title,missing:true}],"redirects":?}}`. links/categories `query.pages[0].{links[]{ns,title},categories[]{ns,title}}`(둘 다 없을 수 있음). ⚠️ Action API는 잘못된 파라미터에 **HTTP 200 + `{"error":{"code","info"}}`**(4xx 아님) → 본문 보고 `error.info` 매핑.
+- 제약(라이브 확인): 검색 `limit` **1–100**(기본 10), 링크/분류 `limit` **1–500**(기본 50), `max_chars`(exchars) **1–1200**. `lang`은 소문자 언어 코드(`[a-z]`+하이픈 변형, 예 `en`·`ko`·`de`·`zh`·`simple`·`zh-yue`) — 형식 위반은 HTTP 전에 차단(호스트 오염 방지). 요약 404 / 본문·링크 `missing:true` → "문서를 찾을 수 없습니다". 무 User-Agent → 403, 스로틀 → 429.
+- 스코프(MVP): 포함 = 검색·요약·본문·링크/분류 / 제외 = 편집·쓰기, 미디어 업로드, 위키데이터 엔티티 상세(요약의 `wikibase_item`만 브리지), `api.wikimedia.org/core/v1/*`(deprecating), CirrusSearch 고급 구문, parse/HTML 렌더, 카테고리 멤버 역방향(`list=categorymembers`)
+- 코어 의존: `get_json`만으로 충분(User-Agent/Bearer는 `headers=`로 주입, 콘텐츠는 본문). 새 코어 동사 불필요.
+- provenance 노트: 4개 엔드포인트·모든 응답 필드를 라이브(en.wikipedia.org)에서 직접 확인. Action API **HTTP 200+`{error}`** 봉투(`action=nonsense` → `badvalue`, `exchars=abc` → `badinteger`)·REST 검색 **total 부재**·`formatversion=2` 배열 형태·`missing:true`·요약 `wikibase_item`/`coordinates`·rest_v1 리다이렉트 추적 전부 라이브 확인. `WIKIPEDIA_API_TOKEN`(Bearer)은 토큰 없이 라이브 검증 불가 → **헤더 조립만 단위 테스트로 확인**(유효성·완화 효과 미검증).
+
+---
+
 ## 블록 템플릿 (복사해서 새 대상 추가)
 
 ```markdown
