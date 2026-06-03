@@ -2,7 +2,7 @@
 
 > ⚙️ 자동 생성 — 직접 수정하지 마세요. `arcsolve-mcp catalog`로 재생성됩니다.
 
-현재 **11개 서비스 · 총 49개 도구**.
+현재 **12개 서비스 · 총 52개 도구**.
 
 ## arxiv — arXiv 학술 프리프린트 읽기(검색·id 조회, Atom XML)
 공식 문서: https://info.arxiv.org/help/api/user-manual.html
@@ -64,6 +64,15 @@
 | `notion_get_page` | 단일 페이지의 메타데이터를 조회한다(GET /pages/{id}). |
 | `notion_query_data_source` | data source의 행(page)을 쿼리한다(POST /data_sources/{id}/query). |
 | `notion_search` | Notion 워크스페이스에서 page/data source를 제목으로 검색한다(POST /search). |
+
+## nws — NWS 미국 날씨 읽기(예보·시간별 예보·활성 기상특보)
+공식 문서: https://www.weather.gov/documentation/services-web-api
+
+| 도구 | 설명 |
+|------|------|
+| `nws_alerts` | 미국 주(state)의 활성 기상특보를 조회한다(GET /alerts/active?area={ST}). |
+| `nws_forecast` | 미국 좌표의 다단계(12시간 주야) 예보를 조회한다(2단계: /points → /gridpoints). |
+| `nws_hourly_forecast` | 미국 좌표의 시간별 예보를 조회한다(2단계: /points → /gridpoints/.../forecast/hourly). |
 
 ## openalex — OpenAlex 학술 그래프 읽기(works/authors 검색·조회)
 공식 문서: https://developers.openalex.org/how-to-use-the-api/api-overview
