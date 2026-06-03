@@ -2,7 +2,7 @@
 
 > ⚙️ 자동 생성 — 직접 수정하지 마세요. `arcsolve-mcp catalog`로 재생성됩니다.
 
-현재 **16개 서비스 · 총 63개 도구**.
+현재 **17개 서비스 · 총 65개 도구**.
 
 ## airkorea — 에어코리아 대기오염정보 읽기(시도·측정소 실시간 측정 + 예보)
 공식 문서: https://www.data.go.kr/data/15073861/openapi.do
@@ -128,6 +128,14 @@
 | `s2_get_paper` | 단일 paper를 조회한다(GET /paper/{id}). |
 | `s2_search_authors` | Semantic Scholar에서 저자(authors)를 검색한다(GET /author/search). |
 | `s2_search_papers` | Semantic Scholar에서 논문(papers)을 relevance 검색한다(GET /paper/search). |
+
+## seoul_transit — 서울 실시간 교통 읽기(지하철 도착·따릉이 대여소)
+공식 문서: https://data.seoul.go.kr/dataList/OA-12764/F/1/datasetView.do
+
+| 도구 | 설명 |
+|------|------|
+| `seoul_bike_status` | 서울 따릉이 대여소의 실시간 현황을 조회한다(GET bikeList). |
+| `seoul_subway_arrivals` | 서울 지하철 역의 실시간 도착정보를 조회한다(GET realtimeStationArrival). |
 
 ## telegram — Telegram Bot API — 텍스트/사진/문서 전송, 메시지 편집·삭제, getMe 헬스체크
 공식 문서: https://core.telegram.org/bots/api
