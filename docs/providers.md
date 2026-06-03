@@ -281,6 +281,33 @@
 
 ---
 
+## tago_transit — TAGO 전국 대중교통 통합 읽기 (버스 도착·정류소·노선 + 고속/시외버스 + 열차)
+- 상태: `done`
+- 인증: **서비스키 필수** — 쿼리 파라미터 `serviceKey`(헤더 아님), env `TAGO_SERVICE_KEY`. ⚠️ **Decoding 키(원문)**(이중 인코딩 방지). 단일 키로 TAGO 네임스페이스 `1613000`의 6개 서비스 전부 커버. 키 없으면 HTTP 전 안내문 반환.
+- 공식 문서(전부 data.go.kr · 네임스페이스 1613000):
+  - 버스도착 ArvlInfoInqireService: https://www.data.go.kr/data/15098530/openapi.do (`getSttnAcctoArvlPrearngeInfoList`·`getCtyCodeList`)
+  - 버스정류소 BusSttnInfoInqireService: https://www.data.go.kr/data/15098534/openapi.do (`getSttnNoList`)
+  - 버스노선 BusRouteInfoInqireService: https://www.data.go.kr/data/15098529/openapi.do (`getRouteAcctoThrghSttnList`)
+  - 고속버스 ExpBusInfoService: https://www.data.go.kr/data/15098522/openapi.do (`getStrtpntAlocFndExpbusInfo`·`getExpBusTrminlList`)
+  - 시외버스 SuburbsBusInfoService: https://www.data.go.kr/data/15098541/openapi.do (`getStrtpntAlocFndSuberbsBusInfo`·`getSuberbsBusTrminlList`)
+  - 열차 TrainInfoService: https://www.data.go.kr/data/15098552/openapi.do (`getCtyAcctoTrainList`)
+  - 구 TAGO 13종 호출중지·대체 공지(이 6종이 현행 대체본): https://www.data.go.kr/bbs/ntc/selectNotice.do?originId=NOTICE_0000000002723
+- 도구(MVP 7개, 전부 GET·읽기 · `http://apis.data.go.kr/1613000<service><op>`):
+  - `tago_city_codes()` — `/ArvlInfoInqireService/getCtyCodeList` 도시코드 목록(버스 입력 `city_code` 보조)
+  - `tago_search_bus_stops(city_code, node_name, numOfRows?, pageNo?)` — `/BusSttnInfoInqireService/getSttnNoList` 정류소명 검색→nodeId
+  - `tago_bus_arrivals(city_code, node_id, numOfRows?, pageNo?)` ⭐ — `/ArvlInfoInqireService/getSttnAcctoArvlPrearngeInfoList` 정류소별 실시간 도착예정(노선번호·남은 정류장·도착예정 초→분)
+  - `tago_bus_route(city_code, route_id, numOfRows?, pageNo?)` — `/BusRouteInfoInqireService/getRouteAcctoThrghSttnList` 노선 경유정류소
+  - `tago_express_bus(dep_terminal_id, arr_terminal_id, dep_date, numOfRows?, pageNo?)` — `/ExpBusInfoService/getStrtpntAlocFndExpbusInfo` 고속버스 운행(등급·요금·출/도착)
+  - `tago_intercity_bus(dep_terminal_id, arr_terminal_id, dep_date, numOfRows?, pageNo?)` — `/SuburbsBusInfoService/getStrtpntAlocFndSuberbsBusInfo` 시외버스 운행
+  - `tago_train(dep_station_id, arr_station_id, dep_date, numOfRows?, pageNo?)` — `/TrainInfoService/getCtyAcctoTrainList` 도시간 열차(KTX/일반 — 등급·열차번호·요금)
+- 응답: 봉투 `{response:{header:{resultCode,resultMsg}, body:{items:{item:[...]}, totalCount,pageNo,numOfRows}}}`. **`resultCode != "00"`이면 에러**(HTTP 200이라도 봉투로 옴; 게이트웨이 키 차단은 `cmmMsgHeader.returnReasonCode`로도 옴 → 30 등 매핑). ⚠️ data.go.kr JSON quirk: `body.items`는 한 단계 더(`{"item":…}`) 싸이고 1건이면 단일 객체·0건이면 빈 문자열 `""` → `normalize_items`가 흡수. 코드·요금·시각은 **문자열** 보존(캐스팅 금지).
+- 코드 의존: 버스는 `city_code`+`node_id`/`route_id`, 고속/시외는 터미널ID, 열차는 역ID가 필요 → `tago_city_codes`·`tago_search_bus_stops`가 버스 입력을 자기완결하게 보조. 터미널/역 ID는 각 서비스의 *목록조회 오퍼레이션(MVP 외) 경로를 README에 안내.
+- 스코프(MVP): 포함 = 버스 도착/정류소/노선 + 고속/시외버스 + 도시간 열차 / 제외 = 버스 실시간 위치(BusLcInfoService)·퍼스널모빌리티·터미널/역 코드 마스터 조회(입력 ID 확보 경로만 안내)·노선번호 목록.
+- 코어 의존: `get_json`만으로 충분(서비스키·`_type=json`·코드는 쿼리, 봉투는 본문). 새 코어 동사 불필요.
+- provenance 노트: 고속/시외/열차 서비스 경로의 `…Service` 접미사는 대체 공지·국토부 표기 기준(영문 상세는 축약형 `ExpBusInfo`/`TrainInfo` 표시 — 표시용 약어로 봄). 일부 응답 필드명(노선 경유정류소 `nodeord`/`updowncd`, 고속/시외 `gradeNm`/`charge`, 열차 `traingradename`/`adultcharge`)은 상세 페이지가 첫 오퍼레이션만 렌더해 동 네임스페이스 표준 표기 채택 → `extra="ignore"`로 흡수(`contract.py`의 `TODO(provenance)`). 라이브 키 없어 4종 경로 직접 검증은 보류.
+
+---
+
 ## 블록 템플릿 (복사해서 새 대상 추가)
 
 ```markdown
