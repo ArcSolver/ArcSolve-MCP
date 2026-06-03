@@ -63,6 +63,15 @@ def test_chger_type_labels_have_combo_and_slow():
     assert CHGER_TYPE_LABELS["02"] == "AC완속"
 
 
+def test_chger_type_labels_recent_codes_cross_verified():
+    # 09=NACS·10=DC콤보+NACS는 다수 외부 구현 교차확인값(heeaayoon·EJGo-712·seung-2001·EVeryCharge).
+    # 과거 오기(10=DC차데모+DC콤보는 실은 05번 코드)를 방지하는 회귀 가드.
+    assert CHGER_TYPE_LABELS["08"] == "DC콤보(완속)"
+    assert CHGER_TYPE_LABELS["09"] == "NACS"
+    assert CHGER_TYPE_LABELS["10"] == "DC콤보+NACS"
+    assert CHGER_TYPE_LABELS["05"] == "DC차데모+DC콤보"  # 05와 10이 섞이지 않도록
+
+
 # ─── 쿼리 빌더 ──────────────────────────────────────────────
 
 

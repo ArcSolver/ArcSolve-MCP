@@ -82,11 +82,15 @@ STAT_LABELS = {
 }
 
 # 충전기 타입 코드(chgerType) → 한글 의미.
-# 출처: 한국환경공단 EvCharger 활용가이드(v1.23) 코드표 + 전국전기차충전소표준데이터.
+# 출처: 한국환경공단 EvCharger 활용가이드(v1.23) 코드표 + 전국전기차충전소표준데이터
 #   https://www.data.go.kr/data/15013115/standard.do
-# TODO(provenance): chgerType 코드표(01~10)는 data.go.kr 상세 페이지에 인라인 렌더되지 않고
-#   다운로드 활용가이드(.docx v1.23)에만 표로 있다. 아래 매핑은 표준데이터/가이드 통용값이며,
-#   미상 코드는 표시 시 원본 코드를 그대로 보존한다(매핑 없으면 코드 노출).
+#   + 다수 외부 구현 교차확인(09=NACS·10=DC콤보+NACS 등 최신 코드):
+#   heeaayoon/KDT_React01(src/19/chgertype.json) · EJGo-712/EVCar(ChargerResponseDto.java) ·
+#   seung-2001/evdesign(StationInfo.jsx) · EVeryCharge(ChargingStationStateTable.js).
+# TODO(provenance): chgerType 코드표는 data.go.kr 상세 페이지에 인라인 렌더되지 않고 다운로드
+#   활용가이드(.docx)에만 표로 있어, 위 외부 구현으로 교차확인했다. 01~08은 다수 구현이 만장일치,
+#   09(NACS·테슬라)·10(DC콤보+NACS)은 복수 구현 일치. 더 최신(11=DC콤보2 버스전용 등)은 구현마다
+#   편차가 있어 싣지 않고, **미상 코드는 표시 시 원본 코드를 그대로 보존한다**(매핑 없으면 코드 노출).
 CHGER_TYPE_LABELS = {
     "01": "DC차데모",
     "02": "AC완속",
@@ -96,8 +100,8 @@ CHGER_TYPE_LABELS = {
     "06": "DC차데모+AC3상+DC콤보",
     "07": "AC3상",
     "08": "DC콤보(완속)",
-    "89": "수소충전소",
-    "10": "DC차데모+DC콤보",
+    "09": "NACS",
+    "10": "DC콤보+NACS",
 }
 
 
