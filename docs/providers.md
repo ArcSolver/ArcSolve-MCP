@@ -137,6 +137,23 @@
 
 ---
 
+## arxiv — arXiv 학술 프리프린트 읽기 (검색·id 조회, Atom XML)
+- 상태: `done`
+- 인증: **무인증**(키 없음·env 불필요). 식별용 User-Agent만 전송. base `https://export.arxiv.org/api/query`
+- 특수성: arXiv는 JSON이 아니라 **Atom 1.0 XML**을 반환한다 → 코어에 **`get_text`**(raw str) 동사를 추가했고, 서비스는 **표준 라이브러리 `xml.etree.ElementTree`**로 파싱한다(feedparser/lxml 등 외부 의존 없음).
+- 공식 문서:
+  - API User Manual(쿼리 인터페이스·파라미터·제약·Atom 응답 구조·error feed·etiquette): https://info.arxiv.org/help/api/user-manual.html
+  - API 개요(공개 API 안내): https://info.arxiv.org/help/api/index.html
+- 도구(MVP, 전부 GET·읽기):
+  - `arxiv_search(query, start?, max_results?, sort_by?, sort_order?)` — `/api/query?search_query=`(필드 prefix `ti`/`au`/`abs`/`cat`/`all` + `AND`/`OR`/`ANDNOT` 문자열 그대로)
+  - `arxiv_get(id_list)` — `/api/query?id_list=`(콤마 구분, 단건 상세/다건 요약)
+- 네임스페이스: atom `http://www.w3.org/2005/Atom` · opensearch `http://a9.com/-/spec/opensearch/1.1/` · arxiv `http://arxiv.org/schemas/atom`. 피드 건수/페이지네이션은 본문 `opensearch:totalResults`/`startIndex`/`itemsPerPage`. entry: id(abs URL)·title·summary(초록)·author/name(+arxiv:affiliation)·published·updated·category(term/scheme)·arxiv:primary_category·link(abstract/pdf/doi 최대 3)·arxiv:comment·arxiv:journal_ref·arxiv:doi.
+- 제약(공식): `max_results` 기본 10·**1회 ≤2000 권장·총 ≤30000**(초과 HTTP 400), `start` 0-based, `sortBy`=relevance/lastUpdatedDate/submittedDate, `sortOrder`=ascending/descending. ⚠️ **에러는 HTTP 200**: malformed id 등은 4xx가 아니라 **HTTP 200 + 단일 `<entry>` title='Error'**(`<id>`=`/api/errors#...`)로 온다 → 파서가 `is_error_feed`로 감지해 `ArxivErrorEntry`로 매핑. etiquette는 연속 호출 시 3초 지연 권장(코드 지연/재시도는 비목표).
+- 스코프(MVP): 포함 = search_query 검색·id_list 조회(메타데이터) / 제외 = boolean 빌더(쿼리는 문자열 그대로), full-text(API는 메타만), figures, RSS/OAI-PMH
+- 코어 의존: **신규 `get_text`**(비-JSON raw str) + 표준 라이브러리 XML 파서. 무인증이라 헤더 주입 불필요.
+
+---
+
 ## 블록 템플릿 (복사해서 새 대상 추가)
 
 ```markdown
