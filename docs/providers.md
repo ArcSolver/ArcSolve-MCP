@@ -186,6 +186,21 @@
 - 제약(라이브 확인): `forecast_days` **0–16**(기본 7), `count` **1–100**(기본 10), `timezone`=IANA 또는 `auto`. ⚠️ 지오코딩 무매칭 시 `results` 키가 **아예 없다**(빈 배열 아님) → 기본값 `[]`로 안전 처리. 에러는 `{"error":true,"reason":"..."}`(HTTP 400).
 - 스코프(MVP): 포함 = 예보 + 지오코딩 검색 / 제외 = air-quality·marine·flood 별도 엔드포인트, 상업용 도메인·`apikey`, `models` 수동선택, `past_days`·단위 파라미터·`timeformat`·Historical(ERA5) API
 - 코어 의존: `get_json`만으로 충분(무인증·단발 조회). 새 코어 동사 불필요.
+## nws — NWS(National Weather Service) 미국 날씨 읽기 (예보·시간별 예보·활성 기상특보)
+- 상태: `done`
+- 인증: **무인증**(키 없음). 단 **`User-Agent` 헤더 필수**(없으면 403, 라이브 확인) → 기본값 상수(`contract.DEFAULT_USER_AGENT`)를 항상 전송하고 `NWS_USER_AGENT`로 덮어쓴다(연락처 권장). base `https://api.weather.gov`. 응답 **GeoJSON**(`application/geo+json`).
+- 공식 문서:
+  - API 안내(base·User-Agent 필수·GeoJSON·엔드포인트·`area` 코드): https://www.weather.gov/documentation/services-web-api
+  - OpenAPI 스펙: https://api.weather.gov/openapi.json
+- 도구(MVP, 전부 GET·읽기):
+  - `nws_forecast(latitude, longitude)` — **2단계**: `/points/{lat},{lon}`로 office/grid → `/gridpoints/{office}/{x},{y}/forecast`
+  - `nws_hourly_forecast(latitude, longitude)` — 동일 2단계, `.../forecast/hourly`
+  - `nws_alerts(area)` — `/alerts/active?area={2글자 주코드}`
+- 특수성: 좌표→예보는 NWS 특유의 **2단계 조회**다. `/points` 응답의 `forecast` URL은 라이브에서 `:80` 포트가 섞여 와서, 그 URL을 직접 쓰지 않고 `gridId`·`gridX`·`gridY`로 경로를 재조립한다.
+- 응답: 예보는 GeoJSON `Feature`(`properties.periods[]`: number·name·startTime/endTime·isDaytime·temperature/temperatureUnit·windSpeed/windDirection·shortForecast/detailedForecast). 특보는 `FeatureCollection`(`features[].properties`: event·severity·urgency·areaDesc·effective/expires·headline). 에러는 RFC 7807 problem+json(`{type,title,status,detail}`).
+- 제약(라이브 확인): **미국(+속령) 좌표만 유효** — 해외 좌표는 `/points`에서 404(`problems/InvalidPoint`, title "Data Unavailable For Requested Point") → "미국 좌표만 지원" 안내로 매핑. `area`는 2글자 주/속령 코드(50주+DC+AS·GU·PR·VI·MP·PW·FM·MH, 라이브 enum 확인) — 그 외 코드는 상류 400 전에 차단. 무 User-Agent → 403.
+- 스코프(MVP): 포함 = 예보·시간별 예보·활성 특보 / 제외 = 관측소 상세(`/stations`), 존별 예보(`/zones/.../forecast`), CAP XML, 원시 그리드 데이터(`forecastGridData`)
+- 코어 의존: `get_json`만으로 충분(User-Agent는 `headers=`로 주입, 콘텐츠는 본문 `properties`/`features`). 새 코어 동사 불필요.
 
 ---
 
