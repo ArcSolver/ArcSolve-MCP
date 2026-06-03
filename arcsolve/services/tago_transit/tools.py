@@ -429,7 +429,7 @@ def register(mcp: FastMCP) -> None:
         numOfRows: int = c.DEFAULT_NUM_OF_ROWS,  # noqa: N803
         pageNo: int = c.DEFAULT_PAGE_NO,  # noqa: N803
     ) -> str:
-        """도시간 열차 운행을 조회한다(GET /TrainInfoService/getCtyAcctoTrainList).
+        """도시간 열차 운행을 조회한다(GET /TrainInfoService/getStrtpntAlocFndTrainInfo).
 
         출발·도착 역ID와 날짜로 그 구간 열차(KTX/일반 등)를 등급·열차번호·요금·출/도착 시각과
         함께 돌려준다. ⚠️ 역ID는 열차 역코드표에서 확보(README 참고).

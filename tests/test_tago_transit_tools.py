@@ -224,7 +224,7 @@ async def test_train_request_and_output(tools, monkeypatch, recording_http):
     out = await tools["tago_train"](
         dep_station_id="NAT010000", arr_station_id="NAT013271", dep_date="20240115"
     )
-    assert http.last["url"].endswith("/TrainInfoService/getCtyAcctoTrainList")
+    assert http.last["url"].endswith("/TrainInfoService/getStrtpntAlocFndTrainInfo")
     # 열차는 depPlaceId/arrPlaceId(역ID).
     assert http.last["params"]["depPlaceId"] == "NAT010000"
     assert http.last["params"]["arrPlaceId"] == "NAT013271"

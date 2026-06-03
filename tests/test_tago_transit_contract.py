@@ -67,7 +67,7 @@ def test_operation_paths_match_official():
     assert OP_ROUTE_STATIONS == "/getRouteAcctoThrghSttnList"
     assert OP_EXP_BUS == "/getStrtpntAlocFndExpbusInfo"
     assert OP_SUBURBS_BUS == "/getStrtpntAlocFndSuberbsBusInfo"
-    assert OP_TRAIN == "/getCtyAcctoTrainList"
+    assert OP_TRAIN == "/getStrtpntAlocFndTrainInfo"
 
 
 # ─── 쿼리 빌더 ──────────────────────────────────────────────
