@@ -2,7 +2,7 @@
 
 > ⚙️ 자동 생성 — 직접 수정하지 마세요. `arcsolve-mcp catalog`로 재생성됩니다.
 
-현재 **15개 서비스 · 총 60개 도구**.
+현재 **16개 서비스 · 총 63개 도구**.
 
 ## airkorea — 에어코리아 대기오염정보 읽기(시도·측정소 실시간 측정 + 예보)
 공식 문서: https://www.data.go.kr/data/15073861/openapi.do
@@ -42,6 +42,15 @@
 | `discord_list_messages` | Bot 토큰으로 채널의 최근 메시지를 조회한다. |
 | `discord_send_embed` | Discord 채널에 Webhook으로 리치 임베드(카드) 1개를 전송한다. |
 | `discord_send_message` | Discord 채널에 Webhook으로 메시지를 전송한다. |
+
+## egen — E-Gen 응급의료정보 읽기(응급실 실시간 가용병상·중증질환 수용가능·응급의료기관 목록)
+공식 문서: https://www.data.go.kr/data/15000563/openapi.do
+
+| 도구 | 설명 |
+|------|------|
+| `egen_list` | 응급의료기관 목록정보를 조회한다(GET /getEgytListInfoInqire). |
+| `egen_realtime_beds` | 응급실 실시간 가용병상정보를 조회한다(GET /getEmrrmRltmUsefulSckbdInfoInqire). |
+| `egen_severe_acceptance` | 중증질환자 수용가능정보를 조회한다(GET /getSrsillDissAceptncPosblInfoInqire). |
 
 ## kakao — 카카오톡 메시지 — 나에게 보내기
 공식 문서: https://developers.kakao.com/docs/latest/ko/kakaotalk-message/rest-api

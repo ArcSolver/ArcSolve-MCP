@@ -18,6 +18,7 @@
 - **crossref**: Crossref 학술 메타데이터 읽기 서비스 추가 — works/journals 검색·단건 조회 4개 GET 도구(`crossref_search_works`/`crossref_get_work`/`crossref_search_journals`/`crossref_get_journal`), 무인증·polite pool 이메일(`CROSSREF_MAILTO`)은 선택 쿼리 파라미터+User-Agent, 본문 message 기반 건수 안내(rows 0–1000·offset 0–10000)
 - **discord**: Webhook 메시지 전송 MCP 추가 — `discord_send_message`
 - **discord**: 핵심 도구 확장 — Webhook 임베드/편집/삭제(`discord_send_embed`·`discord_edit_message`·`discord_delete_message`) + Bot 토큰 경로(`discord_create_message`·`discord_list_messages`, `DISCORD_BOT_TOKEN`)
+- **egen**: E-Gen(국립중앙의료원 중앙응급의료센터) 응급의료정보 읽기 서비스 추가 — 응급실 실시간 가용병상·중증질환자 수용가능·응급의료기관 목록 3개 GET 도구(`egen_realtime_beds`/`egen_severe_acceptance`/`egen_list`), data.go.kr 서비스키는 쿼리 파라미터 `serviceKey`(필수, **Decoding 키** — 이중 인코딩 방지), 응답은 **XML**이라 `get_text`+`xml.etree`로 파싱(arxiv 패턴), 봉투 `resultCode != "00"`/게이트웨이 `cmmMsgHeader` 에러 매핑(서비스키/트래픽), STAGE1/STAGE2는 한글 시도/시군구명, 병상수·가용여부는 문자열·결측 처리, 중증질환 수용가능은 `MKioskTy` 슬롯 수집(가이드 .hwp 의존이라 느슨히)
 - **kakao**: '나에게 보내기' MCP 추가 — `kakao_send_text_to_me`, `kakao_send_link_to_me`
 - **line**: LINE Messaging API push 텍스트 MCP 추가 — `line_send_text`(전송 메시지 id 반환)
 - **line**: push 응답 계약을 공식 스펙(`sentMessages[]`)에 맞게 수정, text 길이를 UTF-16 코드 유닛으로 검증
