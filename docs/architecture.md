@@ -63,6 +63,21 @@ MVP는 로컬 stdio + 상류 OAuth만 쓴다. 원격 배포로 갈 때만 transp
 - 장기 실행 작업(Tasks)·서버 렌더 UI(MCP Apps)는 현재 미사용. 대부분의 공개 API 호출이
   동기 req/res라서다. `얇은 도구 → 계약 호출` 구조라 나중에 Task로 감싸기 쉽다.
 
+## 스킬 — 두 번째 배포 포맷
+
+MCP 서비스가 *런타임에 도구가 무엇인지* 노출한다면, **스킬**은 *그 도구를 어떻게 쓰는지*를 Claude에게
+가르치는 파일 아티팩트다(`skills/<name>/SKILL.md`). 서버가 아니라 `~/.claude/skills/`에 설치되어
+컨텍스트에 점진 로드된다.
+
+- **재사용은 도구 경계에서.** 스킬은 `contract.py`를 import하지 않고 실행 중인 ArcSolve MCP 도구를
+  오케스트레이션한다. 검증된 계약은 MCP 쪽 단일 출처로 남고, 스킬은 그 위의 워크플로다.
+- **자동 발견.** `arcsolve/skill.py`가 레포 루트 `skills/`를 스캔해 `SKILL.md` frontmatter에서 `Skill`을
+  만든다(서비스 레지스트리와 같은 데이터-스캔 철학, import 없음).
+- **검증.** 정적 테스트는 frontmatter·`allowed-tools`↔실재 도구명 일치 같은 구조 불변식만 본다.
+  실제 품질은 eval로 검증한다(서비스의 결정적 단위테스트와 **다른 종류의 보증**).
+
+자세한 절차는 [adding-a-skill.md](adding-a-skill.md).
+
 ## 파일 지도
 
 | 경로 | 역할 |
@@ -71,7 +86,9 @@ MVP는 로컬 stdio + 상류 OAuth만 쓴다. 원격 배포로 갈 때만 transp
 | `arcsolve/service.py` | `Service` = 모든 서비스의 균일 계약 |
 | `arcsolve/http.py` | 공유 HTTP 호출 + `UpstreamError` |
 | `arcsolve/oauth.py` | 범용 OAuth2(authcode+refresh) + 토큰 저장소 |
-| `arcsolve/catalog.py` | 레지스트리 → `docs/services.md` 자동 생성 |
+| `arcsolve/catalog.py` | 레지스트리 → `docs/services.md` + `docs/skills.md` 자동 생성 |
+| `arcsolve/skill.py` | `Skill` = 스킬의 균일 계약 + `skills/` 자동 발견(`SKILL.md` frontmatter) |
 | `arcsolve/services/<name>/` | 서비스 하나 = `contract.py` + `tools.py` + `README.md` |
+| `skills/<name>/` | 스킬 하나 = `SKILL.md`(+ `scripts/`·`references/`) + `README.md` |
 
 문서 배치 규칙은 [adding-a-service.md](adding-a-service.md) 참고.

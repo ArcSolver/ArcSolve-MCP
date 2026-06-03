@@ -26,7 +26,7 @@ def _user_agent() -> dict[str, str]:
 
     출처: API index — 공개 API 식별 권장.
     """
-    return {"User-Agent": "ArcSolve-MCP/arxiv (https://github.com/ArcSolver/ArcSolve-MCP)"}
+    return {"User-Agent": "ArcSolve-MCP/arxiv (https://github.com/ArcSolver/ArcSolve-Kit)"}
 
 
 def _explain(e: UpstreamError) -> str:

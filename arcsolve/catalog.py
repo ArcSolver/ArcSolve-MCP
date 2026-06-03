@@ -11,8 +11,10 @@ from pathlib import Path
 from fastmcp import FastMCP
 
 from arcsolve.services import discover_services
+from arcsolve.skill import discover_skills
 
 CATALOG_PATH = Path(__file__).resolve().parent.parent / "docs" / "services.md"
+SKILLS_CATALOG_PATH = Path(__file__).resolve().parent.parent / "docs" / "skills.md"
 
 
 def _first_line(text: str | None) -> str:
@@ -69,6 +71,45 @@ def render_markdown(catalog: list[dict]) -> str:
 
 async def write_catalog(path: Path = CATALOG_PATH) -> Path:
     md = render_markdown(await build_catalog())
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(md + "\n", encoding="utf-8")
+    return path
+
+
+# ── 스킬 카탈로그 ────────────────────────────────────────────────────────────
+# 스킬은 실행 중인 MCP 도구를 오케스트레이션한다(검증된 계약은 MCP 서비스 쪽 단일 출처).
+# 도구 introspection이 필요 없어 동기 함수다.
+
+def build_skills_catalog() -> list[dict]:
+    return [
+        {"name": s.name, "description": s.description, "tools": list(s.tools)}
+        for s in discover_skills()
+    ]
+
+
+def render_skills_markdown(catalog: list[dict]) -> str:
+    lines = [
+        "# 스킬 카탈로그",
+        "",
+        "> ⚙️ 자동 생성 — 직접 수정하지 마세요. `arcsolve-mcp catalog`로 재생성됩니다.",
+        "",
+        f"현재 **{len(catalog)}개 스킬**. 스킬은 실행 중인 MCP 도구를 오케스트레이션한다"
+        "(검증된 계약은 MCP 서비스 쪽 단일 출처).",
+        "",
+    ]
+    for s in catalog:
+        lines.append(f"## {s['name']}")
+        if s["description"]:
+            lines += ["", s["description"]]
+        if s["tools"]:
+            tools = ", ".join(f"`{t}`" for t in s["tools"])
+            lines += ["", f"오케스트레이션 도구: {tools}"]
+        lines.append("")
+    return "\n".join(lines)
+
+
+def write_skills_catalog(path: Path = SKILLS_CATALOG_PATH) -> Path:
+    md = render_skills_markdown(build_skills_catalog())
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(md + "\n", encoding="utf-8")
     return path
