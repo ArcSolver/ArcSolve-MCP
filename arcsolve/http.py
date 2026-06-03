@@ -1,7 +1,7 @@
 """모든 서비스가 공유하는 HTTP 호출 + 에러 매핑.
 
-서비스는 여기 동사(post_form / get_json / get_with_headers / post_json / patch_json /
-delete_json / post_multipart)를 재사용하고, 직접 httpx 세션을 만들지 않는다.
+서비스는 여기 동사(post_form / get_json / get_text / get_with_headers / post_json /
+patch_json / delete_json / post_multipart)를 재사용하고, 직접 httpx 세션을 만들지 않는다.
 새 인증 방식(Bearer/API-key 등)은 헤더로 주입한다.
 """
 
@@ -119,6 +119,32 @@ async def get_json(
     return await _request(
         "GET", url, headers=headers, params=params, timeout=timeout, transport=transport
     )
+
+
+async def get_text(
+    url: str,
+    *,
+    headers: dict | None = None,
+    params: dict | None = None,
+    timeout: float = DEFAULT_TIMEOUT,
+    transport: httpx.BaseTransport | None = None,
+) -> str:
+    """GET → 응답 본문을 **raw `str`로** 반환(JSON 파싱 안 함).
+
+    JSON이 아닌 본문을 주는 API(예: arXiv의 Atom 1.0 XML)에서 사용한다. 서비스가 본문을
+    표준 라이브러리(`xml.etree.ElementTree` 등)로 직접 파싱한다. 4xx/5xx 에러 매핑은
+    `get_json`과 동일(UpstreamError, payload는 JSON이면 dict, 아니면 text). 본문이 비어 있으면
+    빈 문자열을 돌려준다. transport 주입으로 네트워크 없이 테스트할 수 있다.
+    """
+    async with httpx.AsyncClient(timeout=timeout, transport=transport) as client:
+        r = await client.request("GET", url, headers=headers, params=params)
+    if r.status_code >= 400:
+        try:
+            payload: dict | str = r.json()
+        except Exception:
+            payload = r.text
+        raise UpstreamError(r.status_code, payload)
+    return r.text
 
 
 async def get_with_headers(

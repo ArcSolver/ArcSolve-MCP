@@ -7,6 +7,7 @@ from arcsolve.http import (
     UpstreamError,
     delete_json,
     get_json,
+    get_text,
     get_with_headers,
     parse_link_header,
     patch_json,
@@ -26,6 +27,55 @@ async def test_get_json_ok():
         return httpx.Response(200, json={"ok": True})
 
     assert await get_json("https://x/y", transport=_t(handler)) == {"ok": True}
+
+
+async def test_get_text_returns_raw_body_without_json_parse():
+    xml = '<?xml version="1.0"?><feed xmlns="http://www.w3.org/2005/Atom"><id>x</id></feed>'
+
+    async def handler(req):
+        assert req.method == "GET"
+        return httpx.Response(200, text=xml, headers={"content-type": "application/atom+xml"})
+
+    out = await get_text("https://export.arxiv.org/api/query", transport=_t(handler))
+    assert isinstance(out, str)
+    assert out == xml  # JSON 파싱 없이 원문 그대로
+
+
+async def test_get_text_passes_params_and_headers():
+    seen = {}
+
+    async def handler(req):
+        seen["url"] = str(req.url)
+        seen["ua"] = req.headers.get("user-agent")
+        return httpx.Response(200, text="ok")
+
+    await get_text(
+        "https://x/api/query",
+        params={"search_query": "all:electron", "max_results": 5},
+        headers={"User-Agent": "ArcSolve-MCP/arxiv"},
+        transport=_t(handler),
+    )
+    assert "search_query=all%3Aelectron" in seen["url"]
+    assert "max_results=5" in seen["url"]
+    assert seen["ua"] == "ArcSolve-MCP/arxiv"
+
+
+async def test_get_text_empty_body_returns_empty_string():
+    async def handler(req):
+        return httpx.Response(200)
+
+    assert await get_text("https://x", transport=_t(handler)) == ""
+
+
+async def test_get_text_4xx_raises_upstream_error():
+    async def handler(req):
+        # arXiv: max_results>30000 → HTTP 400(본문은 text/plain 설명).
+        return httpx.Response(400, text="max_results exceeded")
+
+    with pytest.raises(UpstreamError) as ei:
+        await get_text("https://x", transport=_t(handler))
+    assert ei.value.status == 400
+    assert ei.value.payload == "max_results exceeded"
 
 
 async def test_post_form_sets_bearer_and_content_type():
