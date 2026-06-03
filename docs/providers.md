@@ -201,6 +201,20 @@
 - 제약(라이브 확인): **미국(+속령) 좌표만 유효** — 해외 좌표는 `/points`에서 404(`problems/InvalidPoint`, title "Data Unavailable For Requested Point") → "미국 좌표만 지원" 안내로 매핑. `area`는 2글자 주/속령 코드(50주+DC+AS·GU·PR·VI·MP·PW·FM·MH, 라이브 enum 확인) — 그 외 코드는 상류 400 전에 차단. 무 User-Agent → 403.
 - 스코프(MVP): 포함 = 예보·시간별 예보·활성 특보 / 제외 = 관측소 상세(`/stations`), 존별 예보(`/zones/.../forecast`), CAP XML, 원시 그리드 데이터(`forecastGridData`)
 - 코어 의존: `get_json`만으로 충분(User-Agent는 `headers=`로 주입, 콘텐츠는 본문 `properties`/`features`). 새 코어 동사 불필요.
+## usgs_quake — USGS 지진 정보 읽기 (FDSN Event API — 검색·건수, GeoJSON)
+- 상태: `done`
+- 인증: **무인증**(키 없음·env 불필요). 식별용 User-Agent만 전송. base `https://earthquake.usgs.gov/fdsnws/event/1`
+- 특수성: 응답을 **`format=geojson`으로 고정**한다 → 검색은 GeoJSON FeatureCollection(JSON), 건수는 `{count,maxAllowed}`(JSON)라 코어 `get_json`만으로 충분(새 코어 동사 불필요).
+- 공식 문서:
+  - FDSN Event API 명세(엔드포인트·전체 쿼리 파라미터·기본/제약·orderby·format·시간형식·에러): https://earthquake.usgs.gov/fdsnws/event/1/
+  - 실시간 피드(GeoJSON) 안내(`properties` 필드 의미 — mag/place/time/url): https://earthquake.usgs.gov/earthquakes/feed/v1.0/geojson.php
+- 도구(MVP, 전부 GET·읽기):
+  - `usgs_search_earthquakes(starttime?, endtime?, minmagnitude?, maxmagnitude?, latitude?, longitude?, maxradiuskm?, limit?, orderby?)` — `/query?format=geojson&...`
+  - `usgs_count_earthquakes(starttime?, endtime?, minmagnitude?, maxmagnitude?, latitude?, longitude?, maxradiuskm?)` — `/count?format=geojson&...`
+- 응답: 검색 = `{type:"FeatureCollection", metadata:{...,count}, features:[{properties:{mag,place,time,url,...}, geometry:{coordinates:[lon,lat,depth]}, id},...]}` — `time`은 **밀리초 epoch**(→ UTC ISO8601 변환), `coordinates`는 **[경도, 위도, 깊이(km)]**(GeoJSON 규약, 출력은 위도·경도로 재배열). 건수 = `{"count":N, "maxAllowed":20000}`. 결과 없음은 **HTTP 200 + 빈 features**(geojson은 nodata 204 안 씀 — 라이브 확인). 에러 본문은 **text/plain**(`Error 400: Bad Request\n\n...`)이라 첫 의미 줄만 노출.
+- 제약(라이브 확인): `limit` **1–20000**(기본 20·초과 시 400), `orderby`=time/time-asc/magnitude/magnitude-asc, 시간 **ISO8601**(미지정 시 NOW-30일~현재·UTC), 원형 위치 = `latitude`[-90,90]+`longitude`[-180,180]+`maxradiuskm`[0,20001.6](셋이 한 묶음).
+- 스코프(MVP): 포함 = 지진 검색·건수 조회(geojson) / 제외 = QuakeML·CSV·KML·text·xml 포맷, 실시간 요약 피드 파일, 상세 detail product, `eventid` 단건, rectangle(min/max lat·lon) 위치, `offset`/`mindepth`/`maxdepth`/`reviewstatus` 부가 필터
+- 코어 의존: `get_json`만으로 충분(무인증·geojson JSON·건수는 본문). 새 코어 동사 불필요.
 
 ---
 
