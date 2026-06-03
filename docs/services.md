@@ -2,7 +2,7 @@
 
 > ⚙️ 자동 생성 — 직접 수정하지 마세요. `arcsolve-mcp catalog`로 재생성됩니다.
 
-현재 **21개 서비스 · 총 79개 도구**.
+현재 **22개 서비스 · 총 83개 도구**.
 
 ## airkorea — 에어코리아 대기오염정보 읽기(시도·측정소 실시간 측정 + 예보)
 공식 문서: https://www.data.go.kr/data/15073861/openapi.do
@@ -194,6 +194,16 @@
 |------|------|
 | `usgs_count_earthquakes` | 조건에 매칭되는 지진 건수만 센다(GET /count?format=geojson). |
 | `usgs_search_earthquakes` | USGS에서 지진 이벤트를 검색/나열한다(GET /query?format=geojson). |
+
+## wikipedia — 위키백과 읽기(검색·요약·본문·링크)
+공식 문서: https://www.mediawiki.org/wiki/API:REST_API/Reference
+
+| 도구 | 설명 |
+|------|------|
+| `wikipedia_extract` | 문서 평문 본문을 조회한다(TextExtracts: GET /w/api.php?action=query&prop=extracts). |
+| `wikipedia_links` | 문서의 나가는 링크와 분류를 조회한다(Action API: prop=links|categories). |
+| `wikipedia_search` | 위키백과에서 문서를 검색한다(클린 REST: GET /w/rest.php/v1/search/page). |
+| `wikipedia_summary` | 문서의 lead 요약(extract)을 조회한다(rest_v1: GET /api/rest_v1/page/summary/{title}). |
 
 ## zotero — Zotero 라이브러리 읽기(Web API v3 + 로컬 데스크톱 API)
 공식 문서: https://www.zotero.org/support/dev/web_api/v3/basics
