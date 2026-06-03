@@ -2,7 +2,7 @@
 
 > ⚙️ 자동 생성 — 직접 수정하지 마세요. `arcsolve-mcp catalog`로 재생성됩니다.
 
-현재 **14개 서비스 · 총 57개 도구**.
+현재 **15개 서비스 · 총 60개 도구**.
 
 ## airkorea — 에어코리아 대기오염정보 읽기(시도·측정소 실시간 측정 + 예보)
 공식 문서: https://www.data.go.kr/data/15073861/openapi.do
@@ -100,6 +100,15 @@
 |------|------|
 | `openmeteo_forecast` | 좌표의 날씨 예보를 조회한다(GET api /v1/forecast). |
 | `openmeteo_geocode` | 지명을 좌표·국가·시간대로 변환한다(GET geocoding-api /v1/search). |
+
+## pubmed — PubMed(NCBI E-utilities) 생의학 문헌 읽기(검색·요약·abstract)
+공식 문서: https://www.ncbi.nlm.nih.gov/books/NBK25500/
+
+| 도구 | 설명 |
+|------|------|
+| `pubmed_fetch_abstract` | PMID로 초록(abstract) 본문을 가져온다(GET efetch.fcgi, rettype=abstract&retmode=xml). |
+| `pubmed_get_summary` | PMID로 논문 요약(제목·저자·저널·날짜·DOI)을 조회한다(GET esummary.fcgi, retmode=json). |
+| `pubmed_search` | PubMed에서 생의학 문헌을 검색해 PMID 목록을 받는다(GET esearch.fcgi, db=pubmed). |
 
 ## semanticscholar — Semantic Scholar 학술 그래프 읽기(papers/authors 검색·조회)
 공식 문서: https://api.semanticscholar.org/api-docs/graph
