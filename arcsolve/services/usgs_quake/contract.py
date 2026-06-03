@@ -215,16 +215,18 @@ class Feature(BaseModel):
 class Metadata(BaseModel):
     """FeatureCollection metadata(부분).
 
-    generated(생성 ms epoch) · url · title("USGS Earthquakes") · status(HTTP 상태) ·
-    api(서비스 버전) · count(이번 응답 feature 수, 라이브 확인) · limit · offset.
-    출처: 라이브(/query metadata).
+    라이브(/query?format=geojson) metadata는 generated(생성 ms epoch) · url ·
+    title("USGS Earthquakes") · status(HTTP 상태) · api(서비스 버전) · limit · offset를 준다.
+    `count`(이번 응답 feature 수)는 **이 봉투에는 없다**(건수는 별도 /count 엔드포인트의
+    CountResult, 응답 feature 수는 도구가 len(features)로 센다). 향후 추가될 수 있어 선택 필드로만 둔다.
+    출처: 라이브(/query metadata — count 키 부재 확인 2026-06-03).
     """
 
     model_config = {"extra": "ignore"}
 
     title: str | None = None
     status: int | None = None
-    count: int | None = None
+    count: int | None = None  # /query metadata에는 부재(선택) — 건수는 /count 사용
     limit: int | None = None
 
 
