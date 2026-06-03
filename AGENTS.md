@@ -1,166 +1,199 @@
 # AGENTS.md
 
-이 저장소에서 작업하는 **모든 에이전트(사람·AI)**가 따르는 단일 규칙. 생판 모르고 들어와도
-이 문서 + **정답 예시**(MCP 서비스 = `kakao` / Skill = `literature-review`)만 보면
-새 서비스나 스킬을 정확히 구현할 수 있어야 한다.
+> **English** · [한국어](AGENTS.ko.md)
 
-## 미션
+The single set of rules every **agent (human or AI)** follows in this repository. Even
+with zero prior context, this document + the **canonical examples** (MCP service =
+`kakao` / Skill = `academic-discovery`) should be enough to implement a new service or
+skill correctly.
 
-인기 서비스의 **공식 API 계약으로 검증된 능력**을 두 포맷으로 묶는 오픈소스 모음.
+## Mission
 
-- **MCP 서비스** — 하나의 FastMCP 서버가 여러 서비스를 합성해 *런타임 도구*로 노출.
-- **Skill** — Claude에게 *그 도구·워크플로를 어떻게 쓰는지* 가르치는 파일 아티팩트.
+An open-source collection that bundles **capabilities verified against official API
+contracts** into two formats.
 
-둘은 경쟁이 아니라 **같은 계약 백본 위의 두 배포 포맷**이다. 설계 배경은
-[docs/architecture.md](docs/architecture.md).
+- **MCP service** — one FastMCP server composes many services and exposes them as
+  *runtime tools*.
+- **Skill** — a file artifact that teaches Claude *how to use those tools and workflows*.
 
-## 두 산출물 포맷
+The two are not competitors but **two distribution formats over the same contract
+backbone**. Design background: [docs/architecture.md](docs/architecture.md).
 
-| | MCP 서비스 | Skill |
+## The two deliverable formats
+
+| | MCP service | Skill |
 |---|---|---|
-| 무엇 | 런타임에 *도구가 무엇인지* 노출 | 에이전트에게 *어떻게 쓰는지* 가르침 |
-| 단위 | `arcsolve/services/<name>/` 폴더 하나 | `skills/<name>/` 폴더 하나 |
-| 배포 | FastMCP 서버(stdio/HTTP)로 serve | `~/.claude/skills/`에 설치, 컨텍스트에 점진 로드 |
-| 계약 | API 요청/응답 pydantic 모델 (`contract.py`) | `SKILL.md` frontmatter(공개 약속) + 본문 지시의 출처 |
+| What | exposes *what a tool is* at runtime | teaches an agent *how to use it* |
+| Unit | one `arcsolve/services/<name>/` folder | one `skills/<name>/` folder |
+| Delivery | served by a FastMCP server (stdio/HTTP) | installed into `~/.claude/skills/`, progressively loaded into context |
+| Contract | API request/response pydantic models (`contract.py`) | `SKILL.md` frontmatter (the public promise) + the provenance of the body's instructions |
 
-**상보성:** 한 도메인이 두 포맷을 함께 낼 수 있다 — `kakao` MCP 도구 + "카카오 메시징을 잘 쓰는 법"
-스킬. 재사용은 **도구 경계**에서 일어난다: 스킬은 `contract.py`를 import하지 않고 **실행 중인 ArcSolve
-MCP 서버의 도구를 오케스트레이션**한다(규칙 2-2). 검증된 계약은 MCP 쪽 단일 출처로 남는다.
+**Complementarity:** one domain can ship both formats — `kakao` MCP tools + a "how to
+use Kakao messaging well" skill. Reuse happens at the **tool boundary**: a skill does not
+import `contract.py`; it **orchestrates the tools of a running ArcSolve MCP server**
+(rule 2-2). The verified contract stays the single source of truth on the MCP side.
 
-## 황금 규칙: 정답 예시를 복제하라
+## Golden rule: clone the canonical example
 
-- **MCP 서비스**는 `arcsolve/services/kakao/`가 정답이다.
-- **Skill**은 `skills/academic-discovery/`가 정답이다 — 여러 학술 출처(arXiv·Crossref·OpenAlex·
-  PubMed·Semantic Scholar)를 가로질러 논문을 탐색·교차검증하는 **다중 서비스 오케스트레이션**.
-  *(미니멀 단일 서비스 예시는 후속 — 후보: `skills/wikipedia-lookup/`.)*
+- For an **MCP service**, `arcsolve/services/kakao/` is the canonical answer.
+- For a **Skill**, `skills/academic-discovery/` is the canonical answer — a
+  **multi-service orchestration** that discovers and cross-checks papers across several
+  scholarly sources (arXiv · Crossref · OpenAlex · PubMed · Semantic Scholar).
+  *(A minimal single-service example is coming — candidate: `skills/wikipedia-lookup/`.)*
 
-산문 규칙이 헷갈리면 정답 예시 코드가 최종 기준이다.
+When the prose rules feel ambiguous, the canonical example code is the final word.
 
-## 입력과 산출물
+## Inputs and deliverables
 
-**입력**: [docs/providers.md](docs/providers.md)에서 네가 맡은 대상 블록(공식 문서 링크·스코프·계획).
-각 블록은 `format: mcp | skill | both`로 어떤 포맷이 목표인지 명시한다.
+**Input**: your target's block in [docs/providers.md](docs/providers.md) (official-doc
+links, scope, plan). Each block declares `format: mcp | skill | both` to state which
+format is the goal.
 
-### MCP 서비스를 맡았다면
+### If you're assigned an MCP service
 
-산출물: `arcsolve/services/<name>/` 폴더 하나 + changelog 조각 + 테스트 **2종**(계약·도구).
-**그 밖은 건드리지 않는다.**
+Deliverable: one `arcsolve/services/<name>/` folder + your changelog fragment + your
+**two tests** (contract, tools). **Touch nothing else.**
 
 ```
 arcsolve/services/<name>/
-├── contract.py     # 계약: 엔드포인트 상수 + pydantic 요청/응답 모델 (MCP/네트워크 무의존)
-├── tools.py        # MCP 도구: register(mcp)에서 @mcp.tool, 공통 http/oauth 재사용
-├── __init__.py     # SERVICE = Service(...)  ← 자동 발견됨
-└── README.md       # 고정 템플릿 (docs/adding-a-service.md)
-tests/test_<name>_contract.py    # 계약 모델 검증 (네트워크 없음)
-tests/test_<name>_tools.py       # 도구 런타임 검증 (요청 조립·응답 파싱·에러 매핑)
-                                 #   — tests/conftest.py의 FakeMCP/RecordingHTTP 픽스처 사용, 네트워크 없음
-changelog.d/<name>.md            # 한 줄 변경 요약
+├── contract.py     # Contract: endpoint constants + pydantic request/response models (no MCP/network dependency)
+├── tools.py        # MCP tools: @mcp.tool inside register(mcp), reusing the shared http/oauth
+├── __init__.py     # SERVICE = Service(...)  ← auto-discovered
+└── README.md       # Fixed template (docs/adding-a-service.md)
+tests/test_<name>_contract.py    # Contract-model validation (no network)
+tests/test_<name>_tools.py       # Tool runtime validation (request assembly, response parsing, error mapping)
+                                 #   — uses the FakeMCP/RecordingHTTP fixtures in tests/conftest.py, no network
+changelog.d/<name>.md            # One-line change summary
 ```
 
-### Skill을 맡았다면
+### If you're assigned a Skill
 
-산출물: `skills/<name>/` 폴더 하나 + changelog 조각 + 테스트 1종(스킬).
-**그 밖은 건드리지 않는다.**
+Deliverable: one `skills/<name>/` folder + your changelog fragment + one test (skill).
+**Touch nothing else.**
 
 ```
 skills/<name>/
-├── SKILL.md        # 계약: frontmatter(name·description·allowed-tools) + 워크플로 지시 본문
-├── scripts/        # (선택) 순수 헬퍼만 — stdlib 전용, 상류 API는 직접 치지 않음(MCP 도구가 담당)
-├── references/     # (선택) 점진 로드용 레퍼런스 문서
-└── README.md       # 고정 템플릿 + "계약 출처" + "필요 MCP 도구" 섹션 (docs/adding-a-skill.md)
-tests/test_<name>_skill.py       # 정적 불변식: frontmatter·참조 해소·allowed-tools가 실재 도구명과 일치, 네트워크 없음
-evals/<name>/                    # 품질 게이트: eval(skill-creator 하니스) — 위치/형식은 docs/adding-a-skill.md
-changelog.d/skill-<name>.md      # 한 줄 변경 요약 (서비스와 이름 충돌 방지로 'skill-' prefix)
+├── SKILL.md        # Contract: frontmatter (name·description·allowed-tools) + workflow-instruction body
+├── scripts/        # (optional) pure helpers only — stdlib-only, never hit the upstream API directly (MCP tools do that)
+├── references/     # (optional) reference docs for progressive loading
+└── README.md       # Fixed template + "Contract sources" + "Required MCP tools" sections (docs/adding-a-skill.md)
+tests/test_<name>_skill.py       # Static invariants: frontmatter, reference resolution, allowed-tools match real tool names, no network
+evals/<name>/                    # Quality gate: eval (skill-creator harness) — location/format in docs/adding-a-skill.md
+changelog.d/skill-<name>.md      # One-line change summary ('skill-' prefix to avoid name clashes with services)
 ```
 
-`SKILL.md` frontmatter는 다음을 따른다:
-- `name`: 폴더명과 동일, 소문자·하이픈.
-- `description`: **3인칭으로 "무엇을 + 언제(트리거)"**를 정확히. 과대선언 금지(이게 공개 약속 = 계약이다).
-- `allowed-tools`: 오케스트레이션할 **ArcSolve MCP 도구명**을 명시(예: `kakao_send_text_to_me`). 정적 테스트가 실재 도구와 대조한다.
+`SKILL.md` frontmatter follows:
+- `name`: same as the folder, lowercase and hyphenated.
+- `description`: **third person, "what + when (trigger)"**, precisely. No overclaiming
+  (this is the public promise = the contract).
+- `allowed-tools`: the **ArcSolve MCP tool names** to orchestrate (e.g.
+  `kakao_send_text_to_me`). The static test checks them against real tools.
 
-## 규칙
+## Rules
 
-### 1. 계약 충실도 (가장 중요 — 두 포맷 공통)
-- **모든 사실(엔드포인트·필드·명령·API 동작)은 공식 문서 링크에서 실재해야 한다.** 학습지식으로 채우지 말 것.
-- **문서가 모호하면 지어내지 말고** `# TODO(provenance): <무엇이 불확실한지>`를 남기고 보고한다.
-- 계약 출처 링크는 `README.md`의 "계약 출처" 섹션에 명시한다(provenance 테스트가 검사).
-- **MCP 서비스:** `contract.py`의 모든 엔드포인트·필드에 **출처 주석/링크**. 모델은 pydantic, 길이·필수·열거 제약을 문서대로.
-- **Skill:** `description`은 실제 동작과 일치(과대선언 금지). 본문의 **사실 부분**(명령·도구명·파라미터)만 출처 추적 대상이다. **워크플로/판단**은 외부 출처가 없으므로 provenance가 아니라 **eval**로 품질을 검증한다(규칙 6).
+### 1. Contract fidelity (most important — common to both formats)
+- **Every fact (endpoint, field, command, API behavior) must actually exist in the
+  official docs.** Do not fill them from training knowledge.
+- **If the docs are ambiguous, do not invent** — leave a
+  `# TODO(provenance): <what is uncertain>` and report it.
+- Contract source links go in the "Contract sources" section of the `README.md` (the
+  provenance test checks this).
+- **MCP service:** a **source comment/link** on every endpoint and field in
+  `contract.py`. Models are pydantic; reflect length/required/enum constraints as documented.
+- **Skill:** the `description` matches actual behavior (no overclaiming). Only the
+  **factual parts** of the body (commands, tool names, parameters) are subject to
+  provenance tracking. **Workflow/judgment** has no external source, so its quality is
+  verified by **eval**, not provenance (rule 6).
 
-### 2. 공통 코어 재사용 (재발명 금지 — MCP 서비스)
-- HTTP: `arcsolve.http`의 `post_form` / `get_json` / `post_json`(+ `bearer(token)` 헤더 헬퍼).
-  직접 httpx 세션을 만들지 말 것. 코어에 없는 호출 형태가 필요하면 코어를 늘려라(서비스 폴더 안에서 X).
-- OAuth: `arcsolve.oauth.OAuthClient`(authcode+PKCE+refresh+토큰저장). OAuth 쓰는 서비스는
-  `__init__.py`에서 `SERVICE`에 `make_auth_client`를 넘기면 `arcsolve-mcp auth <name>`이 코어 수정 없이 동작.
+### 2. Reuse the shared core (no reinventing — MCP service)
+- HTTP: `arcsolve.http`'s `post_form` / `get_json` / `post_json` (+ the `bearer(token)`
+  header helper). Do not spin up your own httpx session. If you need a call shape the
+  core lacks, **extend the core** (not inside the service folder).
+- OAuth: `arcsolve.oauth.OAuthClient` (authcode + PKCE + refresh + token store). A
+  service that uses OAuth passes `make_auth_client` to `SERVICE` in `__init__.py`, so
+  `arcsolve-mcp auth <name>` works without core changes.
 
-### 2-1. 의존성 (병렬 충돌 방지)
-- 서비스 폴더는 **표준 라이브러리 + 공통 코어만**, 스킬 스크립트는 **표준 라이브러리만** 쓴다(스킬은 `arcsolve`를 import하지 않는다 — 규칙 2-2). 새 서드파티 의존을 폴더에서 추가하지 말 것.
-- 무거운 SDK가 꼭 필요하면 PR 설명에 명시 → **통합 단계에서** `pyproject.toml`/`uv.lock`에 반영(필요 시 extras로 격리).
+### 2-1. Dependencies (avoid parallel conflicts)
+- A service folder uses **only the standard library + the shared core**; a skill script
+  uses **only the standard library** (a skill does not import `arcsolve` — rule 2-2). Do
+  not add a new third-party dependency from a folder.
+- If a heavy SDK is truly required, state it in the PR description → it is reflected in
+  `pyproject.toml`/`uv.lock` **at the integration stage** (isolated via extras if needed).
 
-### 2-2. 재사용은 도구 경계에서 (Skill — ArcSolve의 핵심)
-- 스킬은 `contract.py`를 **import하지 않는다.** 검증된 계약은 MCP 서비스에 단일 출처로 남고,
-  스킬은 **실행 중인 ArcSolve MCP 서버의 도구를 오케스트레이션**한다(스킬 = 도구를 잘 엮는 지시 + 얇은 글루).
-- 어떤 MCP 서비스/도구에 의존하는지 frontmatter `allowed-tools`와 README "필요 MCP 도구"에 명시 → 카탈로그가 표시.
-- API 호출은 **MCP 도구가 담당**한다. 스킬 스크립트가 상류 API를 직접 치지 않는다(그건 서비스의 일).
+### 2-2. Reuse happens at the tool boundary (Skill — the heart of ArcSolve)
+- A skill **does not import `contract.py`.** The verified contract stays the single
+  source of truth in the MCP service, and the skill **orchestrates the tools of a running
+  ArcSolve MCP server** (a skill = instructions that wire tools together well + thin glue).
+- State which MCP services/tools it depends on in the frontmatter `allowed-tools` and the
+  README "Required MCP tools" section → the catalog surfaces them.
+- API calls are **the MCP tool's job**. A skill script never hits the upstream API
+  directly (that's the service's job).
 
-### 3. 네이밍·노출
-- **MCP 도구 이름**은 서비스 1단 prefix: `<name>_<action>` (예: `kakao_send_text_to_me`).
-- `SERVICE`는 `arcsolve/services/<name>/__init__.py`에 선언만 하면 **레지스트리가 자동 발견**한다.
-- **Skill 이름**은 폴더명 = frontmatter `name`. 도구 prefix와는 별개 네임스페이스(페어 스킬은 도메인명을 의도적으로 공유해도 됨).
-- 레지스트리/카탈로그 파일을 편집하지 않는다(자동 발견·자동 생성).
+### 3. Naming and exposure
+- **MCP tool names** use a single service prefix: `<name>_<action>` (e.g.
+  `kakao_send_text_to_me`).
+- Declaring `SERVICE` in `arcsolve/services/<name>/__init__.py` is enough — the
+  **registry auto-discovers** it.
+- **Skill names** are the folder name = frontmatter `name`. A separate namespace from
+  tool prefixes (a paired skill may intentionally share the domain name).
+- Do not edit registry/catalog files (auto-discovered, auto-generated).
 
-### 4. "두 개의 OAuth" 혼동 금지 (MCP 서비스)
-- 상류 OAuth(서버→상류 API, 예: 카카오 로그인)는 `oauth.py`로 처리. MCP transport OAuth(스펙)는 별개이며
-  로컬 stdio에선 불필요. 자세히는 [docs/architecture.md](docs/architecture.md).
+### 4. Don't confuse "the two OAuths" (MCP service)
+- Upstream OAuth (server → upstream API, e.g. Kakao Login) is handled by `oauth.py`. MCP
+  transport OAuth (the spec) is separate and unnecessary for local stdio. Details:
+  [docs/architecture.md](docs/architecture.md).
 
-### 5. 격리 — 절대 건드리지 말 것 (병렬 충돌 방지)
-- `arcsolve/services/__init__.py` (서비스 레지스트리 — 자동 발견)
-- `skills/__init__.py` (스킬 레지스트리 — 자동 발견)
-- `docs/services.md`, `docs/skills.md` (카탈로그 — 자동 생성)
-- `CHANGELOG.md` (본체 — 조각에서 합본)
-- `pyproject.toml` / `uv.lock` (의존성 — 통합 단계 전담)
-- 다른 서비스·스킬의 폴더
-- 공통 코어(`server/service/skill/http/oauth/catalog/changelog`)는 정당한 이유 없이 수정 금지
-  (단, 코어 HTTP 동사 확충처럼 모두에게 이로운 변경은 별도 PR로 허용)
+### 5. Isolation — never touch (avoid parallel conflicts)
+- `arcsolve/services/__init__.py` (service registry — auto-discovery)
+- `skills/__init__.py` (skill registry — auto-discovery)
+- `docs/services.md`, `docs/skills.md` (catalogs — auto-generated)
+- `CHANGELOG.md` (the body — assembled from fragments)
+- `pyproject.toml` / `uv.lock` (dependencies — integration stage owns these)
+- another service's or skill's folder
+- the shared core (`server/service/skill/http/oauth/catalog/changelog`) — no edits
+  without good reason (a change that benefits everyone, like extending the core HTTP
+  verbs, is allowed as a separate PR)
 
-### 6. 품질 게이트 (Skill — 결정적 테스트 + eval)
-- `test_<name>_skill.py`는 **정적 불변식만** 검증한다(frontmatter 필수 필드·참조 해소·`allowed-tools`가 실재 도구명과 일치). 네트워크·모델 없음.
-- 스킬의 실제 품질("Claude를 옳게 행동시키는가")은 **eval**로 검증한다(skill-creator 하니스). 서비스의 결정적 단위테스트와 **다른 종류의 보증**임을 인지한다.
+### 6. Quality gate (Skill — deterministic tests + eval)
+- `test_<name>_skill.py` checks **static invariants only** (frontmatter required fields,
+  reference resolution, `allowed-tools` match real tool names). No network, no model.
+- A skill's real quality ("does it make Claude behave correctly") is verified by **eval**
+  (skill-creator harness). Recognize it as a **different kind of assurance** than a
+  service's deterministic unit tests.
 
 ## Definition of Done
 
-### MCP 서비스
-- [ ] `contract.py`: 엔드포인트=상수, pydantic 모델, **필드마다 출처**, 문서 제약 반영
-- [ ] `tools.py`: `register(mcp)` + `@mcp.tool`, prefix 1단, 공통 `http`/`oauth` 사용, 에러 매핑
-- [ ] `__init__.py`: `SERVICE = Service(name, register, docs_url, summary, make_auth_client?)` — **`docs_url` 필수**, OAuth면 `make_auth_client` 지정
-- [ ] `README.md`: 템플릿 + "계약 출처" 공식 문서 링크(provenance 테스트가 검사)
-- [ ] `tests/test_<name>_contract.py`: 계약 모델 검증, 네트워크 없이 통과
-- [ ] `tests/test_<name>_tools.py`: 도구 런타임 검증 — `conftest.py`의 FakeMCP/RecordingHTTP 사용, 네트워크 없이 통과
-- [ ] `changelog.d/<name>.md`: 변경 요약
-- [ ] 서비스 폴더에 새 서드파티 의존 추가 안 함
-- [ ] `uv run pytest -q` 통과 · `uv run ruff check .` 통과
-- [ ] 환각 없음: 미확정 사항은 `TODO(provenance)`로 표시
+### MCP service
+- [ ] `contract.py`: endpoints = constants, pydantic models, **a source per field**, documented constraints reflected
+- [ ] `tools.py`: `register(mcp)` + `@mcp.tool`, single-level prefix, shared `http`/`oauth`, error mapping
+- [ ] `__init__.py`: `SERVICE = Service(name, register, docs_url, summary, make_auth_client?)` — **`docs_url` required**, `make_auth_client` set if OAuth
+- [ ] `README.md`: template + "Contract sources" official-doc links (the provenance test checks this)
+- [ ] `tests/test_<name>_contract.py`: contract-model validation, passes without network
+- [ ] `tests/test_<name>_tools.py`: tool runtime validation — uses `conftest.py`'s FakeMCP/RecordingHTTP, passes without network
+- [ ] `changelog.d/<name>.md`: change summary
+- [ ] No new third-party dependency added in the service folder
+- [ ] `uv run pytest -q` passes · `uv run ruff check .` passes
+- [ ] No hallucinations: mark anything unconfirmed with `TODO(provenance)`
 
 ### Skill
-- [ ] `SKILL.md`: frontmatter `name`(폴더명 일치) + `description`(3인칭, "무엇을+언제", 과대선언 금지) + `allowed-tools`(오케스트레이션할 MCP 도구명) + 워크플로 지시 본문
-- [ ] 본문의 **사실 부분**(명령·도구명·파라미터)에 출처, 미확정은 `TODO(provenance)`
-- [ ] `contract.py`를 import하지 않음 · 스크립트가 있으면 stdlib 전용 순수 헬퍼(상류 API 직접 호출 X)
-- [ ] `README.md`: 템플릿 + "계약 출처" + "필요 MCP 도구" 섹션(provenance 테스트가 검사)
-- [ ] `tests/test_<name>_skill.py`: 정적 불변식(frontmatter·참조 해소·`allowed-tools`가 실재 도구명과 일치), 네트워크 없이 통과
-- [ ] **eval 통과**: skill-creator 하니스로 품질 검증(규칙 6)
-- [ ] `changelog.d/skill-<name>.md`: 변경 요약
-- [ ] `uv run pytest -q` 통과 · `uv run ruff check .` 통과
+- [ ] `SKILL.md`: frontmatter `name` (matches folder) + `description` (third person, "what + when", no overclaiming) + `allowed-tools` (MCP tool names to orchestrate) + workflow-instruction body
+- [ ] **Factual parts** of the body (commands, tool names, parameters) have sources; mark unconfirmed with `TODO(provenance)`
+- [ ] Does not import `contract.py` · if a script exists, stdlib-only pure helper (no direct upstream API calls)
+- [ ] `README.md`: template + "Contract sources" + "Required MCP tools" sections (the provenance test checks this)
+- [ ] `tests/test_<name>_skill.py`: static invariants (frontmatter, reference resolution, `allowed-tools` match real tool names), passes without network
+- [ ] **eval passes**: quality verified with the skill-creator harness (rule 6)
+- [ ] `changelog.d/skill-<name>.md`: change summary
+- [ ] `uv run pytest -q` passes · `uv run ruff check .` passes
 
-## 명령
+## Commands
 
 ```bash
-uv run pytest -q              # 테스트
-uv run ruff check .           # 린트
-# (통합 단계 전담 — 개별 에이전트는 실행 안 함)
-uv run arcsolve-mcp catalog   # docs/services.md + docs/skills.md 재생성
-uv run arcsolve-mcp changelog # CHANGELOG.md 합본
+uv run pytest -q              # tests
+uv run ruff check .           # lint
+# (integration stage owns these — individual agents do not run them)
+uv run arcsolve-mcp catalog   # regenerate docs/services.md + docs/skills.md
+uv run arcsolve-mcp changelog # assemble CHANGELOG.md
 ```
 
-새 서비스 추가는 [docs/adding-a-service.md](docs/adding-a-service.md),
-새 스킬 추가는 [docs/adding-a-skill.md](docs/adding-a-skill.md) 참고.
+For adding a new service, see [docs/adding-a-service.md](docs/adding-a-service.md);
+for adding a new skill, see [docs/adding-a-skill.md](docs/adding-a-skill.md).

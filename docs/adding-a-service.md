@@ -1,28 +1,31 @@
-# 새 서비스 추가하기
+# Adding a new service
 
-서비스 하나 = **폴더 하나**. 공통 프레임워크(`server`/`service`/`http`/`oauth`)는 건드리지 않는다.
+> **English** · [한국어](adding-a-service.ko.md)
 
-## 3단계
+One service = **one folder**. Don't touch the shared framework
+(`server`/`service`/`http`/`oauth`).
 
-### 1. 계약 작성 — `arcsolve/services/<name>/contract.py`
-상류 API의 '진실'만. 순수 상수 + pydantic 모델, MCP/네트워크 무의존.
+## 3 steps
+
+### 1. Write the contract — `arcsolve/services/<name>/contract.py`
+The upstream API's "truth" only. Pure constants + pydantic models, no MCP/network dependency.
 ```python
 from pydantic import BaseModel, Field
 
 BASE_URL = "https://api.example.com"
-SOME_ENDPOINT = "/v1/things"          # 엔드포인트는 상수로
+SOME_ENDPOINT = "/v1/things"          # endpoints as constants
 
-class CreateThing(BaseModel):          # 요청 스키마
+class CreateThing(BaseModel):          # request schema
     title: str = Field(max_length=100)
 
-class ThingResult(BaseModel):          # 응답 스키마
+class ThingResult(BaseModel):          # response schema
     ok: bool
 ```
-OAuth를 쓰면 `AUTHORIZE_URL` / `TOKEN_URL` / `SCOPES`도 여기에 둔다.
+If you use OAuth, put `AUTHORIZE_URL` / `TOKEN_URL` / `SCOPES` here too.
 
-### 2. 도구 작성 — `arcsolve/services/<name>/tools.py`
-`register(mcp)` 안에서 `@mcp.tool`을 정의하고 공통 `http`/`oauth`를 쓴다.
-도구 이름은 **서비스 prefix 1단**(`example_create_thing`).
+### 2. Write the tools — `arcsolve/services/<name>/tools.py`
+Define `@mcp.tool`s inside `register(mcp)` and use the shared `http`/`oauth`.
+Tool names use a **single service prefix** (`example_create_thing`).
 ```python
 from fastmcp import FastMCP
 from arcsolve.http import post_form, UpstreamError
@@ -31,79 +34,81 @@ from arcsolve.services.example import contract as c
 def register(mcp: FastMCP) -> None:
     @mcp.tool
     async def example_create_thing(title: str) -> str:
-        """thing을 하나 만든다."""        # 첫 줄이 카탈로그 설명이 된다
+        """Create one thing."""        # the first line becomes the catalog description
         ...
 ```
 
-### 3. 선언 — `arcsolve/services/<name>/__init__.py`
+### 3. Declare — `arcsolve/services/<name>/__init__.py`
 ```python
 from arcsolve.service import Service
-from arcsolve.services.example.tools import register  # , make_oauth_client (OAuth면)
+from arcsolve.services.example.tools import register  # , make_oauth_client (if OAuth)
 
 SERVICE = Service(
     name="example",
     register=register,
-    docs_url="https://docs.example.com/api",   # 출처(provenance) — 필수
-    summary="한 줄 설명",
-    # make_auth_client=make_oauth_client,       # OAuth 쓰는 서비스만 — auth CLI 자동 연결
+    docs_url="https://docs.example.com/api",   # provenance — required
+    summary="one-line description",
+    # make_auth_client=make_oauth_client,       # OAuth services only — auto-wires the auth CLI
 )
 ```
-**레지스트리는 건드리지 않는다.** `services/`를 스캔해 `SERVICE`를 자동 발견하므로, 폴더를
-떨구는 것만으로 등록된다(병렬 추가 시 충돌 없음).
+**Don't touch the registry.** It scans `services/` and auto-discovers `SERVICE`, so
+dropping in a folder registers it (no conflicts when adding in parallel).
 
-> HTTP는 공통 코어 동사(`arcsolve.http`의 `post_form`/`get_json`/`post_json`)를 재사용한다.
-> 서비스 폴더에 **새 서드파티 의존을 추가하지 않는다**(필요 시 통합 단계에서 `pyproject.toml`에 반영).
+> Reuse the shared core HTTP verbs (`post_form`/`get_json`/`post_json` in `arcsolve.http`).
+> **Do not add a new third-party dependency** in the service folder (if needed, reflect
+> it in `pyproject.toml` at the integration stage).
 
-### 마무리
-- `tests/test_<name>_contract.py` → 계약 모델 검증(네트워크 없이)
-- `tests/test_<name>_tools.py` → 도구 런타임 검증(요청 조립·응답 파싱·에러 매핑). `tests/conftest.py`의
-  `FakeMCP`(register가 등록한 `@mcp.tool`을 수집)·`RecordingHTTP`(http 동사 mock) 픽스처를 쓴다(네트워크 없이).
-- `changelog.d/<name>.md` → 한 줄 변경 요약 (예: `- **example**: 도구 X 추가`)
-- 통합 단계(개별 에이전트 아님)에서 `arcsolve-mcp catalog` + `arcsolve-mcp changelog` 실행
+### Finishing up
+- `tests/test_<name>_contract.py` → contract-model validation (no network)
+- `tests/test_<name>_tools.py` → tool runtime validation (request assembly, response parsing, error mapping).
+  Use `tests/conftest.py`'s `FakeMCP` (collects the `@mcp.tool`s that register attached) and
+  `RecordingHTTP` (mocks the http verbs) fixtures (no network).
+- `changelog.d/<name>.md` → one-line change summary (e.g. `- **example**: add tool X`)
+- At the integration stage (not the individual agent), run `arcsolve-mcp catalog` + `arcsolve-mcp changelog`
 
-## 서비스 README 템플릿 (필수)
+## Service README template (required)
 
-문서는 **코드 옆에 둔다**: `arcsolve/services/<name>/README.md`. 별도 `docs/<name>.md`를 만들지
-않는다(중복=drift). 모든 서비스가 아래 동일한 골격을 따른다.
+Keep docs **next to the code**: `arcsolve/services/<name>/README.md`. Don't create a
+separate `docs/<name>.md` (duplication = drift). Every service follows the same skeleton below.
 
 ```markdown
 # <Service>
-한 줄 설명.
+One-line description.
 
-## 계약 출처 (공식 문서)
-- API 레퍼런스: <url>
-- 인증/토큰: <url>
-> 계약 본체는 contract.py 에 코드로 박제되어 있다.
+## Contract sources (official docs)
+- API reference: <url>
+- Auth/token: <url>
+> The contract body is set in stone as code in contract.py.
 
-## 엔드포인트
-| 종류 | METHOD · PATH |
+## Endpoints
+| Kind | METHOD · PATH |
 |------|------|
 | ... | ... |
-Base: `...` · 인증: `...` · 스코프: `...`
+Base: `...` · Auth: `...` · Scope: `...`
 
-## 셋업
-1. 키 발급
-2. 인증: `arcsolve-mcp auth <name>`
+## Setup
+1. Issue a key
+2. Authenticate: `arcsolve-mcp auth <name>`
 
-## 도구
-| 도구 | 설명 |
+## Tools
+| Tool | Description |
 |------|------|
 | `<name>_...` | ... |
 
-## 범위 / 제약
+## Scope / limits
 - ...
 
-## 확장 포인트
+## Extension points
 - ...
 ```
 
-## 어디에 무엇을 쓰나 (요약)
+## Where things go (summary)
 
-| 문서 | 위치 | 출처(누가 진실인가) |
+| Document | Location | Source (who is the truth) |
 |------|------|------|
-| 계약 레퍼런스(필드·제약) | `contract.py` | **코드** — prose로 중복 금지 |
-| 서비스 운영 가이드 | `services/<name>/README.md` | 서비스당 1개 |
-| 횡단(아키텍처·이 문서) | `docs/` | 서비스 수와 무관하게 고정 |
-| 서비스 카탈로그 | `docs/services.md` | **자동 생성** (`arcsolve-mcp catalog`) |
-| 체인지로그 | `changelog.d/<name>.md` → `CHANGELOG.md` | 조각으로 쓰고 **합본** (`arcsolve-mcp changelog`) |
-| 공통 작업 규칙 | `AGENTS.md` | 모든 에이전트의 단일 출처 |
+| Contract reference (fields/limits) | `contract.py` | **code** — no prose duplication |
+| Service operating guide | `services/<name>/README.md` | one per service |
+| Cross-cutting (architecture, this doc) | `docs/` | fixed regardless of service count |
+| Service catalog | `docs/services.md` | **auto-generated** (`arcsolve-mcp catalog`) |
+| Changelog | `changelog.d/<name>.md` → `CHANGELOG.md` | written as fragments, then **assembled** (`arcsolve-mcp changelog`) |
+| Shared working rules | `AGENTS.md` | single source of truth for every agent |

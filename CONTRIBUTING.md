@@ -1,35 +1,46 @@
-# 기여 가이드
+# Contributing
 
-ArcSolve MCP에 기여해 주셔서 감사합니다. 작업 규칙의 단일 출처는 [AGENTS.md](AGENTS.md)입니다.
+> **English** · [한국어](CONTRIBUTING.ko.md)
 
-## 개발 셋업
+Thanks for contributing to ArcSolve-Kit. The single source of truth for working rules
+is [AGENTS.md](AGENTS.md).
+
+## Dev setup
 
 ```bash
 uv venv
 uv pip install -e ".[dev]"
-uv run pytest -q          # 테스트
-uv run ruff check .       # 린트
+uv run pytest -q          # tests
+uv run ruff check .       # lint
 ```
 
-## 새 서비스 추가
+## Adding a new service
 
-[docs/adding-a-service.md](docs/adding-a-service.md)의 절차를 따릅니다. 요약:
+Follow the procedure in [docs/adding-a-service.md](docs/adding-a-service.md). Summary:
 
-1. `arcsolve/services/<name>/`에 `contract.py` + `tools.py` + `__init__.py` + `README.md`
-2. `tests/test_<name>_contract.py` (네트워크 없는 계약 검증)
-3. `changelog.d/<name>.md` (한 줄 변경 요약)
-4. **레지스트리는 건드리지 않습니다** — 폴더만 떨구면 자동 발견됩니다.
+1. `arcsolve/services/<name>/` with `contract.py` + `tools.py` + `__init__.py` + `README.md`
+2. `tests/test_<name>_contract.py` (contract validation, no network)
+3. `changelog.d/<name>.md` (one-line change summary)
+4. **Don't touch the registry** — dropping in a folder auto-discovers it.
 
-## PR 체크리스트
+## PR checklist
 
-- [ ] `uv run pytest -q` 통과
-- [ ] `uv run ruff check .` 통과
-- [ ] 계약(`contract.py`)의 모든 필드가 공식 문서 링크에서 확인됨 (환각 금지, 미확정은 `# TODO(provenance)`)
-- [ ] 서비스 README에 "계약 출처" 공식 문서 링크 포함
-- [ ] 새 의존성을 서비스 폴더에서 추가하지 않음 (필요 시 PR 설명에 명시 → 통합 시 `pyproject.toml` 반영)
-- [ ] (자동) CI가 `catalog`/`changelog` 재생성 후 drift가 없는지 검사
+- [ ] `uv run pytest -q` passes
+- [ ] `uv run ruff check .` passes
+- [ ] Every field in the contract (`contract.py`) is confirmed against an official-doc
+      link (no hallucinations; mark anything unconfirmed with `# TODO(provenance)`)
+- [ ] The service README includes "Contract sources" official-doc links
+- [ ] No new dependency added in the service folder (if needed, note it in the PR
+      description → reflected in `pyproject.toml` at integration)
+- [ ] (automated) CI regenerates `catalog`/`changelog` and checks there is no drift
 
-## 커밋·브랜치
+## Docs language (i18n)
 
-- 기본 브랜치에서 직접 작업하지 말고 브랜치를 파세요.
-- 한 PR은 하나의 서비스/관심사로 좁게.
+Docs are bilingual — **English is canonical**, Korean (`*.ko.md`) is a translation.
+When you change a canonical file, update its `*.ko.md` in the same change or leave it
+for the maintainer/Codex to refresh. See [docs/i18n.md](docs/i18n.md).
+
+## Commits / branches
+
+- Don't work directly on the default branch — cut a branch.
+- Keep each PR narrow: one service/concern.
