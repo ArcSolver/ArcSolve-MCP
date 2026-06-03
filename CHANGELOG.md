@@ -18,6 +18,7 @@
 - **line**: LINE Messaging API push 텍스트 MCP 추가 — `line_send_text`(전송 메시지 id 반환)
 - **line**: push 응답 계약을 공식 스펙(`sentMessages[]`)에 맞게 수정, text 길이를 UTF-16 코드 유닛으로 검증
 - **line**: 코어 도구 확장 — `line_reply_text`(reply, sentMessages), `line_multicast_text`(userId 최대 500, 빈 응답), `line_broadcast_text`(빈 응답), `line_get_profile`(Profile 조회) 추가
+- **notion**: Notion 워크스페이스 읽기 서비스 추가 — search·page·block children·database·data source 조회/쿼리 6개 도구(`notion_search`/`notion_get_page`/`notion_get_block_children`/`notion_get_database`/`notion_get_data_source`/`notion_query_data_source`), 필수 Bearer 토큰(`NOTION_TOKEN`), API 버전 2026-03-11 핀 고정(data source 모델)
 - **openalex**: OpenAlex 학술 그래프 읽기 서비스 추가 — works/authors 검색·단건 조회 4개 GET 도구(`openalex_search_works`/`openalex_get_work`/`openalex_search_authors`/`openalex_get_author`), API 키·mailto는 선택 쿼리 파라미터(키 없이도 동작), 본문 meta 기반 건수 안내
 - **repo**: README 상단 배지(CI · License · Python) 추가, 저장소 public 공개
 - **telegram**: sendMessage 기반 telegram_send_message 추가
