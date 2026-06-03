@@ -2,7 +2,7 @@
 
 > ⚙️ 자동 생성 — 직접 수정하지 마세요. `arcsolve-mcp catalog`로 재생성됩니다.
 
-현재 **20개 서비스 · 총 76개 도구**.
+현재 **21개 서비스 · 총 79개 도구**.
 
 ## airkorea — 에어코리아 대기오염정보 읽기(시도·측정소 실시간 측정 + 예보)
 공식 문서: https://www.data.go.kr/data/15073861/openapi.do
@@ -125,6 +125,15 @@
 |------|------|
 | `openmeteo_forecast` | 좌표의 날씨 예보를 조회한다(GET api /v1/forecast). |
 | `openmeteo_geocode` | 지명을 좌표·국가·시간대로 변환한다(GET geocoding-api /v1/search). |
+
+## parking — 한국교통안전공단 전국 주차장 정보 읽기(시설·운영 + 실시간 잔여면 ⭐ 연동 주차장 한정)
+공식 문서: https://www.data.go.kr/data/15099883/openapi.do
+
+| 도구 | 설명 |
+|------|------|
+| `parking_operation` | 전국 주차장 운영정보를 조회한다(GET /B553881/Parking/PrkOprInfo). |
+| `parking_realtime` | 전국 주차장 실시간 잔여 주차면을 조회한다(GET /B553881/Parking/PrkRealtimeInfo). ⭐ |
+| `parking_search` | 전국 주차장 시설정보를 조회한다(GET /B553881/Parking/PrkSttusInfo). |
 
 ## pubmed — PubMed(NCBI E-utilities) 생의학 문헌 읽기(검색·요약·abstract)
 공식 문서: https://www.ncbi.nlm.nih.gov/books/NBK25500/

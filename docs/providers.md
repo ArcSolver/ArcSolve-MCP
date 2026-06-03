@@ -337,6 +337,23 @@
 - 스코프(MVP): 포함 = 충전기 실시간 상태 + 충전소 정보 / 제외 = 전국전기차충전소표준데이터(정적 표준데이터)·급속충전 별도 서비스·충전량/통계.
 - provenance 노트: `getChargerStatus`만 상세 페이지에 인라인 렌더(busiId·statId·chgerId·stat·statUpdDt + stat 코드 의미 확인). `getChargerInfo` 응답 필드 전체 표와 `chgerType` 코드표는 다운로드 활용가이드(.docx v1.23)에만 있어, 정보 필드는 표준데이터(15013115) 한글 라벨로 교차확인·`extra="ignore"`로 느슨히 받고 미상 chgerType 코드는 원본 보존(`contract.py`의 `TODO(provenance)`). zcode/zscode 전체 코드↔지역명 표는 미제공(가이드 의존) → 코드 문자열 그대로 전달.
 - 코어 의존: `get_text`(XML, arxiv가 추가) — 기존 코어. 키는 쿼리 파라미터, 페이지네이션은 본문. 새 코어 동사 불필요.
+## parking — 한국교통안전공단 전국 주차장 정보 읽기 (시설·운영 + 실시간 잔여면 ⭐ 연동 주차장 한정)
+- 상태: `done`
+- 인증: data.go.kr 서비스키 (쿼리 파라미터 `serviceKey` — **Decoding 키**, 이중 인코딩 방지). OAuth 아님.
+- 공식 문서:
+  - 한국교통안전공단 주차정보 제공 API: https://www.data.go.kr/data/15099883/openapi.do
+    - `PrkSttusInfo`(주차장 시설정보 — 주차장명·도로명주소·위경도·총 주차구획 수, PK `prk_center_id`)
+    - `PrkOprInfo`(주차장 운영정보 — 운영시간·요금)
+    - `PrkRealtimeInfo`(주차장 실시간 정보 — 현재 주차가능 구획 수 ⭐ 연동 주차장 한정)
+- 도구(MVP 3개, 전부 GET·읽기 · `http://apis.data.go.kr/B553881/Parking/<op>`):
+  - `parking_search(numOfRows?, pageNo?)` — `/PrkSttusInfo` 전국 주차장 시설정보(주차장명·도로명주소·위경도·총 주차구획 수·PK)
+  - `parking_operation(numOfRows?, pageNo?)` — `/PrkOprInfo` 운영정보(운영시간·기본/추가 요금·무료회차)
+  - `parking_realtime(numOfRows?, pageNo?)` ⭐ — `/PrkRealtimeInfo` 실시간 잔여 주차면(현재/총 주차가능 구획 수)
+- 응답: 봉투 quirk(**B553881 고유 — tago/airkorea와 다름**) — 최상위 `{resultCode, resultMsg, totalCount, pageNo, numOfRows, <오퍼레이션명>: [항목...]}`. 즉 항목 배열이 **오퍼레이션명 키 바로 아래**에 실린다(표준 `response.body.items.item` 아님). **`resultCode != "00"`이면 에러**(HTTP 200이라도 봉투로 옴; 게이트웨이 키 차단은 `cmmMsgHeader.returnReasonCode`로도 옴 → 30 등 매핑). 1건이면 단일 객체·0건이면 키 누락 → `normalize_items`가 흡수. 모든 응답은 **주차장관리번호 `prk_center_id`를 PK**로 공유. 좌표·요금·시각·면수는 **문자열** 보존(캐스팅 금지, 잔여 0면도 보존). 인증 `format=2`(JSON, 1=XML) 명시.
+- 스코프(MVP): 포함 = 시설정보 + 운영정보 + 실시간 잔여면(연동 주차장) / 제외 = 서울 공영주차장(별도 데이터셋)·주정차금지구역 등 표준데이터(정적)·개별 주차장관리번호 단건 조회(상류 미제공).
+- ⚠️ **실시간 잔여면 커버리지 한계**: 공식 안내상 운영·실시간 정보는 시설정보보다 데이터 수가 훨씬 적다 — **시스템에 연동된 일부 주차장만** 실시간 잔여면 제공, 대다수는 정적 시설정보 전용. 도구 설명·README에 명시(과장 금지).
+- 코어 의존: `get_json`만으로 충분(서비스키·`format`·페이지는 쿼리, 봉투는 본문). 새 코어 동사 불필요.
+- provenance 노트: base·시설정보(PrkSttusInfo 경로·`serviceKey`/`pageNo`/`numOfRows`/`format`·`prk_center_id`/`prk_plce_nm`/`prk_plce_adres`/`prk_plce_entrc_la,lo`/`prk_cmprt_co`·PK)는 data.go.kr 상세에서 직접 확인. 운영(PrkOprInfo)·실시간(PrkRealtimeInfo) 경로 및 필드(`opertn_*`/`parking_chrge_*`, 실시간 `pkfc_ParkingLots_total`/`pkfc_Available_ParkingLots_total`)는 상세 페이지가 필드 정의를 내려받기 기술문서(.docx)에 둬 인라인 미확인 → **둘 이상의 독립 외부 구현(실제 API 호출 코드·사용 문서)으로 교차확인**해 채택. 봉투 형태(오퍼레이션명 키 아래 항목 배열)도 외부 구현 교차확인. 노상/노외/부설 구분·요일별 운영시간은 표기 미확정 → `extra="ignore"`로 흡수(`contract.py`의 `TODO(provenance)`). 라이브 키 없어 4xx/5xx·실데이터 경로는 mock 검증.
 
 ---
 
