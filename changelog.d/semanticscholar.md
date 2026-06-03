@@ -1,0 +1,1 @@
+- **semanticscholar**: Semantic Scholar 학술 그래프 읽기 서비스 추가 — papers/authors 검색·단건 조회 4개 GET 도구(`s2_search_papers`/`s2_get_paper`/`s2_search_authors`/`s2_get_author`), API 키는 선택 `x-api-key` 헤더(키 없이 공유 풀로 동작·전용 풀 1 RPS), `fields` 콤마 구분 필드 선택, 본문 `total`/`offset`/`next` 기반 건수 안내(paper limit≤100·offset+limit<1000, author limit≤1000)
