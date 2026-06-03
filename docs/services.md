@@ -2,7 +2,7 @@
 
 > ⚙️ 자동 생성 — 직접 수정하지 마세요. `arcsolve-mcp catalog`로 재생성됩니다.
 
-현재 **22개 서비스 · 총 83개 도구**.
+현재 **23개 서비스 · 총 87개 도구**.
 
 ## airkorea — 에어코리아 대기오염정보 읽기(시도·측정소 실시간 측정 + 예보)
 공식 문서: https://www.data.go.kr/data/15073861/openapi.do
@@ -194,6 +194,16 @@
 |------|------|
 | `usgs_count_earthquakes` | 조건에 매칭되는 지진 건수만 센다(GET /count?format=geojson). |
 | `usgs_search_earthquakes` | USGS에서 지진 이벤트를 검색/나열한다(GET /query?format=geojson). |
+
+## wikidata — Wikidata 읽기(엔티티 검색·단건 조회·statements·SPARQL)
+공식 문서: https://www.wikidata.org/wiki/Wikidata:Data_access
+
+| 도구 | 설명 |
+|------|------|
+| `wikidata_entity` | 단일 엔티티(item Q… 또는 property P…)를 조회한다(REST v1 /entities). |
+| `wikidata_search` | Wikidata에서 엔티티를 검색한다(Action API wbsearchentities). |
+| `wikidata_sparql` | WDQS에 SPARQL 쿼리를 실행한다(GET /sparql, format=json). |
+| `wikidata_statements` | item의 statements(속성→값)를 조회한다(REST v1 /entities/items/{id}/statements). |
 
 ## wikipedia — 위키백과 읽기(검색·요약·본문·링크)
 공식 문서: https://www.mediawiki.org/wiki/API:REST_API/Reference
