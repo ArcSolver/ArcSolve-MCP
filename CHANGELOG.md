@@ -22,6 +22,7 @@
 - **line**: push 응답 계약을 공식 스펙(`sentMessages[]`)에 맞게 수정, text 길이를 UTF-16 코드 유닛으로 검증
 - **line**: 코어 도구 확장 — `line_reply_text`(reply, sentMessages), `line_multicast_text`(userId 최대 500, 빈 응답), `line_broadcast_text`(빈 응답), `line_get_profile`(Profile 조회) 추가
 - **notion**: Notion 워크스페이스 읽기 서비스 추가 — search·page·block children·database·data source 조회/쿼리 6개 도구(`notion_search`/`notion_get_page`/`notion_get_block_children`/`notion_get_database`/`notion_get_data_source`/`notion_query_data_source`), 필수 Bearer 토큰(`NOTION_TOKEN`), API 버전 2026-03-11 핀 고정(data source 모델)
+- **nws**: NWS(National Weather Service) 미국 날씨 읽기 서비스 추가 — 예보·시간별 예보·활성 기상특보 3개 GET 도구(`nws_forecast`/`nws_hourly_forecast`/`nws_alerts`), 무인증이나 **User-Agent 헤더 필수**(기본값 상수, `NWS_USER_AGENT`로 덮어씀), 좌표→예보는 NWS 특유의 **2단계 조회**(`/points` → `/gridpoints/.../forecast`), GeoJSON `properties.periods[]`/`features[]` 파싱, **미국 좌표만 유효**(해외 404 InvalidPoint → 안내 매핑)
 - **openalex**: OpenAlex 학술 그래프 읽기 서비스 추가 — works/authors 검색·단건 조회 4개 GET 도구(`openalex_search_works`/`openalex_get_work`/`openalex_search_authors`/`openalex_get_author`), API 키·mailto는 선택 쿼리 파라미터(키 없이도 동작), 본문 meta 기반 건수 안내
 - **openmeteo**: Open-Meteo 날씨·기후 읽기 서비스 추가 — 예보·지오코딩 2개 GET 도구(`openmeteo_geocode`/`openmeteo_forecast`), 무인증(키·env 불필요·식별 User-Agent만), hourly/daily/current는 콤마 구분 변수명 문자열 그대로 전달(검증 상류 위임), 동적 변수 블록은 dict로 수신(`forecast_days` 0–16·`count` 1–100), 지오코딩 무매칭 시 `results` 키 부재 안전 처리, 에러 봉투 `{error,reason}`(400) 매핑
 - **repo**: README 상단 배지(CI · License · Python) 추가, 저장소 public 공개
