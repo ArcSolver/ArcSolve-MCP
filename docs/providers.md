@@ -308,6 +308,22 @@
 
 ---
 
+## airport — 인천국제공항 여객편 운항현황 읽기 (실시간 출발·도착)
+- 상태: `done`
+- 인증: **서비스키 필수** — 쿼리 파라미터 `serviceKey`(헤더 아님), env `AIRPORT_SERVICE_KEY`. ⚠️ **Decoding 키(원문)**(이중 인코딩 방지). 인천국제공항공사 기관코드 `B551177`, 단일 키로 운항현황 상세조회 서비스 커버. 키 없으면 HTTP 전 안내문 반환. ⚠️ **개발계정 일 500건** 트래픽 제한.
+- 공식 문서(data.go.kr · 인천국제공항공사 B551177):
+  - 항공기 운항 현황 상세 조회(여객편 운항현황 상세조회): https://www.data.go.kr/data/15140153/openapi.do (`StatusOfPassengerFlightsDeOdp/getPassengerArrivalsDeOdp`·`…/getPassengerDeparturesDeOdp`)
+- 도구(MVP 2개, 전부 GET·읽기 · `http://apis.data.go.kr/B551177/StatusOfPassengerFlightsDeOdp<op>`):
+  - `airport_arrivals(search_day?, from_time?, to_time?, airport_code?, flight_id?, lang?, numOfRows?, pageNo?)` ⭐ — `/getPassengerArrivalsDeOdp` 여객편 도착현황(편명·항공사·출발지·예정/변경시각·터미널·수하물수취대·출구·운항상태)
+  - `airport_departures(search_day?, from_time?, to_time?, airport_code?, flight_id?, lang?, numOfRows?, pageNo?)` ⭐ — `/getPassengerDeparturesDeOdp` 여객편 출발현황(편명·항공사·목적지·예정/변경시각·터미널·체크인카운터·탑승구·운항상태)
+- 요청: `searchday`(YYYYMMDD, 미지정 시 당일 · D-3~D+6)·`from_time`/`to_time`(HHMM, 기본 0000~2400)·`airport_code`/`flight_id`(선택 필터)·`lang`(K 국문/E 영문)·`numOfRows`/`pageNo`. ⚠️ 인천공항은 `_type`이 아니라 **`type=json`**(외부 구현 실호출 교차확인).
+- 응답: 봉투 `{response:{header:{resultCode,resultMsg}, body:{items:[...], totalCount,pageNo,numOfRows}}}`. **`resultCode != "00"`이면 에러**(HTTP 200이라도 봉투로 옴; 게이트웨이 키 차단은 `cmmMsgHeader.returnReasonCode`로도 옴 → 30/22 등 매핑). ⚠️ items quirk: 인천공항은 `body.items`가 **곧장 리스트**(타 data.go.kr 서비스의 `items.item` 중첩과 다름), 1건이면 단일 객체·0건이면 빈 리스트/빈 문자열 → `normalize_items`가 흡수. 편명·시각·터미널·게이트는 **문자열** 보존(캐스팅 금지).
+- 스코프(MVP): 포함 = 인천공항 여객편 실시간 출발·도착 운항현황 / 제외 = 화물편 운항현황·주차/혼잡도/면세/기상/교통 등 부가 서비스·KAC(김포/제주 등) 타 공항.
+- 코어 의존: `get_json`만으로 충분(서비스키·`type=json`·필터는 쿼리, 봉투는 본문). 새 코어 동사 불필요.
+- provenance 노트: 기관코드 `B551177`·서비스 `StatusOfPassengerFlightsDeOdp`·오퍼레이션 `getPassengerArrivalsDeOdp`/`getPassengerDeparturesDeOdp`·`type=json` 파라미터·요청 파라미터(`searchday`/`from_time`/`to_time`/`lang`)·응답 필드(`airline`/`flightId`/`airport`/`airportCode`/`scheduleDateTime`/`estimatedDateTime`/`terminalid`/`gatenumber`/`remark`/`fid`, 도착 `carousel`/`exitnumber`, 출발 `chkinrange`)는 data.go.kr 15140153 + 다수 외부 구현 실호출/실응답으로 교차확인. `codeshare`/`city` 등 일부 필드는 상세 페이지 JS 렌더로 정적 스키마 미확인 → 확인된 필드만 모델에 두고 `extra="ignore"`로 흡수(`contract.py`의 `TODO(provenance)`). 라이브 키 없어 라이브 호출 검증은 보류.
+
+---
+
 ## 블록 템플릿 (복사해서 새 대상 추가)
 
 ```markdown
