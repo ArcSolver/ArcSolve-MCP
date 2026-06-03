@@ -2,7 +2,7 @@
 
 > ⚙️ 자동 생성 — 직접 수정하지 마세요. `arcsolve-mcp catalog`로 재생성됩니다.
 
-현재 **19개 서비스 · 총 74개 도구**.
+현재 **20개 서비스 · 총 76개 도구**.
 
 ## airkorea — 에어코리아 대기오염정보 읽기(시도·측정소 실시간 측정 + 예보)
 공식 문서: https://www.data.go.kr/data/15073861/openapi.do
@@ -59,6 +59,14 @@
 | `egen_list` | 응급의료기관 목록정보를 조회한다(GET /getEgytListInfoInqire). |
 | `egen_realtime_beds` | 응급실 실시간 가용병상정보를 조회한다(GET /getEmrrmRltmUsefulSckbdInfoInqire). |
 | `egen_severe_acceptance` | 중증질환자 수용가능정보를 조회한다(GET /getSrsillDissAceptncPosblInfoInqire). |
+
+## ev_charger — 전기차 충전소(한국환경공단) 정보·실시간 상태 읽기(충전소 정보 + 충전기 실시간 상태)
+공식 문서: https://www.data.go.kr/data/15076352/openapi.do
+
+| 도구 | 설명 |
+|------|------|
+| `evcharger_info` | 충전소 정보를 조회한다(GET /getChargerInfo). |
+| `evcharger_status` | 충전기 실시간 상태를 조회한다(GET /getChargerStatus). |
 
 ## kakao — 카카오톡 메시지 — 나에게 보내기
 공식 문서: https://developers.kakao.com/docs/latest/ko/kakaotalk-message/rest-api
