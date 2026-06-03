@@ -264,6 +264,23 @@
 
 ---
 
+## seoul_transit — 서울 실시간 교통 읽기 (지하철 도착·따릉이)
+- 상태: `done`
+- 인증: **인증키 필수 · ⚠️ 2종 분리** — 인증키는 **URL path 첫 세그먼트**(쿼리/헤더 아님). 지하철 실시간은 **전용 '실시간 지하철 인증키'** env `SEOUL_SUBWAY_API_KEY`(호스트 `http://swopenAPI.seoul.go.kr/api/subway`), 따릉이 등 일반은 **'일반 인증키'** env `SEOUL_OPENDATA_API_KEY`(호스트 `http://openapi.seoul.go.kr:8088`). 각 도구가 해당 키 없으면 HTTP 전 안내문 반환.
+- 공식 문서:
+  - 지하철 실시간 도착(OA-12764): https://data.seoul.go.kr/dataList/OA-12764/F/1/datasetView.do (미러: https://www.data.go.kr/data/15058052/openapi.do)
+  - 따릉이 실시간 대여(OA-15493): https://data.seoul.go.kr/dataList/OA-15493/A/1/datasetView.do
+  - 공통 결과코드(RESULT.CODE) 메세지표: https://data.gangnam.go.kr/openinf/openapiview.jsp?infId=OA-18724
+- 도구(MVP, 전부 GET·읽기):
+  - `seoul_subway_arrivals(station_name)` — `{KEY}/json/realtimeStationArrival/{START}/{END}/{역명}` (전 호선·상하행 도착)
+  - `seoul_bike_status(start?=1, end?=1000, station_name?)` — `{KEY}/json/bikeList/{START}/{END}/` (대여소 현황, **1회 ≤1000건**)
+- 응답: 지하철 `{errorMessage:{status,code,message,total}, realtimeArrivalList:[...]}` — code=INFO-000 정상(정상에도 errorMessage 존재). 따릉이 `{rentBikeStatus:{list_total_count, RESULT:{CODE,MESSAGE}, row:[...]}}` — 인증키/요청오류는 최상위 `RESULT`로도 옴(양쪽 검사). 항목 값은 전부 **문자열**(거치수·위경도·시각). 본문 기반 → `get_json`으로 충분(헤더 동사 불필요).
+- 제약(공식): 따릉이 1회 **최대 1000건**(end−start+1≤1000, 초과 `ERROR-336` — HTTP 전 차단). 결과코드 매핑: INFO-100 인증키·INFO-200 데이터없음·ERROR-3xx 요청·ERROR-5xx/6xx 서버. 지하철 `recptnDt`(생성시각)는 **과거** → '현재로부터 N초 전' 보정 표시.
+- 스코프(MVP): 포함 = 지하철 한 역 실시간 도착 + 따릉이 실시간 대여소 / 제외 = 버스(전국 TAGO 별도), 지하철 실시간 열차위치(OA-12601)·도착일괄(OA-15799), 따릉이 대여소 정적정보(OA-13252)·이용현황 통계
+- 코어 의존: `get_json`만으로 충분(인증키·json·요청위치·역명은 path 세그먼트, 봉투는 본문). 새 코어 동사 불필요.
+
+---
+
 ## 블록 템플릿 (복사해서 새 대상 추가)
 
 ```markdown
