@@ -215,6 +215,20 @@
 - 제약(라이브 확인): `limit` **1–20000**(기본 20·초과 시 400), `orderby`=time/time-asc/magnitude/magnitude-asc, 시간 **ISO8601**(미지정 시 NOW-30일~현재·UTC), 원형 위치 = `latitude`[-90,90]+`longitude`[-180,180]+`maxradiuskm`[0,20001.6](셋이 한 묶음).
 - 스코프(MVP): 포함 = 지진 검색·건수 조회(geojson) / 제외 = QuakeML·CSV·KML·text·xml 포맷, 실시간 요약 피드 파일, 상세 detail product, `eventid` 단건, rectangle(min/max lat·lon) 위치, `offset`/`mindepth`/`maxdepth`/`reviewstatus` 부가 필터
 - 코어 의존: `get_json`만으로 충분(무인증·geojson JSON·건수는 본문). 새 코어 동사 불필요.
+## airkorea — 에어코리아(한국환경공단) 대기오염정보 읽기 (시도·측정소 실시간 + 예보)
+- 상태: `done`
+- 인증: **서비스키 필수**(data.go.kr 발급) — OAuth 아니라 **쿼리 파라미터 `serviceKey`**(헤더 아님). env `AIRKOREA_SERVICE_KEY`. base `http://apis.data.go.kr/B552584/ArpltnInforInqireSvc`
+- ⚠️ data.go.kr 서비스키 함정: 키는 **Encoding/Decoding 2종** 발급 → httpx가 쿼리 파라미터를 자동 URL-인코딩하므로 params에 **Decoding 키(원문)**를 넣어 이중 인코딩을 피한다(잘못 넣으면 resultCode=30 미등록 키). `returnType=json` 항상 명시(기본 XML 회피).
+- 공식 문서:
+  - 대기오염정보 OpenAPI(ArpltnInforInqireSvc) 상세(엔드포인트·공통 파라미터·봉투·예보 필드): https://www.data.go.kr/data/15073861/openapi.do
+- 도구(MVP, 전부 GET·읽기):
+  - `airkorea_realtime_by_region(sidoName, ver?, numOfRows?, pageNo?)` — `/getCtprvnRltmMesureDnsty` 시도별(측정소별 PM10/PM2.5/O3/NO2/CO/SO2·통합지수 khai)
+  - `airkorea_realtime_by_station(stationName, dataTerm?, ver?, numOfRows?, pageNo?)` — `/getMsrstnAcctoRltmMesureDnsty` 측정소별 시간대별
+  - `airkorea_forecast(searchDate, informCode?, numOfRows?, pageNo?)` — `/getMinuDustFrcstDspth` 대기질 예보통보(권역별 등급·개황·원인·행동요령)
+- 응답: 봉투 `{response:{header:{resultCode,resultMsg}, body:{items:[...], totalCount, pageNo, numOfRows}}}` — 본문 페이지네이션 → `get_json`으로 충분. **`resultCode != "00"`이면 에러**(HTTP 200이라도 봉투로 옴; 30=미등록 키, 22=트래픽 초과, 03=데이터 없음 등). 측정값(`pm10Value`·`khaiValue` 등)은 **문자열**·결측 `"-"` → 캐스팅 금지.
+- 제약(공식): `sidoName`=전국·서울·…·세종(18), `dataTerm`=DAILY/MONTH/3MONTH, `ver` 기본 1.3(PM2.5 포함, 1.4=24시간 예측이동농도). 레이트리밋 **개발계정 500/일**.
+- 스코프(MVP): 포함 = 시도/측정소 실시간 측정 + 예보통보 / 제외 = 측정소 목록(별도 `MsrstnInfoInqireSvc`), CAI 상세, 통계, 주간예보
+- 코어 의존: `get_json`만으로 충분(키는 쿼리 파라미터, 페이지네이션은 본문). 새 코어 동사 불필요.
 
 ---
 

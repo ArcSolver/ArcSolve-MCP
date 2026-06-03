@@ -2,7 +2,16 @@
 
 > ⚙️ 자동 생성 — 직접 수정하지 마세요. `arcsolve-mcp catalog`로 재생성됩니다.
 
-현재 **13개 서비스 · 총 54개 도구**.
+현재 **14개 서비스 · 총 57개 도구**.
+
+## airkorea — 에어코리아 대기오염정보 읽기(시도·측정소 실시간 측정 + 예보)
+공식 문서: https://www.data.go.kr/data/15073861/openapi.do
+
+| 도구 | 설명 |
+|------|------|
+| `airkorea_forecast` | 대기질 예보통보를 조회한다(GET /getMinuDustFrcstDspth). |
+| `airkorea_realtime_by_region` | 시도별 실시간 측정정보를 조회한다(GET /getCtprvnRltmMesureDnsty). |
+| `airkorea_realtime_by_station` | 측정소별 실시간 측정정보를 조회한다(GET /getMsrstnAcctoRltmMesureDnsty). |
 
 ## arxiv — arXiv 학술 프리프린트 읽기(검색·id 조회, Atom XML)
 공식 문서: https://info.arxiv.org/help/api/user-manual.html

@@ -1,0 +1,1 @@
+- **airkorea**: 에어코리아(한국환경공단) 대기오염정보 읽기 서비스 추가 — 시도별·측정소별 실시간 측정정보와 대기질 예보통보 3개 GET 도구(`airkorea_realtime_by_region`/`airkorea_realtime_by_station`/`airkorea_forecast`), data.go.kr 서비스키는 쿼리 파라미터 `serviceKey`(필수, **Decoding 키** — 이중 인코딩 방지), `returnType=json` 명시, 봉투 `resultCode != "00"` 에러 매핑(서비스키/트래픽), 측정값은 문자열·결측 '-' 처리
