@@ -321,6 +321,22 @@
 - 스코프(MVP): 포함 = 인천공항 여객편 실시간 출발·도착 운항현황 / 제외 = 화물편 운항현황·주차/혼잡도/면세/기상/교통 등 부가 서비스·KAC(김포/제주 등) 타 공항.
 - 코어 의존: `get_json`만으로 충분(서비스키·`type=json`·필터는 쿼리, 봉투는 본문). 새 코어 동사 불필요.
 - provenance 노트: 기관코드 `B551177`·서비스 `StatusOfPassengerFlightsDeOdp`·오퍼레이션 `getPassengerArrivalsDeOdp`/`getPassengerDeparturesDeOdp`·`type=json` 파라미터·요청 파라미터(`searchday`/`from_time`/`to_time`/`lang`)·응답 필드(`airline`/`flightId`/`airport`/`airportCode`/`scheduleDateTime`/`estimatedDateTime`/`terminalid`/`gatenumber`/`remark`/`fid`, 도착 `carousel`/`exitnumber`, 출발 `chkinrange`)는 data.go.kr 15140153 + 다수 외부 구현 실호출/실응답으로 교차확인. `codeshare`/`city` 등 일부 필드는 상세 페이지 JS 렌더로 정적 스키마 미확인 → 확인된 필드만 모델에 두고 `extra="ignore"`로 흡수(`contract.py`의 `TODO(provenance)`). 라이브 키 없어 라이브 호출 검증은 보류.
+## ev_charger — 전기차 충전소(한국환경공단) 정보·실시간 상태 읽기 (충전소 정보 + 충전기 실시간 상태)
+- 상태: `done`
+- 인증: **서비스키 필수**(data.go.kr 발급) — OAuth 아니라 **쿼리 파라미터 `serviceKey`**(헤더 아님). env `EV_CHARGER_SERVICE_KEY`. base `http://apis.data.go.kr/B552584/EvCharger`(airkorea와 같은 기관 B552584).
+- ⚠️ data.go.kr 서비스키 함정(airkorea·egen과 동일): 키는 **Encoding/Decoding 2종** 발급 → httpx가 쿼리 파라미터를 자동 URL-인코딩하므로 params에 **Decoding 키(원문)**를 넣어 이중 인코딩을 피한다(잘못 넣으면 resultCode=30 미등록 키). **응답은 XML**(상세 페이지·활용가이드 v1.23 XML 기준, `_type=json` 공식 확인 불가) → `get_text`+`xml.etree`로 파싱(egen/arxiv 패턴).
+- 공식 문서:
+  - 한국환경공단_전기자동차 충전소 정보 OpenAPI(EvCharger) 상세(base·오퍼레이션·serviceKey/pageNo/numOfRows/period/zcode·getChargerStatus 응답 필드·stat 코드·실시간 5분 갱신): https://www.data.go.kr/data/15076352/openapi.do
+  - 전국전기차충전소표준데이터(정보 필드 한글 라벨 교차참조): https://www.data.go.kr/data/15013115/standard.do
+- 도구(MVP, 전부 GET·읽기):
+  - `evcharger_status(zcode?, zscode?, period?, numOfRows?, pageNo?)` ⭐ — `/getChargerStatus` 충전기 실시간 상태(충전중/충전대기/통신이상/운영중지/점검중/상태미확인 + 상태갱신일시). 지역코드 필터.
+  - `evcharger_info(zcode?, zscode?, numOfRows?, pageNo?)` — `/getChargerInfo` 충전소 정보(충전기 타입 코드·주소·위경도·운영기관·이용가능시간). 지역코드 필터.
+- 응답: 봉투 XML `<response><header><resultCode/><resultMsg/></header><body><items><item/>…<totalCount/><pageNo/></body></response>` — 본문 페이지네이션. **`resultCode != "00"`이면 에러**(HTTP 200이라도 봉투로 옴; 게이트웨이 키 차단은 `<header>` 대신 `cmmMsgHeader/returnReasonCode`로 옴 → 30 등 매핑). 상태(`stat`)·타입(`chgerType`)·위경도·플래그(`*Yn`)는 **문자열**·결측 빈 값 → 캐스팅 금지. `stat` 코드: 1통신이상·2충전대기·3충전중·4운영중지·5점검중·9상태미확인(한글 표시).
+- 제약(공식): `zcode`(시도)·`zscode`(시군구)는 **행정구역 지역코드**(zcode=앞 2자리, 선택). `period`(분, status 전용) 기본 5·[1,10] 클램프. `numOfRows` 기본 100·**[10,9999]** 클램프·`pageNo` 기본 1.
+- ⚠️ 실시간 지연: `getChargerStatus`는 "실시간"이지만 상류가 **약 5분 주기** 갱신 → 결과는 수 분 지연된 캐시 스냅샷(`statUpdDt`로 갱신시각 확인). 도구 출력 헤더에 "약 5분 지연(캐시 스냅샷)" 명시.
+- 스코프(MVP): 포함 = 충전기 실시간 상태 + 충전소 정보 / 제외 = 전국전기차충전소표준데이터(정적 표준데이터)·급속충전 별도 서비스·충전량/통계.
+- provenance 노트: `getChargerStatus`만 상세 페이지에 인라인 렌더(busiId·statId·chgerId·stat·statUpdDt + stat 코드 의미 확인). `getChargerInfo` 응답 필드 전체 표와 `chgerType` 코드표는 다운로드 활용가이드(.docx v1.23)에만 있어, 정보 필드는 표준데이터(15013115) 한글 라벨로 교차확인·`extra="ignore"`로 느슨히 받고 미상 chgerType 코드는 원본 보존(`contract.py`의 `TODO(provenance)`). zcode/zscode 전체 코드↔지역명 표는 미제공(가이드 의존) → 코드 문자열 그대로 전달.
+- 코어 의존: `get_text`(XML, arxiv가 추가) — 기존 코어. 키는 쿼리 파라미터, 페이지네이션은 본문. 새 코어 동사 불필요.
 
 ---
 
