@@ -376,6 +376,23 @@
 - 스코프(MVP): 포함 = 검색·요약·본문·링크/분류 / 제외 = 편집·쓰기, 미디어 업로드, 위키데이터 엔티티 상세(요약의 `wikibase_item`만 브리지), `api.wikimedia.org/core/v1/*`(deprecating), CirrusSearch 고급 구문, parse/HTML 렌더, 카테고리 멤버 역방향(`list=categorymembers`)
 - 코어 의존: `get_json`만으로 충분(User-Agent/Bearer는 `headers=`로 주입, 콘텐츠는 본문). 새 코어 동사 불필요.
 - provenance 노트: 4개 엔드포인트·모든 응답 필드를 라이브(en.wikipedia.org)에서 직접 확인. Action API **HTTP 200+`{error}`** 봉투(`action=nonsense` → `badvalue`, `exchars=abc` → `badinteger`)·REST 검색 **total 부재**·`formatversion=2` 배열 형태·`missing:true`·요약 `wikibase_item`/`coordinates`·rest_v1 리다이렉트 추적 전부 라이브 확인. `WIKIPEDIA_API_TOKEN`(Bearer)은 토큰 없이 라이브 검증 불가 → **헤더 조립만 단위 테스트로 확인**(유효성·완화 효과 미검증).
+## wikidata — Wikidata 읽기 (엔티티 검색·단건 조회·statements·SPARQL)
+- 상태: `done`
+- 인증: **무인증**(키 없음). 단 **식별 가능한 `User-Agent` 필수**(없으면 403/스로틀, WDQS가 특히 엄격) → 기본값 상수(`contract.DEFAULT_USER_AGENT`)를 항상 전송하고 `WIKIDATA_USER_AGENT`로 덮어쓴다(연락처 권장). (선택) `WIKIDATA_API_TOKEN`이 있으면 `Authorization: Bearer`로 레이트리밋 완화(읽기는 토큰 없이도 동작). Action API base `https://www.wikidata.org/w/api.php`, REST v1 base `https://www.wikidata.org/w/rest.php/wikibase/v1`, WDQS `https://query.wikidata.org/sparql`.
+- 공식 문서:
+  - Action API(`wbsearchentities` — base·파라미터·limit/type·응답 search[]): https://www.mediawiki.org/wiki/Wikibase/API
+  - Wikibase REST API v1(엔티티 단건·statements·labels/descriptions/aliases/sitelinks·value.content): https://www.wikidata.org/wiki/Wikidata:REST_API
+  - WDQS(SPARQL JSON 출력·60s 캡·동시 5쿼리·User-Agent 정책): https://www.mediawiki.org/wiki/Wikidata_Query_Service/User_Manual
+- 도구(MVP, 전부 GET·읽기):
+  - `wikidata_search(query, language="en", type="item", limit=7)` — Action API `wbsearchentities`(type∈{item,property,lexeme,form,sense}, limit 1..50)
+  - `wikidata_entity(id, language="en")` — REST v1 `/entities/items/{Qid}`(또는 `/entities/properties/{Pid}`). 라벨·설명·별칭·statement 수·영어 위키백과 sitelink
+  - `wikidata_statements(id, property=None)` — REST v1 `/entities/items/{Qid}/statements`(property로 필터). 속성→값, 값은 raw id/문자열
+  - `wikidata_sparql(query, limit=None)` — WDQS `/sparql?format=json`. 변수 헤더+행, `limit`은 표시 행 수만 제한
+- 특수성: **세 상류 혼용**(Action API 검색·REST v1 엔티티/statements·WDQS SPARQL). **Action API는 HTTP 200으로 `{"error":{"code","info"}}` 봉투**를 줄 수 있어 본문 `error`를 우선 확인한다. **WDQS는 쿼리당 최대 60초** 허용 → 코어 기본 10초 대신 `timeout=60` 전달(동시 5쿼리 제한). REST statements는 **레거시 `wbgetentities`보다 안정적인 REST v1**(2024-11 정식)을 쓴다.
+- 응답: 검색 `{search:[{id,label,description,match,aliases?}], "search-continue"?}`. REST 엔티티 `{id,labels{lang:val},descriptions,aliases{lang:[..]},statements{Pxx:[..]},sitelinks{enwiki:{title,url}}}`. statements는 property id→[statement] dict, `value.content`가 **data_type별로 가변**(string→str, wikibase-item→"Qxx", time→{time,precision}, quantity→{amount,unit}, monolingualtext→{language,text}) → `Any`로 받고 compact 렌더링(**P/Q 라벨은 raw id**, 추가 호출 없음). SPARQL `{head:{vars},results:{bindings:[{var:{type,value,...}}]}}`.
+- 제약(공식): `wbsearchentities` limit **1..50**(기본 7)·type enum, 엔티티 id **item `Q\d+`/property `P\d+`**(statements는 item만) — 위반은 상류 전에 차단. WDQS 구문 오류 **400은 자바 예외/HTML 텍스트 본문** → 원문 노출 없이 "SPARQL 구문 오류(400)"로 매핑. 출력 행 최대 50(초과 시 "(N행 중 50행 표시)"). 무 User-Agent → 403.
+- 스코프(MVP): 포함 = 검색·엔티티 단건·statements·SPARQL / 제외 = 엔티티 편집(쓰기)·`wbgetentities`(레거시)·lexeme/form/sense 단건 REST·sitelinks 전체·qualifiers/references 상세·P/Q 라벨 해석
+- 코어 의존: `get_json`만으로 충분(User-Agent/Bearer는 `headers=`, 검색 파라미터·SPARQL은 쿼리, WDQS는 `timeout=60` 전달). 새 코어 동사 불필요.
 
 ---
 
