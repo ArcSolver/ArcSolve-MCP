@@ -245,6 +245,22 @@
 - 레이트리밋: 키 없으면 **초당 3건**(초과 429), 키 있으면 **초당 10건**.
 - 스코프(MVP): 포함 = esearch(검색)·esummary(요약)·efetch(초록) / 제외 = WebEnv/history 체이닝(`usehistory`), pubmed 외 db, MeSH 상세, `elink`/`einfo`/`espell`
 - 코어 의존: `get_json`(esearch/esummary) + `get_text`(efetch XML, arxiv가 추가) — 둘 다 기존 코어. 키·tool·email은 쿼리 파라미터. 새 코어 동사 불필요.
+## egen — E-Gen(국립중앙의료원) 응급의료정보 읽기 (응급실 실시간 가용병상·중증질환 수용가능·기관 목록)
+- 상태: `done`
+- 인증: **서비스키 필수**(data.go.kr 발급) — OAuth 아니라 **쿼리 파라미터 `serviceKey`**(헤더 아님). env `EGEN_SERVICE_KEY`. base `http://apis.data.go.kr/B552657/ErmctInfoInqireService`
+- ⚠️ data.go.kr 서비스키 함정(airkorea와 동일): 키는 **Encoding/Decoding 2종** 발급 → httpx가 쿼리 파라미터를 자동 URL-인코딩하므로 params에 **Decoding 키(원문)**를 넣어 이중 인코딩을 피한다(잘못 넣으면 resultCode=30 미등록 키). **응답은 XML**(상세 페이지·활용가이드 XML 기준, `_type=json` 공식 확인 불가) → `get_text`+`xml.etree`로 파싱(arxiv 패턴).
+- 공식 문서:
+  - 국립중앙의료원_전국 응급의료기관 정보 조회 서비스(ErmctInfoInqireService) 상세(base·오퍼레이션·STAGE1/STAGE2·응답 필드): https://www.data.go.kr/data/15000563/openapi.do
+  - 중앙응급의료센터 Open API 안내: https://www.e-gen.or.kr/nemc/open_api.do
+- 도구(MVP, 전부 GET·읽기):
+  - `egen_realtime_beds(stage1, stage2?, numOfRows?, pageNo?)` — `/getEmrrmRltmUsefulSckbdInfoInqire` 응급실 실시간 가용병상(응급실·수술실·중환자실·입원실 가용수 + CT/MRI/조영촬영기/인공호흡기/구급차 가용여부)
+  - `egen_severe_acceptance(stage1, stage2?, numOfRows?, pageNo?)` — `/getSrsillDissAceptncPosblInfoInqire` 중증질환자 수용가능(심근경색·뇌출혈·중증화상 등 MKioskTy 단말 표시 기준)
+  - `egen_list(stage1, stage2?, numOfRows?, pageNo?)` — `/getEgytListInfoInqire` 응급의료기관 목록(기관명·주소·전화·분류·위경도)
+- 응답: 봉투 XML `<response><header><resultCode/><resultMsg/></header><body><items><item/>…<totalCount/><pageNo/></body></response>` — 본문 페이지네이션. **`resultCode != "00"`이면 에러**(HTTP 200이라도 봉투로 옴; 게이트웨이 키 차단은 `<header>` 대신 `cmmMsgHeader/returnReasonCode`로 옴 → 30 등으로 매핑). 병상수(`hvec` 등)는 정수 문자열, 가용여부(`hvctayn` 등)는 `Y`/`N`이며 결측은 빈 값/`-`/`N` → 캐스팅 금지.
+- 제약(공식): `STAGE1`(시도)·`STAGE2`(시군구)는 **한글 주소명**(STAGE1 필수, STAGE2 선택). 페이지네이션 `numOfRows`(기본 100)·`pageNo`(기본 1).
+- 스코프(MVP): 포함 = 응급실 실시간 가용병상 + 중증질환 수용가능 + 응급의료기관 목록 / 제외 = 외상센터·기관 위치/기본정보·AED·약국 등 별도 오퍼레이션
+- provenance 노트: 중증질환 수용가능 `MKioskTy1~28` 슬롯의 정확한 질환 항목명·개수는 상세 페이지의 다운로드 활용가이드(.hwp) 의존이라 인라인 확인 불가 → 개별 필드 고정 모델링 대신 `mkiosk` dict로 느슨히 수집(`contract.py`의 `TODO(provenance)`).
+- 코어 의존: `get_text`(XML, arxiv가 추가) — 기존 코어. 키는 쿼리 파라미터, 페이지네이션은 본문. 새 코어 동사 불필요.
 
 ---
 
