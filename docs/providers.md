@@ -118,6 +118,25 @@
 
 ---
 
+## crossref — Crossref 학술 메타데이터 읽기 (works/journals 검색·조회)
+- 상태: `done`
+- 인증: **무인증**(키 없음). polite pool은 연락 이메일 `mailto=`(env `CROSSREF_MAILTO`, 선택) — 쿼리 파라미터 + User-Agent에 명시(공식 etiquette). base `https://api.crossref.org`
+- 공식 문서:
+  - REST API README(엔드포인트·쿼리·rows/offset·sort/order·etiquette): https://github.com/CrossRef/rest-api-doc/blob/master/README.md
+  - 응답 포맷(Work 오브젝트): https://github.com/CrossRef/rest-api-doc/blob/master/api_format.md
+  - 공식 안내(retrieve metadata): https://www.crossref.org/documentation/retrieve-metadata/rest-api/
+- 도구(MVP, 전부 GET·읽기):
+  - `crossref_search_works(query?, filter?, sort?, order?, rows?, offset?)` — `/works?query=&filter=`
+  - `crossref_get_work(doi)` — `/works/{doi}`
+  - `crossref_search_journals(query?, rows?, offset?)` — `/journals?query=`
+  - `crossref_get_journal(issn)` — `/journals/{issn}`
+- 응답: `{status, message-type, message-version, message:{...}}` — 리스트면 `message`에 `total-results`/`items-per-page`/`items`(본문 → `get_json`으로 충분), 단건이면 `message`가 곧 엔티티. **에러(validation-failure) 봉투의 `message`는 배열**(`[{message,...}]`). Work 필드는 대문자/하이픈(`DOI`·`is-referenced-by-count`·`container-title`) → pydantic alias.
+- 제약(라이브 확인): `rows` **0–1000**(기본 20), `offset` 0–10000(이후 cursor), `order`=asc/desc. 없는 DOI/ISSN은 404 + `text/plain` `Resource not found.`. filter는 `name:value`(콤마=AND).
+- 스코프(MVP): 포함 = works/journals 검색·단건 조회 / 제외 = members·funders·types·licenses 엔티티, cursor 딥페이지네이션, content negotiation(citation 포맷), `/journals/{issn}/works`, sample·select·facet
+- 코어 의존: `get_json`만으로 충분(mailto는 쿼리 파라미터+UA 헤더, 페이지네이션은 본문). 새 코어 동사 불필요.
+
+---
+
 ## 블록 템플릿 (복사해서 새 대상 추가)
 
 ```markdown
