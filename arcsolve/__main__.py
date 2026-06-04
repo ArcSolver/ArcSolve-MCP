@@ -13,9 +13,25 @@ from __future__ import annotations
 
 import asyncio
 import sys
+import urllib.parse
 import webbrowser
 
 from arcsolve.server import build_server
+
+
+def _parse_redirect(raw: str) -> tuple[str, str | None]:
+    """사용자가 붙여넣은 값에서 (code, state)를 뽑는다.
+
+    'code='가 들어 있으면 redirect URL(또는 쿼리스트링)로 보고 파싱하고, 아니면 입력 전체를
+    code로 취급한다(state 없음). state가 있으면 exchange_code가 CSRF 대조에 쓴다.
+    """
+    if "code=" not in raw:
+        return raw, None
+    qs = urllib.parse.urlparse(raw).query or raw
+    params = urllib.parse.parse_qs(qs)
+    code = (params.get("code") or [raw])[0]
+    state = (params.get("state") or [None])[0]
+    return code, state
 
 
 def _auth(name: str) -> None:
@@ -33,15 +49,16 @@ def _auth(name: str) -> None:
 
     url = client.authorize_url_for_login()
     print("브라우저에서 아래 URL을 열어 로그인/동의한 뒤,")
-    print("리다이렉트된 주소(redirect_uri)의 ?code=... 값을 복사해 붙여넣으세요.\n")
+    print("리다이렉트된 주소(redirect_uri) 전체를 그대로 붙여넣으세요(또는 ?code=... 값만).\n")
     print(url + "\n")
     try:
         webbrowser.open(url)
     except Exception:
         pass
 
-    code = input("code = ").strip()
-    tok = asyncio.run(client.exchange_code(code))
+    raw = input("redirect URL 전체(또는 code) = ").strip()
+    code, state = _parse_redirect(raw)
+    tok = asyncio.run(client.exchange_code(code, state=state))
     print("\n✅ 인증 완료. ~/.arcsolve/credentials.json 에 저장했습니다(권한 0600).")
     print("호스트 설정의 env에 refresh_token을 직접 넣어도 됩니다(평문 노출 주의):")
     print(f"  {name.upper()}_REFRESH_TOKEN={tok.get('refresh_token')}")

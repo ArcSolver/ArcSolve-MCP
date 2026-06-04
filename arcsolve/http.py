@@ -11,7 +11,21 @@ import re
 
 import httpx
 
+from arcsolve import __version__
+
 DEFAULT_TIMEOUT = 10.0
+
+# 식별용 기본 User-Agent. UA 누락 시 403을 주는 API(NWS·Wikipedia 등)를 구조적으로 예방하고,
+# 서비스마다 UA 문자열을 손으로 박는 drift를 없앤다. 호출자가 명시한 UA가 항상 우선한다.
+DEFAULT_USER_AGENT = f"arcsolve/{__version__} (+https://github.com/ArcSolver/ArcSolve-Kit)"
+
+
+def _with_default_ua(headers: dict | None) -> dict:
+    """기본 User-Agent를 깔고 호출자 헤더로 덮어쓴다(호출자 UA가 우선)."""
+    merged = {"User-Agent": DEFAULT_USER_AGENT}
+    if headers:
+        merged.update(headers)
+    return merged
 
 
 class UpstreamError(RuntimeError):
@@ -46,7 +60,8 @@ async def _request_raw(
     """
     async with httpx.AsyncClient(timeout=timeout, transport=transport) as client:
         r = await client.request(
-            method, url, headers=headers, params=params, data=data, json=json, files=files
+            method, url, headers=_with_default_ua(headers),
+            params=params, data=data, json=json, files=files,
         )
     if r.status_code >= 400:
         try:
@@ -137,7 +152,7 @@ async def get_text(
     빈 문자열을 돌려준다. transport 주입으로 네트워크 없이 테스트할 수 있다.
     """
     async with httpx.AsyncClient(timeout=timeout, transport=transport) as client:
-        r = await client.request("GET", url, headers=headers, params=params)
+        r = await client.request("GET", url, headers=_with_default_ua(headers), params=params)
     if r.status_code >= 400:
         try:
             payload: dict | str = r.json()

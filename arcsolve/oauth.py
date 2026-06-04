@@ -16,12 +16,15 @@ import hashlib
 import json
 import os
 import secrets
+import tempfile
 import time
 import urllib.parse
 from dataclasses import dataclass, field
 from pathlib import Path
 
 import httpx
+
+from arcsolve.http import DEFAULT_USER_AGENT
 
 DEFAULT_STORE = Path.home() / ".arcsolve" / "credentials.json"
 _TIMEOUT = 10.0
@@ -56,11 +59,24 @@ class TokenStore:
             os.chmod(self.path.parent, 0o700)
         except OSError:
             pass
-        self.path.write_text(json.dumps(data, indent=2, ensure_ascii=False))
+        payload = json.dumps(data, indent=2, ensure_ascii=False)
+        # 원자적 교체: 같은 디렉터리에 임시 파일로 쓰고 os.replace로 갈아끼운다. 쓰기 도중
+        # 중단/충돌이 나도 기존 credentials.json(전 서비스 토큰)이 잘리거나 손상되지 않는다.
+        fd, tmp = tempfile.mkstemp(dir=self.path.parent, prefix=".credentials-", suffix=".tmp")
         try:
-            os.chmod(self.path, 0o600)
-        except OSError:
-            pass
+            with os.fdopen(fd, "w", encoding="utf-8") as f:
+                f.write(payload)
+            try:
+                os.chmod(tmp, 0o600)  # 최종 파일 권한 0600 (replace는 임시파일 모드를 유지)
+            except OSError:
+                pass
+            os.replace(tmp, self.path)
+        except BaseException:
+            try:
+                os.unlink(tmp)
+            except OSError:
+                pass
+            raise
 
 
 @dataclass
@@ -76,6 +92,7 @@ class OAuthClient:
     store: TokenStore = field(default_factory=TokenStore)
     transport: httpx.BaseTransport | None = None  # 테스트 주입용
     _verifier: str | None = field(default=None, init=False, repr=False)
+    _state: str | None = field(default=None, init=False, repr=False)  # CSRF 방어용 state
 
     async def access_token(self) -> str:
         """유효한 access token을 반환한다. 만료(또는 부재) 시 refresh로 자동 갱신."""
@@ -98,8 +115,17 @@ class OAuthClient:
         self._save(tok, fallback_refresh=refresh)
         return tok["access_token"]
 
-    async def exchange_code(self, code: str) -> dict:
-        """authorization code를 토큰으로 교환하고 저장한다(최초 1회 인증)."""
+    async def exchange_code(self, code: str, state: str | None = None) -> dict:
+        """authorization code를 토큰으로 교환하고 저장한다(최초 1회 인증).
+
+        `state`를 주면 authorize_url_for_login()이 만든 값과 대조한다(CSRF·인가코드 주입 방어).
+        수동 복붙 흐름에서 state를 모르면 None으로 생략할 수 있다(같은 프로세스에서 authorize URL을
+        만들었고 state도 함께 받은 경우에만 검증).
+        """
+        if state is not None and self._state is not None and not secrets.compare_digest(
+            state, self._state
+        ):
+            raise RuntimeError(f"{self.service}: OAuth state 불일치 — 인증을 처음부터 다시 하세요.")
         data = {
             "grant_type": "authorization_code",
             "client_id": self.client_id,
@@ -115,6 +141,7 @@ class OAuthClient:
     def authorize_url_for_login(self) -> str:
         verifier, challenge = _pkce_pair()
         self._verifier = verifier
+        self._state = secrets.token_urlsafe(16)  # 저장해 두고 exchange_code에서 대조
         query = urllib.parse.urlencode(
             {
                 "client_id": self.client_id,
@@ -123,7 +150,7 @@ class OAuthClient:
                 "scope": " ".join(self.scopes),
                 "code_challenge": challenge,
                 "code_challenge_method": "S256",
-                "state": secrets.token_urlsafe(16),
+                "state": self._state,
             }
         )
         return f"{self.authorize_url}?{query}"
@@ -131,8 +158,9 @@ class OAuthClient:
     async def _post_token(self, data: dict) -> dict:
         if self.client_secret:
             data = {**data, "client_secret": self.client_secret}
+        headers = {"User-Agent": DEFAULT_USER_AGENT}
         async with httpx.AsyncClient(timeout=_TIMEOUT, transport=self.transport) as client:
-            r = await client.post(self.token_url, data=data)
+            r = await client.post(self.token_url, data=data, headers=headers)
         r.raise_for_status()
         return r.json()
 
