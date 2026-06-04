@@ -12,7 +12,10 @@ from arcsolve.services import select_services
 
 
 def build_server(services: list[str] | None = None) -> FastMCP:
-    mcp = FastMCP("arcsolve")
+    # mask_error_details=True: 도구에서 처리되지 않은 예외의 원문 str을 클라이언트에 그대로
+    # 전송하지 않는다(내부 경로·상류 원문 등 정보 노출 방지). 도구가 의도적으로 반환하는
+    # 사람용 메시지(_explain 등)는 영향받지 않는다.
+    mcp = FastMCP("arcsolve", mask_error_details=True)
     for svc in select_services(services):
         svc.register(mcp)
     return mcp

@@ -64,7 +64,7 @@ async def test_arrivals_request_and_output(tools, monkeypatch, recording_http):
 
     out = await tools["airport_arrivals"]()
     assert http.last["url"] == (
-        "http://apis.data.go.kr/B551177/StatusOfPassengerFlightsDeOdp/getPassengerArrivalsDeOdp"
+        "https://apis.data.go.kr/B551177/StatusOfPassengerFlightsDeOdp/getPassengerArrivalsDeOdp"
     )
     # 서비스키는 쿼리 파라미터(헤더 아님), type=json(인천공항은 _type 아님).
     assert http.last["params"]["serviceKey"] == "DECODED_KEY"

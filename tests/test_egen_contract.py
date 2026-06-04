@@ -31,7 +31,7 @@ import xml.etree.ElementTree as ET
 
 
 def test_constants_match_official():
-    assert BASE_URL == "http://apis.data.go.kr/B552657/ErmctInfoInqireService"
+    assert BASE_URL == "https://apis.data.go.kr/B552657/ErmctInfoInqireService"
     assert PATH_REALTIME_BEDS == "/getEmrrmRltmUsefulSckbdInfoInqire"
     assert PATH_SEVERE_ACCEPTANCE == "/getSrsillDissAceptncPosblInfoInqire"
     assert PATH_LIST == "/getEgytListInfoInqire"

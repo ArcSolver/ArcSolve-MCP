@@ -44,7 +44,7 @@ from arcsolve.services.tago_transit.contract import (
 
 def test_base_and_namespace():
     # 전국 대중교통 통합 네임스페이스 1613000.
-    assert BASE_URL == "http://apis.data.go.kr/1613000"
+    assert BASE_URL == "https://apis.data.go.kr/1613000"
     assert TYPE_JSON == "json"
     assert RESULT_CODE_OK == "00"
     assert DEFAULT_NUM_OF_ROWS == 100

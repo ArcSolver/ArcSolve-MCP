@@ -18,11 +18,14 @@ from __future__ import annotations
 
 from datetime import datetime
 from typing import TYPE_CHECKING
+from zoneinfo import ZoneInfo
 
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 from arcsolve.http import UpstreamError, get_json
 from arcsolve.services.seoul_transit import contract as c
+
+_KST = ZoneInfo("Asia/Seoul")  # recptnDt는 KST 기준 — 호스트 로컬타임과 무관하게 KST로 계산
 
 if TYPE_CHECKING:
     from fastmcp import FastMCP  # 타입힌트 전용 — 런타임 fastmcp import 회피
@@ -105,7 +108,7 @@ def _explain_http(e: UpstreamError, *, what: str) -> str:
         return f"인증/권한 오류({e.status}): {what} 인증키를 확인하세요.{detail}"
     if e.status == 429:
         return f"요청 한도 초과(429): 잠시 후 재시도하세요.{detail}"
-    return f"서울 교통 API 오류 {e.status}:{detail or ' ' + str(e.payload)}"
+    return f"서울 교통 API 오류 {e.status}:{detail}"
 
 
 def _v(value: str | None) -> str:
@@ -125,10 +128,11 @@ def _age_note(recptn_dt: str | None) -> str:
     if not recptn_dt:
         return ""
     try:
-        gen = datetime.strptime(recptn_dt.strip(), "%Y-%m-%d %H:%M:%S")
+        gen = datetime.strptime(recptn_dt.strip(), "%Y-%m-%d %H:%M:%S").replace(tzinfo=_KST)
     except (ValueError, TypeError):
         return f" (생성 {recptn_dt})"
-    delta = int((datetime.now() - gen).total_seconds())
+    # KST-aware로 비교 — 호스트 타임존(UTC·미주·유럽 등)과 무관하게 정확한 경과시간.
+    delta = int((datetime.now(_KST) - gen).total_seconds())
     if delta < 0:
         return f" (생성 {recptn_dt})"  # 시계 차이 등 — 음수면 원시각만
     return f" (생성 {recptn_dt} · {delta}초 전)"

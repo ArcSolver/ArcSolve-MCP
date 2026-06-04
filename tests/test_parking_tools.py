@@ -60,7 +60,7 @@ async def test_search_request_and_output(tools, monkeypatch, recording_http):
     monkeypatch.setattr(f"{MOD}.get_json", http)
 
     out = await tools["parking_search"]()
-    assert http.last["url"] == "http://apis.data.go.kr/B553881/Parking/PrkSttusInfo"
+    assert http.last["url"] == "https://apis.data.go.kr/B553881/Parking/PrkSttusInfo"
     # 서비스키는 쿼리 파라미터(헤더 아님), format=2 명시.
     assert http.last["params"]["serviceKey"] == "DECODED_KEY"
     assert http.last["params"]["format"] == "2"

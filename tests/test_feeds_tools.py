@@ -34,6 +34,12 @@ def tools(load_tools):
     return load_tools(register)
 
 
+async def test_fetch_blocks_ssrf_internal_ip(tools):
+    # get_text를 mock하지 않음 — 실제 SSRF 가드가 리터럴 내부 IP(메타데이터)를 차단(무네트워크).
+    out = await tools["feeds_fetch"]("http://169.254.169.254/latest/meta-data/")
+    assert "차단" in out
+
+
 async def test_fetch_request_and_output(tools, monkeypatch, recording_http):
     http = recording_http(ret=RSS2)
     monkeypatch.setattr(f"{MOD}.get_text", http)

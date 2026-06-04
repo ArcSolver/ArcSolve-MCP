@@ -25,7 +25,7 @@ from pydantic import BaseModel
 
 # ─── base URL / 엔드포인트 상수 ─────────────────────────────
 # 출처(base·엔드포인트): https://www.data.go.kr/data/15073861/openapi.do
-BASE_URL = "http://apis.data.go.kr/B552584/ArpltnInforInqireSvc"
+BASE_URL = "https://apis.data.go.kr/B552584/ArpltnInforInqireSvc"
 # 시도별 실시간 측정정보 조회
 PATH_REALTIME_BY_REGION = "/getCtprvnRltmMesureDnsty"
 # 측정소별 실시간 측정정보 조회

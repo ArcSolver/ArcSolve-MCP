@@ -59,9 +59,14 @@ def _auth(name: str) -> None:
     raw = input("redirect URL 전체(또는 code) = ").strip()
     code, state = _parse_redirect(raw)
     tok = asyncio.run(client.exchange_code(code, state=state))
+    rt = tok.get("refresh_token")
     print("\n✅ 인증 완료. ~/.arcsolve/credentials.json 에 저장했습니다(권한 0600).")
-    print("호스트 설정의 env에 refresh_token을 직접 넣어도 됩니다(평문 노출 주의):")
-    print(f"  {name.upper()}_REFRESH_TOKEN={tok.get('refresh_token')}")
+    if "--show-token" in sys.argv:
+        # 명시 요청 시에만 평문 노출(스크롤백·CI 로그 잔존 주의).
+        print(f"  {name.upper()}_REFRESH_TOKEN={rt}")
+    elif rt:
+        masked = rt[:4] + "…" + rt[-4:] if len(rt) > 12 else "…"
+        print(f"  refresh_token 저장됨({masked}). 전체 값은 `arcsolve auth {name} --show-token`으로 출력.")
 
 
 def _catalog() -> None:

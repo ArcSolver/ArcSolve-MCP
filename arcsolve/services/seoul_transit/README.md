@@ -24,6 +24,8 @@
 
 > ⚠️ **지하철 실시간 도착은 별도 인증키가 필요합니다.** 서울 열린데이터광장은 지하철 실시간 데이터에 대해 일반 인증키와 **다른 '실시간 지하철 인증키'**를 발급합니다(전용 호스트 `swopenAPI.seoul.go.kr`). 따릉이 등 일반 데이터셋은 '일반 인증키'(`openapi.seoul.go.kr:8088`)를 씁니다. 각 도구는 해당 키가 없으면 HTTP 호출 전에 안내 문자열을 반환합니다.
 
+> 🔒 **전송 경로 주의(HTTP):** 두 호스트(`swopenAPI.seoul.go.kr`, `openapi.seoul.go.kr:8088`)는 현재 **HTTPS를 제공하지 않아 HTTP로 호출**한다(검증 결과 TLS 미응답). 인증키가 **URL path 세그먼트**에 실리므로 신뢰할 수 없는 네트워크에서는 키 노출 위험이 있다. 상류가 HTTPS를 지원하면 `contract.py`의 `*_BASE_URL`을 `https://`로 전환할 것. data.go.kr 기반 서비스(airkorea·egen·ev_charger·airport·parking·tago_transit)는 모두 HTTPS로 호출한다.
+
 ## 엔드포인트 (전부 GET)
 | 도구 | URL |
 |------|------|

@@ -78,7 +78,7 @@ async def test_realtime_request_and_output(tools, monkeypatch, recording_http):
 
     out = await tools["egen_realtime_beds"](stage1="서울특별시", stage2="종로구")
     assert http.last["url"] == (
-        "http://apis.data.go.kr/B552657/ErmctInfoInqireService/getEmrrmRltmUsefulSckbdInfoInqire"
+        "https://apis.data.go.kr/B552657/ErmctInfoInqireService/getEmrrmRltmUsefulSckbdInfoInqire"
     )
     # 서비스키는 쿼리 파라미터(헤더 아님), Decoding 키 원문 그대로(이중 인코딩 방지).
     assert http.last["params"]["serviceKey"] == "DECODED_KEY"

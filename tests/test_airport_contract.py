@@ -32,7 +32,7 @@ from arcsolve.services.airport.contract import (
 
 def test_base_and_institution_code():
     # 인천국제공항공사 기관코드 B551177.
-    assert BASE_URL == "http://apis.data.go.kr/B551177"
+    assert BASE_URL == "https://apis.data.go.kr/B551177"
     assert SERVICE_PASSENGER_FLIGHTS == "/StatusOfPassengerFlightsDeOdp"
     assert TYPE_JSON == "json"
     assert RESULT_CODE_OK == "00"

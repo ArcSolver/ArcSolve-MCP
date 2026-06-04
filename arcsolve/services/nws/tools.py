@@ -74,7 +74,7 @@ def _explain(e: UpstreamError, *, point: bool = False) -> str:
         return f"요청 한도 초과(429): 잠시 후 재시도하세요.{detail}"
     if e.status in (500, 502, 503, 504):
         return f"NWS 서버 오류({e.status}): 잠시 후 재시도하세요.{detail}"
-    return f"NWS API 오류 {e.status}:{detail or ' ' + str(e.payload)}"
+    return f"NWS API 오류 {e.status}:{detail}"
 
 
 def _period_line(p: c.ForecastPeriod) -> str:

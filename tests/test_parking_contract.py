@@ -29,7 +29,7 @@ from arcsolve.services.parking.contract import (
 
 def test_base_and_operations():
     # 단일 base B553881/Parking + 3개 오퍼레이션.
-    assert BASE_URL == "http://apis.data.go.kr/B553881/Parking"
+    assert BASE_URL == "https://apis.data.go.kr/B553881/Parking"
     assert OP_FACILITY == "PrkSttusInfo"
     assert OP_OPERATION == "PrkOprInfo"
     assert OP_REALTIME == "PrkRealtimeInfo"

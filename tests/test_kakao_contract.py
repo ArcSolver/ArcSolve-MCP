@@ -39,6 +39,11 @@ def test_text_max_length_enforced():
         TextTemplate(text="가" * 201)
 
 
+def test_text_empty_rejected():
+    with pytest.raises(ValidationError):
+        TextTemplate(text="")  # 빈 본문은 진입점에서 차단
+
+
 def test_buttons_max_two_enforced():
     btn = Button(title="확인", link=Link(web_url="https://a.b"))
     TextTemplate(text="ok", buttons=[btn, btn])  # 2개는 허용

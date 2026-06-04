@@ -56,7 +56,7 @@ class TextTemplate(BaseModel):
     """
 
     object_type: Literal["text"] = "text"
-    text: str = Field(max_length=200)
+    text: str = Field(min_length=1, max_length=200)  # 빈 본문은 진입점에서 차단
     link: Link | None = None
     button_title: str | None = None
     buttons: list[Button] | None = Field(default=None, max_length=2)

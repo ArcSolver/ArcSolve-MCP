@@ -44,9 +44,17 @@ class TokenStore:
         self.path = path
 
     def _read(self) -> dict:
-        if self.path.exists():
+        if not self.path.exists():
+            return {}
+        try:
             return json.loads(self.path.read_text())
-        return {}
+        except (json.JSONDecodeError, OSError, ValueError):
+            # 손상된 파일이 모든 토큰 읽기를 막지 않도록: .bak으로 비키고 빈 상태로 폴백.
+            try:
+                self.path.replace(self.path.with_suffix(self.path.suffix + ".bak"))
+            except OSError:
+                pass
+            return {}
 
     def get(self, service: str) -> dict:
         return self._read().get(service, {})
@@ -118,14 +126,17 @@ class OAuthClient:
     async def exchange_code(self, code: str, state: str | None = None) -> dict:
         """authorization code를 토큰으로 교환하고 저장한다(최초 1회 인증).
 
-        `state`를 주면 authorize_url_for_login()이 만든 값과 대조한다(CSRF·인가코드 주입 방어).
-        수동 복붙 흐름에서 state를 모르면 None으로 생략할 수 있다(같은 프로세스에서 authorize URL을
-        만들었고 state도 함께 받은 경우에만 검증).
+        authorize_url_for_login()으로 state를 생성했다면(대화형 흐름) `state`를 **반드시** 넘겨야
+        하며 생성값과 일치해야 한다(CSRF·인가코드 주입 방어). state를 떼고 code만 넘기면 거부한다 —
+        `arcsolve auth`는 redirect URL 전체를 붙여넣어 code·state를 함께 받는다.
+        authorize URL을 만들지 않은 흐름(self._state 없음)에서는 state 검증을 생략한다.
         """
-        if state is not None and self._state is not None and not secrets.compare_digest(
-            state, self._state
+        if self._state is not None and (
+            state is None or not secrets.compare_digest(state, self._state)
         ):
-            raise RuntimeError(f"{self.service}: OAuth state 불일치 — 인증을 처음부터 다시 하세요.")
+            raise RuntimeError(
+                f"{self.service}: OAuth state 누락/불일치 — redirect URL 전체를 붙여넣어 다시 시도하세요."
+            )
         data = {
             "grant_type": "authorization_code",
             "client_id": self.client_id,
@@ -162,7 +173,11 @@ class OAuthClient:
         async with httpx.AsyncClient(timeout=_TIMEOUT, transport=self.transport) as client:
             r = await client.post(self.token_url, data=data, headers=headers)
         r.raise_for_status()
-        return r.json()
+        tok = r.json()
+        if not isinstance(tok, dict) or "access_token" not in tok:
+            # 상류가 토큰 대신 에러/예상 밖 응답을 주면 KeyError 대신 명확한 메시지로.
+            raise RuntimeError(f"{self.service}: 토큰 응답이 올바르지 않습니다(access_token 없음).")
+        return tok
 
     def _save(self, tok: dict, fallback_refresh: str | None = None) -> None:
         # 일부 제공자는 refresh 시 새 refresh_token을 주지 않는다 → 기존 값 유지.

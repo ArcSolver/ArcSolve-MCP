@@ -40,7 +40,7 @@ from pydantic import BaseModel, field_validator
 
 # ─── base URL / 서비스 경로 상수 ────────────────────────────
 # 전국 대중교통 통합 네임스페이스. 출처: 위 6개 data.go.kr 페이지 공통.
-BASE_URL = "http://apis.data.go.kr/1613000"
+BASE_URL = "https://apis.data.go.kr/1613000"
 
 # 서비스(엔드포인트 그룹) 경로.
 # 출처: data.go.kr 페이지 + [국토교통부] TAGO OPEN API 대체 공지(NOTICE_0000000002723)의

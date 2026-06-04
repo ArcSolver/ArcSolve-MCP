@@ -22,6 +22,8 @@ from __future__ import annotations
 
 import xml.etree.ElementTree as ET
 
+from arcsolve.xml import safe_fromstring
+
 from pydantic import BaseModel
 
 # ─── base URL / 엔드포인트 상수 ─────────────────────────────
@@ -396,7 +398,7 @@ def parse_abstracts(xml_text: str) -> list[PubmedArticle]:
     XML이 깨졌으면 ET.ParseError가 올라간다(호출부가 매핑).
     출처: 라이브 efetch 응답 구조(PubmedArticleSet/PubmedArticle).
     """
-    root = ET.fromstring(xml_text)
+    root = safe_fromstring(xml_text)
     return [_parse_article(pa) for pa in root.findall("./PubmedArticle")]
 
 

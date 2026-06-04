@@ -37,7 +37,7 @@ def _explain(e: UpstreamError) -> str:
         return f"요청 오류(400): 좌표/변수명/파라미터를 확인하세요.{detail}"
     if e.status == 429:
         return "요청 한도 초과(429): 잠시 후 재시도하세요(무료 풀의 일일/분당 한도)."
-    return f"Open-Meteo API 오류 {e.status}:{detail or ' ' + str(e.payload)}"
+    return f"Open-Meteo API 오류 {e.status}:{detail}"
 
 
 def _geocode_line(r: c.GeocodingResult) -> str:

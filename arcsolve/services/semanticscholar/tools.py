@@ -65,7 +65,7 @@ def _explain(e: UpstreamError) -> str:
             "요청 한도 초과(429): 공유 풀이 혼잡합니다. 잠시 후 재시도하세요. "
             f"SEMANTICSCHOLAR_API_KEY를 쓰면 전용 풀(1 RPS)로 안정적입니다.{detail}"
         )
-    return f"Semantic Scholar API 오류 {e.status}:{detail or ' ' + str(e.payload)}"
+    return f"Semantic Scholar API 오류 {e.status}:{detail}"
 
 
 def _author_summary(authors: list[dict] | None) -> str:

@@ -71,7 +71,7 @@ def _explain(e: UpstreamError) -> str:
         )
     if e.status == 504:
         return f"게이트웨이 시간초과(504): 쿼리가 무겁습니다. rows를 줄이거나 재시도하세요.{detail}"
-    return f"Crossref API 오류 {e.status}:{detail or ' ' + str(e.payload)}"
+    return f"Crossref API 오류 {e.status}:{detail}"
 
 
 def _authors(authors: list[dict] | None) -> str:

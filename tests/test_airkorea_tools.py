@@ -56,7 +56,7 @@ async def test_region_request_and_output(tools, monkeypatch, recording_http):
 
     out = await tools["airkorea_realtime_by_region"](sidoName="서울")
     assert http.last["url"] == (
-        "http://apis.data.go.kr/B552584/ArpltnInforInqireSvc/getCtprvnRltmMesureDnsty"
+        "https://apis.data.go.kr/B552584/ArpltnInforInqireSvc/getCtprvnRltmMesureDnsty"
     )
     # 서비스키는 쿼리 파라미터(헤더 아님), returnType=json 명시.
     assert http.last["params"]["serviceKey"] == "DECODED_KEY"

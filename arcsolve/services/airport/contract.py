@@ -37,7 +37,7 @@ from pydantic import BaseModel, field_validator
 # ─── base URL / 서비스 경로 상수 ────────────────────────────
 # 인천국제공항공사 기관코드 B551177. 출처: data.go.kr 15140153 + 다수 외부 구현 실호출 URL
 #   (예: http://apis.data.go.kr/B551177/StatusOfPassengerFlightsDeOdp/getPassengerArrivalsDeOdp).
-BASE_URL = "http://apis.data.go.kr/B551177"
+BASE_URL = "https://apis.data.go.kr/B551177"
 
 # 여객편 운항현황 상세조회 서비스(엔드포인트 그룹) 경로.
 SERVICE_PASSENGER_FLIGHTS = "/StatusOfPassengerFlightsDeOdp"

@@ -33,11 +33,13 @@ from __future__ import annotations
 
 import xml.etree.ElementTree as ET
 
+from arcsolve.xml import safe_fromstring
+
 from pydantic import BaseModel
 
 # ─── base URL / 엔드포인트 상수 ─────────────────────────────
 # 출처(base·오퍼레이션): https://www.data.go.kr/data/15076352/openapi.do
-BASE_URL = "http://apis.data.go.kr/B552584/EvCharger"
+BASE_URL = "https://apis.data.go.kr/B552584/EvCharger"
 # 충전소 정보 조회(충전소·충전기 위치/타입/운영기관/이용가능시간)
 PATH_CHARGER_INFO = "/getChargerInfo"
 # 충전기 상태 실시간 제공(충전중/대기/통신이상 + 상태갱신일시; 약 5분 갱신)
@@ -355,7 +357,7 @@ def parse_charger_info(xml_text: str) -> tuple[Header, list[Charger], Page]:
     XML이 깨졌으면 ET.ParseError가 올라간다(호출부가 매핑).
     출처: https://www.data.go.kr/data/15076352/openapi.do
     """
-    root = ET.fromstring(xml_text)
+    root = safe_fromstring(xml_text)
     header = parse_header(root)
     items = [Charger(**_item_fields(item)) for item in _items(root)]
     return header, items, parse_page(root)
@@ -366,7 +368,7 @@ def parse_charger_status(xml_text: str) -> tuple[Header, list[ChargerStatus], Pa
 
     출처: https://www.data.go.kr/data/15076352/openapi.do
     """
-    root = ET.fromstring(xml_text)
+    root = safe_fromstring(xml_text)
     header = parse_header(root)
     items = [ChargerStatus(**_item_fields(item)) for item in _items(root)]
     return header, items, parse_page(root)

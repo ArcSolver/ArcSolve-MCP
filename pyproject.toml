@@ -18,6 +18,9 @@ classifiers = [
     "Topic :: Scientific/Engineering :: Artificial Intelligence",
 ]
 dependencies = [
+    "defusedxml>=0.7.1",
+    # 상한 캡은 두지 않는다: fastmcp 3.x가 최신 httpx/pydantic를 요구해, 캡을 걸면 uv가
+    # fastmcp를 깨진 2.x로 강등시킨다(검증됨). 호환성은 uv.lock 고정으로 관리한다.
     "fastmcp>=2.0",
     "httpx>=0.27",
     "pydantic>=2.7",
@@ -45,6 +48,19 @@ path = "arcsolve/__init__.py"
 
 [tool.hatch.build.targets.wheel]
 packages = ["arcsolve"]
+
+[tool.hatch.build.targets.sdist]
+# 배포 sdist에서 로컬/민감 파일을 명시 제외(전역 git ignore에 의존하지 않음 — PyPI는 영구·미러링).
+exclude = [
+    ".claude",
+    ".github",
+    "/dist",
+    "/docs/local",
+    "*.bak",
+    ".env",
+    ".env.*",
+    "credentials.json",
+]
 
 [tool.ruff]
 line-length = 100

@@ -100,7 +100,7 @@ def _explain_http(e: UpstreamError) -> str:
         )
     if e.status == 429:
         return f"요청 한도 초과(429): 일일 트래픽 한도(개발계정 일 500건)를 확인하세요.{detail}"
-    return f"인천공항 API 오류 {e.status}:{detail or ' ' + str(e.payload)}"
+    return f"인천공항 API 오류 {e.status}:{detail}"
 
 
 def _hint_for_code(code: str, msg: str) -> str:
