@@ -30,8 +30,26 @@ jobs:
         with:
           python-version: "3.11"
 
-      - name: Build
-        run: uv build
+      - name: Verify tag matches __version__ (release only)
+        if: github.event_name == 'push'
+        run: |
+          TAG="${GITHUB_REF_NAME#v}"
+          VER="$(grep -oE '__version__ *= *"[^"]+"' arcsolve/__init__.py | grep -oE '[0-9][^"]*')"
+          echo "tag=$TAG  __version__=$VER"
+          test "$TAG" = "$VER" || { echo "::error::태그 v$TAG 와 __version__ $VER 불일치"; exit 1; }
+
+      - name: Build (clean)
+        run: |
+          rm -rf dist build
+          uv build
+
+      - name: Guard — no sensitive/local files in sdist
+        run: |
+          if tar tzf dist/*.tar.gz | grep -Eiq '(^|/)[.](claude|env|git)(/|$)|credential'; then
+            echo "::error::sdist에 민감/로컬 파일 포함"
+            tar tzf dist/*.tar.gz | grep -Ei '[.]claude|[.]env|[.]git/|credential'
+            exit 1
+          fi
 
       - name: Publish to TestPyPI (rehearsal — manual dispatch)
         if: github.event_name == 'workflow_dispatch'

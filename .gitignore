@@ -11,5 +11,8 @@ build/
 # 로컬 토큰 저장소(실수로 커밋되지 않도록)
 .arcsolve/
 credentials.json
+*.bak
+# 에이전트/IDE 로컬 설정(레포 .gitignore에 명시 — sdist 누출 방지, 전역 ignore에 의존하지 않음)
+.claude/
 # 커밋하지 않는 로컬 전용 문서(그랜트 신청서·초안 등)
 docs/local/
