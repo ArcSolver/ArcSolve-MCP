@@ -31,7 +31,7 @@ from arcsolve.services.airkorea.contract import (
 
 
 def test_constants_match_official():
-    assert BASE_URL == "http://apis.data.go.kr/B552584/ArpltnInforInqireSvc"
+    assert BASE_URL == "https://apis.data.go.kr/B552584/ArpltnInforInqireSvc"
     assert PATH_REALTIME_BY_REGION == "/getCtprvnRltmMesureDnsty"
     assert PATH_REALTIME_BY_STATION == "/getMsrstnAcctoRltmMesureDnsty"
     assert PATH_FORECAST == "/getMinuDustFrcstDspth"

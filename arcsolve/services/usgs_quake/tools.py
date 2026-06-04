@@ -52,7 +52,7 @@ def _explain(e: UpstreamError) -> str:
         return "요청 한도 초과(429): 잠시 후 재시도하세요."
     if e.status == 503:
         return "서비스 일시 불가(503): 잠시 후 재시도하세요."
-    return f"USGS API 오류 {e.status}:{detail or ' ' + str(e.payload)}"
+    return f"USGS API 오류 {e.status}:{detail}"
 
 
 def _fmt_time(ms: int | None) -> str:

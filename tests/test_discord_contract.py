@@ -50,6 +50,13 @@ def test_content_max_length_enforced():
         ExecuteWebhookRequest(content="가" * (CONTENT_MAX_LENGTH + 1))  # 2001자는 거부
 
 
+def test_content_empty_string_rejected():
+    # None(임베드 전용)은 허용하되 명시적 빈 문자열("")은 거부(상류 400 사전 방지).
+    ExecuteWebhookRequest(embeds=[Embed(title="t")])  # content 없음 = OK
+    with pytest.raises(ValidationError):
+        ExecuteWebhookRequest(content="")
+
+
 def test_execute_webhook_content_optional_for_embed_only():
     # content/embeds 중 하나면 되므로, content 없이 embeds만 있어도 모델은 유효하다.
     r = ExecuteWebhookRequest(embeds=[Embed(title="t")])

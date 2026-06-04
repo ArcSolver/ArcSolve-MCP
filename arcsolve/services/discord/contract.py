@@ -130,7 +130,8 @@ class ExecuteWebhookRequest(BaseModel):
     """
 
     # content: string · "the message contents (up to 2000 characters)"
-    content: str | None = Field(default=None, max_length=CONTENT_MAX_LENGTH)
+    # None(임베드 전용)은 허용하되, 명시적 빈 문자열("")은 차단(상류 400 사전 방지).
+    content: str | None = Field(default=None, min_length=1, max_length=CONTENT_MAX_LENGTH)
     # embeds: array of up to 10 embed objects · "embedded rich content"
     embeds: list[Embed] | None = Field(default=None, max_length=MAX_EMBEDS)
     # username: string (false) · "override the default username of the webhook"
@@ -151,7 +152,8 @@ class EditWebhookMessageRequest(BaseModel):
     """
 
     # content: string · "the message contents (up to 2000 characters)"
-    content: str | None = Field(default=None, max_length=CONTENT_MAX_LENGTH)
+    # None(임베드 전용)은 허용하되, 명시적 빈 문자열("")은 차단(상류 400 사전 방지).
+    content: str | None = Field(default=None, min_length=1, max_length=CONTENT_MAX_LENGTH)
     # embeds: array of up to 10 embed objects · "embedded rich content"
     embeds: list[Embed] | None = Field(default=None, max_length=MAX_EMBEDS)
 
@@ -166,7 +168,7 @@ class CreateMessageRequest(BaseModel):
     출처: https://discord.com/developers/docs/resources/message#create-message-jsonform-params
     """
 
-    content: str = Field(max_length=CONTENT_MAX_LENGTH)
+    content: str = Field(min_length=1, max_length=CONTENT_MAX_LENGTH)  # 빈 본문 차단
 
 
 class MessageAuthor(BaseModel):

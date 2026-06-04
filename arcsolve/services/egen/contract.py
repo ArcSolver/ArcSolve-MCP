@@ -31,7 +31,7 @@ from pydantic import BaseModel
 
 # ─── base URL / 엔드포인트 상수 ─────────────────────────────
 # 출처(base·오퍼레이션): https://www.data.go.kr/data/15000563/openapi.do
-BASE_URL = "http://apis.data.go.kr/B552657/ErmctInfoInqireService"
+BASE_URL = "https://apis.data.go.kr/B552657/ErmctInfoInqireService"
 # 응급실 실시간 가용병상정보 조회
 PATH_REALTIME_BEDS = "/getEmrrmRltmUsefulSckbdInfoInqire"
 # 중증질환자 수용가능정보 조회

@@ -63,7 +63,7 @@ def _explain(e: UpstreamError) -> str:
             "요청 한도 초과(429): 잠시 후 재시도하세요. "
             f"OPENALEX_MAILTO로 polite pool을 쓰면 안정적입니다.{detail}"
         )
-    return f"OpenAlex API 오류 {e.status}:{detail or ' ' + str(e.payload)}"
+    return f"OpenAlex API 오류 {e.status}:{detail}"
 
 
 def _author_summary(authorships: list[dict] | None) -> str:

@@ -68,7 +68,7 @@ async def test_status_request_and_output(tools, monkeypatch, recording_http):
     monkeypatch.setattr(f"{MOD}.get_text", http)
 
     out = await tools["ev_charger_status"](zcode="11", zscode="11680")
-    assert http.last["url"] == "http://apis.data.go.kr/B552584/EvCharger/getChargerStatus"
+    assert http.last["url"] == "https://apis.data.go.kr/B552584/EvCharger/getChargerStatus"
     # 서비스키는 쿼리 파라미터(헤더 아님), Decoding 키 원문 그대로(이중 인코딩 방지).
     assert http.last["params"]["serviceKey"] == "DECODED_KEY"
     assert http.last["params"]["zcode"] == "11"

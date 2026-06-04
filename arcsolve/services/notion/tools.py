@@ -68,7 +68,7 @@ def _explain(e: UpstreamError) -> str:
         )
     if e.status == 429:
         return f"요청 한도 초과(429): 잠시 후 재시도하세요.{detail}{suffix}"
-    return f"Notion API 오류 {e.status}:{detail or ' ' + str(e.payload)}{suffix}"
+    return f"Notion API 오류 {e.status}:{detail}{suffix}"
 
 
 def _list_note(result: n.ListResponse) -> str:

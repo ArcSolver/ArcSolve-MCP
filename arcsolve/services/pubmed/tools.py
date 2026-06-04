@@ -76,7 +76,7 @@ def _explain(e: UpstreamError) -> str:
             "요청 한도 초과(429): 키 없이는 초당 3건까지입니다. 잠시 후 재시도하세요. "
             f"NCBI_API_KEY를 쓰면 초당 10건으로 늘어납니다.{detail}"
         )
-    return f"PubMed E-utilities 오류 {e.status}:{detail or ' ' + str(e.payload)}"
+    return f"PubMed E-utilities 오류 {e.status}:{detail}"
 
 
 def _author_summary(authors: list[c.SummaryAuthor]) -> str:

@@ -88,7 +88,7 @@ def _explain(e: UpstreamError) -> str:
         )
     if e.status == 429:
         return f"요청 한도 초과(429): 일일 트래픽 한도를 확인하세요.{detail}"
-    return f"전기차 충전소 API 오류 {e.status}:{detail or ' ' + str(e.payload)}"
+    return f"전기차 충전소 API 오류 {e.status}:{detail}"
 
 
 def _check_header(header: c.Header | None) -> str | None:

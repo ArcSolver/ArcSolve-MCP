@@ -62,7 +62,7 @@ async def test_city_codes_request_and_output(tools, monkeypatch, recording_http)
 
     out = await tools["tago_city_codes"]()
     assert http.last["url"] == (
-        "http://apis.data.go.kr/1613000/ArvlInfoInqireService/getCtyCodeList"
+        "https://apis.data.go.kr/1613000/ArvlInfoInqireService/getCtyCodeList"
     )
     # 서비스키는 쿼리 파라미터(헤더 아님), _type=json 명시.
     assert http.last["params"]["serviceKey"] == "DECODED_KEY"

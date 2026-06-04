@@ -36,7 +36,7 @@ from arcsolve.services.ev_charger.contract import (
 
 
 def test_constants_match_official():
-    assert BASE_URL == "http://apis.data.go.kr/B552584/EvCharger"
+    assert BASE_URL == "https://apis.data.go.kr/B552584/EvCharger"
     assert PATH_CHARGER_INFO == "/getChargerInfo"
     assert PATH_CHARGER_STATUS == "/getChargerStatus"
     assert RESULT_CODE_OK == "00"

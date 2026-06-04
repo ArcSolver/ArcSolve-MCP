@@ -37,7 +37,7 @@ from pydantic import BaseModel
 
 # ─── base URL / 엔드포인트 상수 ─────────────────────────────
 # 출처(base·오퍼레이션): https://www.data.go.kr/data/15076352/openapi.do
-BASE_URL = "http://apis.data.go.kr/B552584/EvCharger"
+BASE_URL = "https://apis.data.go.kr/B552584/EvCharger"
 # 충전소 정보 조회(충전소·충전기 위치/타입/운영기관/이용가능시간)
 PATH_CHARGER_INFO = "/getChargerInfo"
 # 충전기 상태 실시간 제공(충전중/대기/통신이상 + 상태갱신일시; 약 5분 갱신)

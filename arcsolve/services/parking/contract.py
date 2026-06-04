@@ -48,7 +48,7 @@ from pydantic import BaseModel, field_validator
 
 # ─── base URL / 오퍼레이션 경로 상수 ────────────────────────
 # 출처: https://www.data.go.kr/data/15099883/openapi.do (요청주소 `…/Parking/PrkSttusInfo`).
-BASE_URL = "http://apis.data.go.kr/B553881/Parking"
+BASE_URL = "https://apis.data.go.kr/B553881/Parking"
 
 # 오퍼레이션(엔드포인트) 경로 + JSON 항목 배열이 실리는 키(=오퍼레이션명).
 # 시설정보: 상세 페이지에서 직접 확인. 운영/실시간: 다수 외부 구현으로 교차확인.
