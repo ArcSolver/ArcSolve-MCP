@@ -1,0 +1,30 @@
+# 라이브 계약 드리프트 점검 (nightly) — 무인증 서비스의 대표 도구를 실제 엔드포인트로 호출해
+# 상류 계약 변화를 사람 개입 전에 포착한다. **PR 게이트가 아니다** — 빨간불은 알림 신호.
+# 상류 가용성에 따라 flaky할 수 있어 스케줄/수동 디스패치로만 돈다(PR/push에는 안 돌림).
+#
+# Actions는 공급망 안전을 위해 커밋 SHA로 핀(트레일링 주석에 버전).
+name: Nightly live drift
+
+on:
+  schedule:
+    - cron: "0 6 * * *"   # 매일 06:00 UTC
+  workflow_dispatch:
+
+jobs:
+  live:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@fac544c07dec837d0ccb6301d7b5580bf5edae39 # v8.2.0
+        with:
+          python-version: "3.11"
+
+      - name: Install deps
+        run: uv sync --extra dev
+
+      - name: Live contract drift (no-auth services)
+        env:
+          ARCSOLVE_LIVE: "1"
+        run: uv run pytest -m live -q

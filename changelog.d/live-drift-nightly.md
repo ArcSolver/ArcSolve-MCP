@@ -1,0 +1,1 @@
+- ci(test): 라이브 계약 드리프트 nightly 추가 — 무인증 8서비스(openmeteo·hackernews·feeds·openalex·crossref·arxiv·usgs_quake·nws)의 대표 도구를 실제 엔드포인트로 호출해 상류 계약(엔드포인트·필드명) 변화를 사람 개입 전에 포착. 평소 PR/CI에선 skip(`ARCSOLVE_LIVE` 미설정·무네트워크 원칙 유지), nightly(`-m live`)·수동 디스패치로만 실행. PR 게이트가 아니라 알림 신호(상류 가용성에 flaky 가능). '검증된 능력' 약속을 실제로 지키는 게이트.
