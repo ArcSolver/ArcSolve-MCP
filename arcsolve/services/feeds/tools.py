@@ -10,7 +10,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 from xml.etree.ElementTree import ParseError
 
-from arcsolve.http import UpstreamError, get_text
+from arcsolve.http import MAX_RESPONSE_BYTES, UpstreamError, get_text
 from arcsolve.services.feeds import contract as c
 
 if TYPE_CHECKING:
@@ -62,7 +62,12 @@ def register(mcp: FastMCP) -> None:
             return str(e)
 
         try:
-            xml = await get_text(url, headers=_user_agent())
+            # 신뢰불가 URL → SSRF 가드(내부망/메타데이터/loopback 차단) + 스트리밍 크기 컷오프.
+            xml = await get_text(
+                url, headers=_user_agent(), max_bytes=MAX_RESPONSE_BYTES, guard_ssrf=True
+            )
+        except ValueError as e:  # SSRF 차단(assert_public_url)
+            return f"요청이 차단되었습니다: {e}"
         except UpstreamError as e:
             return _explain(e)
         try:

@@ -7,6 +7,7 @@ from arcsolve.http import (
     NetworkError,
     Retry,
     UpstreamError,
+    assert_public_url,
     delete_json,
     get_json,
     get_text,
@@ -279,3 +280,93 @@ async def test_no_retry_propagates_raw_httpx_error_by_default():
     # 기본(retry 미지정)은 원본 httpx 예외 그대로 — 기존 서비스의 `except httpx.ConnectError` 호환.
     with pytest.raises(httpx.ConnectError):
         await get_json("https://x", transport=_t(handler))
+
+
+# ── 배포 전 하드닝: SSRF·DoS·정보노출 ────────────────────────────────────────
+
+
+@pytest.mark.parametrize(
+    "bad",
+    [
+        "http://127.0.0.1/x",
+        "http://169.254.169.254/latest/meta-data/",  # 클라우드 메타데이터
+        "http://10.0.0.5/x",
+        "http://[::1]/x",
+        "http://0.0.0.0/x",
+    ],
+)
+async def test_assert_public_url_blocks_internal(bad):
+    # 리터럴 IP는 DNS를 타지 않으므로 무네트워크로 검증된다.
+    with pytest.raises(ValueError):
+        await assert_public_url(bad)
+
+
+async def test_assert_public_url_allows_public_literal():
+    await assert_public_url("http://8.8.8.8/")  # 공인 IP → 통과(raise 없음)
+
+
+async def test_assert_public_url_rejects_non_http():
+    with pytest.raises(ValueError):
+        await assert_public_url("file:///etc/passwd")
+
+
+async def test_get_text_guard_ssrf_blocks_internal():
+    with pytest.raises(ValueError):
+        await get_text("http://127.0.0.1/feed", guard_ssrf=True)
+
+
+async def test_network_error_masks_token_in_url():
+    async def handler(req):
+        raise httpx.ConnectError("refused")
+
+    with pytest.raises(NetworkError) as ei:
+        await get_json(
+            "https://api.telegram.org/bot123:SECRET/sendMessage",
+            transport=_t(handler),
+            retry=Retry(attempts=0, backoff=0),
+        )
+    msg = str(ei.value)
+    assert "SECRET" not in msg and "bot123" not in msg  # 토큰 누출 없음
+    assert "api.telegram.org" in msg  # 호스트는 진단용으로 유지
+
+
+def test_upstream_error_truncates_long_text_payload():
+    e = UpstreamError(500, "E" * 5000)
+    assert len(e.payload) <= 2048 + 10
+    assert e.payload.endswith("…(절단)")
+
+
+def test_upstream_error_keeps_dict_payload():
+    e = UpstreamError(400, {"code": -1, "msg": "x"})
+    assert e.payload == {"code": -1, "msg": "x"}  # dict는 서비스가 파싱하므로 보존
+
+
+async def test_retry_after_is_capped_to_max_delay():
+    calls = {"n": 0}
+
+    async def handler(req):
+        calls["n"] += 1
+        return httpx.Response(503, headers={"Retry-After": "999999"}, text="busy")
+
+    # max_delay=0 → 거대 Retry-After여도 즉시 재시도(장시간 sleep 자기-DoS 방지). 빨리 끝나야 한다.
+    with pytest.raises(UpstreamError):
+        await get_json(
+            "https://x", transport=_t(handler), retry=Retry(attempts=1, backoff=0, max_delay=0)
+        )
+    assert calls["n"] == 2
+
+
+async def test_get_text_max_bytes_rejects_large_body():
+    async def handler(req):
+        return httpx.Response(200, text="A" * 5000)
+
+    with pytest.raises(UpstreamError) as ei:
+        await get_text("https://x", transport=_t(handler), max_bytes=1000)
+    assert ei.value.status == 413
+
+
+async def test_get_text_max_bytes_allows_small_body():
+    async def handler(req):
+        return httpx.Response(200, text="small")
+
+    assert await get_text("https://x", transport=_t(handler), max_bytes=1000) == "small"
