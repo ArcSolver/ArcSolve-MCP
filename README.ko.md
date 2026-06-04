@@ -79,27 +79,34 @@ ArcSolve-Kit/
 ## 빠른 시작
 
 ```bash
-# 1) 설치
-uv pip install -e ".[dev]"      # 또는: pip install -e ".[dev]"
+# 설치 없이 실행 — uvx가 PyPI에서 즉시 받아 실행(권장)
+uvx arcsolve                    # 전체 서비스, stdio MCP 서버
+uvx arcsolve serve kakao        # kakao만 노출
+uvx arcsolve list               # 사용 가능한 서비스 목록
 
-# 2) 자격증명 (.env.example 참고)
-cp .env.example .env            # KAKAO_REST_API_KEY 등 채우기
+# 또는 CLI를 전역 설치
+uv tool install arcsolve        # 또는: pipx install arcsolve · pip install arcsolve
+arcsolve
 
-# 3) 카카오 1회 인증 → refresh_token 저장
-arcsolve auth kakao
-
-# 4) 로컬 동작 확인
-arcsolve                    # stdio MCP 서버 실행
+# 소스에서(개발)
+uv pip install -e ".[dev]"
 ```
 
-MCP 호스트(Claude Desktop 등) 등록 예:
+이어서 자격증명을 넣고 필요한 인증을 한다:
+
+```bash
+cp .env.example .env            # KAKAO_REST_API_KEY 등 채우기(.env.example 참고)
+arcsolve auth kakao             # 1회 OAuth → refresh_token 저장(0600)
+```
+
+MCP 호스트(Claude Desktop 등) 등록 — `uvx`면 사전 설치 불필요:
 
 ```json
 {
   "mcpServers": {
     "arcsolve": {
-      "command": "arcsolve",
-      "args": ["serve", "kakao"],
+      "command": "uvx",
+      "args": ["arcsolve", "serve", "kakao"],
       "env": {
         "KAKAO_REST_API_KEY": "...",
         "KAKAO_REFRESH_TOKEN": "..."
@@ -108,6 +115,8 @@ MCP 호스트(Claude Desktop 등) 등록 예:
   }
 }
 ```
+
+> CLI를 전역 설치했다면 `"command": "arcsolve"`로 두고 `args`에서 `"arcsolve"`를 뺀다.
 
 ## 원하는 모듈만 쓰기
 

@@ -1,0 +1,3 @@
+- dist: end-user 설치/실행 경로를 README에 추가(`uvx arcsolve` 무설치 실행·`uv tool install`·호스트 설정의 uvx 변형, 양어). 패키징은 끝났으나 진입로가 없던 공백 해소.
+- release: `arcsolve release <ver>` 서브커맨드 추가 — `__version__`·server.json 버전 동기화 + changelog.d 조각을 `## [ver] - date` 섹션으로 확정하고 조각 소비. SemVer 검증. (release.yml의 태그↔버전 게이트와 짝)
+- registry: MCP 레지스트리 등재용 `server.json`(공식 스키마 2025-12-11, PyPI 패키지 `arcsolve`·stdio·uvx) + README `<!-- mcp-name: io.github.ArcSolver/arcsolve -->` 소유권 마커. 발견성 채널 연결.
