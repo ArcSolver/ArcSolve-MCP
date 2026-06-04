@@ -18,6 +18,7 @@ classifiers = [
     "Topic :: Scientific/Engineering :: Artificial Intelligence",
 ]
 dependencies = [
+    "defusedxml>=0.7.1",
     # 상한 캡은 두지 않는다: fastmcp 3.x가 최신 httpx/pydantic를 요구해, 캡을 걸면 uv가
     # fastmcp를 깨진 2.x로 강등시킨다(검증됨). 호환성은 uv.lock 고정으로 관리한다.
     "fastmcp>=2.0",

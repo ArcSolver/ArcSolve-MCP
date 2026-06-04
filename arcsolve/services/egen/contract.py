@@ -27,6 +27,8 @@ from __future__ import annotations
 
 import xml.etree.ElementTree as ET
 
+from arcsolve.xml import safe_fromstring
+
 from pydantic import BaseModel
 
 # ─── base URL / 엔드포인트 상수 ─────────────────────────────
@@ -326,7 +328,7 @@ def parse_realtime_beds(xml_text: str) -> tuple[Header, list[RealtimeBeds], Page
     XML이 깨졌으면 ET.ParseError가 올라간다(호출부가 매핑).
     출처: https://www.data.go.kr/data/15000563/openapi.do
     """
-    root = ET.fromstring(xml_text)
+    root = safe_fromstring(xml_text)
     header = parse_header(root)
     items = [
         RealtimeBeds(**{c.tag: (c.text or "").strip() for c in item if c.text})
@@ -341,7 +343,7 @@ def parse_severe_acceptance(xml_text: str) -> tuple[Header, list[SevereAcceptanc
     MKioskTy*로 시작하는 요소는 mkiosk dict에 라벨=텍스트로 모은다(고정 모델 회피).
     출처: https://www.data.go.kr/data/15000563/openapi.do
     """
-    root = ET.fromstring(xml_text)
+    root = safe_fromstring(xml_text)
     header = parse_header(root)
     items: list[SevereAcceptance] = []
     for item in _items(root):
@@ -364,7 +366,7 @@ def parse_list(xml_text: str) -> tuple[Header, list[Institution], Page]:
 
     출처: https://www.data.go.kr/data/15000563/openapi.do
     """
-    root = ET.fromstring(xml_text)
+    root = safe_fromstring(xml_text)
     header = parse_header(root)
     items = [
         Institution(**{c.tag: (c.text or "").strip() for c in item if c.text})

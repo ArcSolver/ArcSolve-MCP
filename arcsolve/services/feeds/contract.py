@@ -21,6 +21,8 @@ import html as _htmllib
 import re
 import xml.etree.ElementTree as ET
 
+from arcsolve.xml import safe_fromstring
+
 from pydantic import BaseModel
 
 # ─── 제약 상수 ──────────────────────────────────────────────
@@ -241,7 +243,7 @@ def parse_feed(xml_text: str) -> ParsedFeed:
     - `<rdf:RDF>` → RSS 1.0/RDF
     XML이 깨졌으면 `ET.ParseError`가 올라간다(호출부가 매핑). 알 수 없는 루트는 ValueError.
     """
-    root = ET.fromstring(xml_text)
+    root = safe_fromstring(xml_text)
     name = _local(root.tag)
     if name == "feed":
         return _parse_atom(root)
