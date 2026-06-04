@@ -88,7 +88,7 @@ async def test_search_request_and_output(tools, monkeypatch, recording_http):
     assert http.last["params"]["max_results"] == 5
     assert http.last["params"]["start"] == 0
     # 식별용 User-Agent(무인증)
-    assert "ArcSolve-MCP" in http.last["headers"]["User-Agent"]
+    assert "arcsolve" in http.last["headers"]["User-Agent"]
     assert "총 42건" in out
     assert "1605.08386v1" in out and "Multimatricvariate" in out and "2016" in out
     assert "Jose A. Diaz-Garcia 외 1명" in out

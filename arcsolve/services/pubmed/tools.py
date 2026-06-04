@@ -36,7 +36,7 @@ class PubMedSettings(BaseSettings):
     model_config = SettingsConfigDict(env_prefix="NCBI_", env_file=".env", extra="ignore")
     api_key: str | None = None
     # 기본 tool 식별값(env로 덮어쓸 수 있음) — 공식 etiquette 권장.
-    tool: str | None = "ArcSolve-MCP"
+    tool: str | None = "arcsolve"
     email: str | None = None
 
 

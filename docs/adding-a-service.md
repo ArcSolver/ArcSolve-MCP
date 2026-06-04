@@ -64,7 +64,7 @@ dropping in a folder registers it (no conflicts when adding in parallel).
   Use `tests/conftest.py`'s `FakeMCP` (collects the `@mcp.tool`s that register attached) and
   `RecordingHTTP` (mocks the http verbs) fixtures (no network).
 - `changelog.d/<name>.md` → one-line change summary (e.g. `- **example**: add tool X`)
-- At the integration stage (not the individual agent), run `arcsolve-mcp catalog` + `arcsolve-mcp changelog`
+- At the integration stage (not the individual agent), run `arcsolve catalog` + `arcsolve changelog`
 
 ## Service README template (required)
 
@@ -88,7 +88,7 @@ Base: `...` · Auth: `...` · Scope: `...`
 
 ## Setup
 1. Issue a key
-2. Authenticate: `arcsolve-mcp auth <name>`
+2. Authenticate: `arcsolve auth <name>`
 
 ## Tools
 | Tool | Description |
@@ -109,6 +109,6 @@ Base: `...` · Auth: `...` · Scope: `...`
 | Contract reference (fields/limits) | `contract.py` | **code** — no prose duplication |
 | Service operating guide | `services/<name>/README.md` | one per service |
 | Cross-cutting (architecture, this doc) | `docs/` | fixed regardless of service count |
-| Service catalog | `docs/services.md` | **auto-generated** (`arcsolve-mcp catalog`) |
-| Changelog | `changelog.d/<name>.md` → `CHANGELOG.md` | written as fragments, then **assembled** (`arcsolve-mcp changelog`) |
+| Service catalog | `docs/services.md` | **auto-generated** (`arcsolve catalog`) |
+| Changelog | `changelog.d/<name>.md` → `CHANGELOG.md` | written as fragments, then **assembled** (`arcsolve changelog`) |
 | Shared working rules | `AGENTS.md` | single source of truth for every agent |

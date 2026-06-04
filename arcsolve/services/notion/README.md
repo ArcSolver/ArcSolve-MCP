@@ -40,7 +40,7 @@ Base: `https://api.notion.com/v1` · 인증: `Authorization: Bearer <NOTION_TOKE
 2. **읽을 페이지/데이터베이스를 통합과 공유**(연결 추가)해야 한다 — 공유 안 하면 404(`object_not_found`).
 3. `.env`: `NOTION_TOKEN=<토큰>`
 
-> 사전발급 토큰 방식 — 인터랙티브 OAuth가 아니므로 `arcsolve-mcp auth notion` 단계는 없다.
+> 사전발급 토큰 방식 — 인터랙티브 OAuth가 아니므로 `arcsolve auth notion` 단계는 없다.
 
 ## 도구
 | 도구 | 설명 |

@@ -18,7 +18,7 @@
 ArcSolve MCP 서버에서 아래 도구가 노출돼 있어야 한다(`SKILL.md`의 `allowed-tools`와 일치):
 - Wikipedia — `wikipedia_search`, `wikipedia_summary`, `wikipedia_extract`, `wikipedia_links`
 
-> 셋업: `arcsolve-mcp serve wikipedia` (또는 `ARCSOLVE_SERVICES=wikipedia`). 읽기 전용·무인증으로
+> 셋업: `arcsolve serve wikipedia` (또는 `ARCSOLVE_SERVICES=wikipedia`). 읽기 전용·무인증으로
 > 동작하지만 Wikimedia는 식별용 `User-Agent`를 요구한다(`WIKIPEDIA_USER_AGENT` 권장) — 서비스 README 참고.
 
 ## 범위 / 경계

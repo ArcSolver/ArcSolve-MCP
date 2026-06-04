@@ -66,7 +66,7 @@ async def test_search_default_user_agent(tools, monkeypatch, recording_http):
     http = recording_http(ret={"search": []})
     monkeypatch.setattr(f"{MOD}.get_json", http)
     await tools["wikidata_search"](query="x")
-    assert "ArcSolve-MCP" in http.last["headers"]["User-Agent"]
+    assert "arcsolve" in http.last["headers"]["User-Agent"]
 
 
 async def test_search_user_agent_override_from_env(monkeypatch, load_tools, recording_http):

@@ -75,7 +75,7 @@ async def test_search_request_and_output(tools, monkeypatch, recording_http):
     assert http.last["params"]["retmax"] == 2
     # 키 없음 → api_key 파라미터 없음. tool 기본값은 붙는다(식별 권장).
     assert "api_key" not in http.last["params"]
-    assert http.last["params"]["tool"] == "ArcSolve-MCP"
+    assert http.last["params"]["tool"] == "arcsolve"
     assert "총 67815건" in out
     assert "42233250, 42232503" in out
 

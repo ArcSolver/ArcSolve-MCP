@@ -53,7 +53,7 @@ async def test_search_request_and_output(tools, monkeypatch, recording_http):
     assert http.last["params"]["limit"] == 20  # 기본
     assert http.last["params"]["orderby"] == "magnitude"
     # User-Agent 식별 헤더.
-    assert "ArcSolve-MCP" in http.last["headers"]["User-Agent"]
+    assert "arcsolve" in http.last["headers"]["User-Agent"]
     # 출력: 규모·위치·이벤트 URL.
     assert "1건" in out
     assert "M5.1" in out

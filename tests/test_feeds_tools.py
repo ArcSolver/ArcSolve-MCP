@@ -40,7 +40,7 @@ async def test_fetch_request_and_output(tools, monkeypatch, recording_http):
 
     out = await tools["feeds_fetch"](url="https://news.example.com/rss", limit=5)
     assert http.last["url"] == "https://news.example.com/rss"
-    assert "ArcSolve-MCP" in http.last["headers"]["User-Agent"]
+    assert "arcsolve" in http.last["headers"]["User-Agent"]
     assert "Example News" in out and "[rss]" in out
     assert "First post" in out
     assert "https://news.example.com/1" in out

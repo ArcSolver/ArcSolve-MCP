@@ -1,9 +1,9 @@
-# Publish arcsolve-mcp via PyPI Trusted Publishing (OIDC — no API tokens).
+# Publish arcsolve via PyPI Trusted Publishing (OIDC — no API tokens).
 #   - workflow_dispatch  → TestPyPI (rehearsal)
 #   - push tag `v*`      → PyPI (release)
 #
 # One-time setup: register a "pending publisher" on PyPI **and** TestPyPI linking
-#   project = arcsolve-mcp · owner = ArcSolver · repo = ArcSolve-Kit
+#   project = arcsolve · owner = ArcSolver · repo = ArcSolve-Kit
 #   workflow = release.yml · environment = (leave blank)
 # Docs: https://docs.pypi.org/trusted-publishers/
 #

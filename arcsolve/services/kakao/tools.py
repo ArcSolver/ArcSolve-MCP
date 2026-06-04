@@ -46,7 +46,7 @@ def _explain(e: UpstreamError) -> str:
     payload = e.payload if isinstance(e.payload, dict) else {}
     code = payload.get("code")
     if code == -401:
-        return "카카오 토큰이 만료/무효입니다. `arcsolve-mcp auth kakao`로 다시 인증하세요."
+        return "카카오 토큰이 만료/무효입니다. `arcsolve auth kakao`로 다시 인증하세요."
     if code == -402:
         return "동의항목 부족: 카카오 앱에서 talk_message(메시지 전송) 권한을 켜세요."
     return f"카카오 API 오류 {e.status}: {e.payload}"

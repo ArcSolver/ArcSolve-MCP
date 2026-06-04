@@ -1,7 +1,7 @@
 """changelog.d/ 조각을 단일 CHANGELOG.md의 [Unreleased] 섹션으로 합본한다.
 
 각 서비스 에이전트는 `changelog.d/<name>.md`에 자기 변경만 적고(병렬 충돌 없음),
-통합 단계에서 `arcsolve-mcp changelog`로 합본한다. 마커 사이만 교체하므로 릴리즈된
+통합 단계에서 `arcsolve changelog`로 합본한다. 마커 사이만 교체하므로 릴리즈된
 버전 섹션은 보존된다.
 """
 

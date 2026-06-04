@@ -40,7 +40,7 @@ def test_constants_match_official():
     assert REST_SEARCH_PATH == "/w/rest.php/v1/search/page"
     assert REST_V1_SUMMARY_PREFIX == "/api/rest_v1/page/summary/"
     assert ACTION_API_PATH == "/w/api.php"
-    assert "ArcSolve-MCP" in DEFAULT_USER_AGENT
+    assert "arcsolve" in DEFAULT_USER_AGENT
     assert "ArcSolver/ArcSolve-Kit" in DEFAULT_USER_AGENT
 
 

@@ -111,7 +111,7 @@ changelog.d/skill-<name>.md      # One-line change summary ('skill-' prefix to a
   core lacks, **extend the core** (not inside the service folder).
 - OAuth: `arcsolve.oauth.OAuthClient` (authcode + PKCE + refresh + token store). A
   service that uses OAuth passes `make_auth_client` to `SERVICE` in `__init__.py`, so
-  `arcsolve-mcp auth <name>` works without core changes.
+  `arcsolve auth <name>` works without core changes.
 
 ### 2-1. Dependencies (avoid parallel conflicts)
 - A service folder uses **only the standard library + the shared core**; a skill script
@@ -191,8 +191,8 @@ changelog.d/skill-<name>.md      # One-line change summary ('skill-' prefix to a
 uv run pytest -q              # tests
 uv run ruff check .           # lint
 # (integration stage owns these — individual agents do not run them)
-uv run arcsolve-mcp catalog   # regenerate docs/services.md + docs/skills.md
-uv run arcsolve-mcp changelog # assemble CHANGELOG.md
+uv run arcsolve catalog   # regenerate docs/services.md + docs/skills.md
+uv run arcsolve changelog # assemble CHANGELOG.md
 ```
 
 For adding a new service, see [docs/adding-a-service.md](docs/adding-a-service.md);

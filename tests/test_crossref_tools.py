@@ -113,7 +113,7 @@ async def test_user_agent_present_without_mailto(tools, monkeypatch, recording_h
     monkeypatch.setattr(f"{MOD}.get_json", http)
     await tools["crossref_search_works"](query="x")
     ua = http.last["headers"]["User-Agent"]
-    assert "ArcSolve-MCP" in ua
+    assert "arcsolve" in ua
     assert "mailto:" not in ua  # mailto 없으면 붙이지 않는다
 
 

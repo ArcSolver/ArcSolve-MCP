@@ -19,7 +19,7 @@ if TYPE_CHECKING:
 
 def _user_agent() -> dict[str, str]:
     """식별용 User-Agent 헤더(무인증이지만 식별은 예의 — 일부 피드는 UA 없으면 403)."""
-    return {"User-Agent": "ArcSolve-MCP/feeds (https://github.com/ArcSolver/ArcSolve-Kit)"}
+    return {"User-Agent": "arcsolve/feeds (https://github.com/ArcSolver/ArcSolve-Kit)"}
 
 
 def _explain(e: UpstreamError) -> str:

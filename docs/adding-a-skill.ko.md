@@ -71,7 +71,7 @@ Claude가 따를 절차를 적는다. 사실 부분(도구명·파라미터·명
 - `evals/`(또는 `skills/<name>/evals/`) → **품질 게이트**: skill-creator 하니스로 "Claude를 옳게
   행동시키는가"를 검증(비결정적, 모델 호출 — pytest CI와 별개).
 - `changelog.d/skill-<name>.md` → 한 줄 요약 (서비스와 이름 충돌 방지로 `skill-` prefix).
-- 통합 단계(개별 에이전트 아님)에서 `arcsolve-mcp catalog` 실행 → `docs/skills.md` 재생성.
+- 통합 단계(개별 에이전트 아님)에서 `arcsolve catalog` 실행 → `docs/skills.md` 재생성.
 
 ## 스킬 README 템플릿 (필수)
 
@@ -91,7 +91,7 @@ Claude가 따를 절차를 적는다. 사실 부분(도구명·파라미터·명
 이 스킬은 ArcSolve MCP 서버에서 아래 도구가 노출돼 있어야 한다(`allowed-tools`와 일치).
 - `foo_search`, `foo_get` — <service A>
 - `bar_search` — <service B>
-> 셋업: `arcsolve-mcp serve <service A> <service B>` (또는 ARCSOLVE_SERVICES)
+> 셋업: `arcsolve serve <service A> <service B>` (또는 ARCSOLVE_SERVICES)
 
 ## 범위 / 경계
 - 포함 = ... / 제외(다른 스킬) = ...
@@ -104,6 +104,6 @@ Claude가 따를 절차를 적는다. 사실 부분(도구명·파라미터·명
 | 검증된 API 계약 | MCP `services/<x>/contract.py` | **코드** — 스킬은 재정의 안 함 |
 | 스킬 본체(워크플로·트리거) | `skills/<name>/SKILL.md` | 스킬당 1개 |
 | 스킬 운영 가이드 | `skills/<name>/README.md` | 스킬당 1개 |
-| 스킬 카탈로그 | `docs/skills.md` | **자동 생성** (`arcsolve-mcp catalog`) |
+| 스킬 카탈로그 | `docs/skills.md` | **자동 생성** (`arcsolve catalog`) |
 | 체인지로그 | `changelog.d/skill-<name>.md` → `CHANGELOG.md` | 조각으로 쓰고 **합본** |
 | 공통 작업 규칙 | `AGENTS.md` | 모든 에이전트의 단일 출처 |

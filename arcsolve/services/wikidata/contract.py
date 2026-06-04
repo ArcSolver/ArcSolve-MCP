@@ -40,7 +40,7 @@ SPARQL_URL = "https://query.wikidata.org/sparql"
 # Wikimedia는 식별 가능한 User-Agent가 없으면 403/스로틀로 막는다(WDQS가 특히 엄격).
 # 기본값을 상수로 두고 env(WIKIDATA_USER_AGENT)로 덮어쓴다(연락처 포함 권장).
 # 출처: WDQS User Manual(User-Agent 정책) + Wikimedia User-Agent policy.
-DEFAULT_USER_AGENT = "ArcSolve-MCP (github.com/ArcSolver/ArcSolve-Kit)"
+DEFAULT_USER_AGENT = "arcsolve (github.com/ArcSolver/ArcSolve-Kit)"
 
 # ─── 검색 limit / 타입 / id 패턴 제약(공식) ────────────────
 # wbsearchentities: limit 1..50(기본 7). type ∈ {item, property, lexeme, form, sense}.

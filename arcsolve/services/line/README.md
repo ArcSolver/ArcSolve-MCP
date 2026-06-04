@@ -34,7 +34,7 @@ Base: `https://api.line.me` · 인증: `Authorization: Bearer {channel access to
    - `LINE_CHANNEL_ACCESS_TOKEN=<발급한 토큰>`
    - `LINE_TO=<기본 수신자 userId/groupId/roomId>` (선택 — 인자로 덮어쓰기 가능)
 
-> 인터랙티브 OAuth가 아니므로 `arcsolve-mcp auth line` 단계는 없다(토큰을 env로 직접 받는다).
+> 인터랙티브 OAuth가 아니므로 `arcsolve auth line` 단계는 없다(토큰을 env로 직접 받는다).
 
 ## 도구
 | 도구 | 설명 |

@@ -38,7 +38,7 @@ Base: `https://api.crossref.org` · 인증: 없음(선택 `mailto`) · 스코프
 1. 키 발급 단계 없음(무인증).
 2. `.env`(선택): `CROSSREF_MAILTO=you@example.com` — polite pool 식별용 연락 이메일.
 
-> 무인증·선택 쿼리 파라미터 방식 — 인터랙티브 OAuth가 아니므로 `arcsolve-mcp auth crossref` 단계는 없다.
+> 무인증·선택 쿼리 파라미터 방식 — 인터랙티브 OAuth가 아니므로 `arcsolve auth crossref` 단계는 없다.
 
 ## 도구
 | 도구 | 설명 |
