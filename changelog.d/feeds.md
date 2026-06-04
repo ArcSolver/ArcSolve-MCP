@@ -1,1 +1,0 @@
-- **feeds**: RSS/Atom/RDF 피드 읽기 서비스 추가 — 임의 피드 URL을 받아 메타·최근 항목을 요약하는 1개 GET 도구(`feeds_fetch`), 무인증, RSS 2.0/Atom 1.0/RSS 1.0(RDF) 세 포맷을 루트 엘리먼트로 자동 감지해 표준 라이브러리 `xml.etree.ElementTree`로 파싱(외부 의존 없음), 로컬명 기반 탐색으로 `dc:`/`content:` 확장 흡수, HTML 스니펫 평문화·길이 제한. 코어 `get_text` 재사용(스크래핑 없이 웹 콘텐츠 수집)

@@ -1,1 +1,0 @@
-- **usgs_quake**: USGS 지진 정보 읽기 서비스 추가 — FDSN Event API 검색·건수 2개 GET 도구(`usgs_search_earthquakes`/`usgs_count_earthquakes`), 무인증·`format=geojson` 고정, 시간 ISO8601·`orderby`(time/magnitude)·원형 위치(`latitude`+`longitude`+`maxradiuskm`)·`limit` 1–20000(기본 20), GeoJSON FeatureCollection 파싱(time ms→UTC, coordinates[lon,lat,depth])·`{count,maxAllowed}` 건수

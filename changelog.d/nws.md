@@ -1,1 +1,0 @@
-- **nws**: NWS(National Weather Service) 미국 날씨 읽기 서비스 추가 — 예보·시간별 예보·활성 기상특보 3개 GET 도구(`nws_forecast`/`nws_hourly_forecast`/`nws_alerts`), 무인증이나 **User-Agent 헤더 필수**(기본값 상수, `NWS_USER_AGENT`로 덮어씀), 좌표→예보는 NWS 특유의 **2단계 조회**(`/points` → `/gridpoints/.../forecast`), GeoJSON `properties.periods[]`/`features[]` 파싱, **미국 좌표만 유효**(해외 404 InvalidPoint → 안내 매핑)
