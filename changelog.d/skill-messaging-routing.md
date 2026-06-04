@@ -1,1 +1,0 @@
-- **skill-messaging-routing**: 메시징 라우팅 교차서비스 스킬 추가 — Kakao(나에게)·Telegram·Discord·LINE을 청중 모델에 맞춰 고르고 플랫폼별 포맷(임베드·미디어·길이제한)으로 전송. 전송 행위라 사전 확인 필수·broadcast는 사용자 확인 후·스팸 금지. 기존 메시징 4종 도구를 contract 변경 없이 오케스트레이션.

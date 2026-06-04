@@ -1,3 +1,0 @@
-- core(http): 식별용 기본 User-Agent(`arcsolve/<version>`)를 모든 요청에 주입 — UA 누락 시 403을 주는 API(NWS·Wikipedia 등)를 구조적으로 예방하고 서비스별 UA 하드코딩 drift를 제거. 호출자가 명시한 UA는 항상 우선.
-- core(oauth): OAuth `state`를 생성만 하던 것을 저장·대조하도록 보강(CSRF·인가코드 주입 방어). `exchange_code(code, state=?)` + `arcsolve auth`가 redirect URL 전체 붙여넣기를 받아 code/state를 파싱. 토큰 저장을 `tempfile`+`os.replace` 원자적 교체로 변경해 쓰기 중단 시 credentials.json 손상 방지. 토큰 엔드포인트에도 기본 UA 전송.
-- core(pkg): 패키지 버전을 `arcsolve/__init__.py` 단일 출처로 통일(hatch dynamic version) — pyproject 이중 기록 제거로 릴리스 시 버전·UA·PyPI 메타데이터 drift 차단.

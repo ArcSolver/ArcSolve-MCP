@@ -1,1 +1,0 @@
-- **crossref**: Crossref 학술 메타데이터 읽기 서비스 추가 — works/journals 검색·단건 조회 4개 GET 도구(`crossref_search_works`/`crossref_get_work`/`crossref_search_journals`/`crossref_get_journal`), 무인증·polite pool 이메일(`CROSSREF_MAILTO`)은 선택 쿼리 파라미터+User-Agent, 본문 message 기반 건수 안내(rows 0–1000·offset 0–10000)

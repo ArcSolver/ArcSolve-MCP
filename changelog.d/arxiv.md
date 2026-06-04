@@ -1,2 +1,0 @@
-- **arxiv**: arXiv 학술 프리프린트 읽기 서비스 추가 — 검색·id 조회 2개 GET 도구(`arxiv_search`/`arxiv_get`), 무인증, **Atom 1.0 XML** 응답을 표준 라이브러리 `xml.etree.ElementTree`로 파싱(외부 의존 없음), HTTP 200 error-entry(title='Error') 감지·매핑, max_results 기본 10·총 ≤30000(초과 HTTP 400)
-- **core**: `get_text` HTTP 동사 추가 — 비-JSON 본문(arXiv Atom XML 등)을 raw str로 반환(get_json과 동형, 4xx/5xx UpstreamError 매핑)
