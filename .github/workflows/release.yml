@@ -1,0 +1,42 @@
+# Publish arcsolve-mcp via PyPI Trusted Publishing (OIDC — no API tokens).
+#   - workflow_dispatch  → TestPyPI (rehearsal)
+#   - push tag `v*`      → PyPI (release)
+#
+# One-time setup: register a "pending publisher" on PyPI **and** TestPyPI linking
+#   project = arcsolve-mcp · owner = ArcSolver · repo = ArcSolve-Kit
+#   workflow = release.yml · environment = (leave blank)
+# Docs: https://docs.pypi.org/trusted-publishers/
+#
+# Hardening note: for production, pin the actions below to commit digests
+# (e.g. actions/checkout@<sha>) rather than moving tags.
+name: Publish
+
+on:
+  workflow_dispatch:
+  push:
+    tags:
+      - "v*"
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write        # required for OIDC trusted publishing
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          python-version: "3.11"
+
+      - name: Build
+        run: uv build
+
+      - name: Publish to TestPyPI (rehearsal — manual dispatch)
+        if: github.event_name == 'workflow_dispatch'
+        run: uv publish --publish-url https://test.pypi.org/legacy/ --trusted-publishing always
+
+      - name: Publish to PyPI (release — tag push)
+        if: github.event_name == 'push'
+        run: uv publish --trusted-publishing always
