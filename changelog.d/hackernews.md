@@ -1,1 +1,0 @@
-- **hackernews**: Hacker News 읽기 서비스 추가 — 4개 GET 도구(`hn_item`/`hn_top`/`hn_search`/`hn_user`), 무인증, 두 공식 API 합성(구조적 데이터=Firebase `/v0/*`, 전문 검색=Algolia HN Search `/api/v1/search`·`search_by_date`), 랭킹은 id 배열만 주므로 상위 N개를 `asyncio.gather`로 병렬 fetch(N+1·상한 50), title/text/about HTML 평문화, 코어 `get_json` 재사용

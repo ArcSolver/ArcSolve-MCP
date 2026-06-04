@@ -1,1 +1,0 @@
-- **notion**: Notion 워크스페이스 읽기 서비스 추가 — search·page·block children·database·data source 조회/쿼리 6개 도구(`notion_search`/`notion_get_page`/`notion_get_block_children`/`notion_get_database`/`notion_get_data_source`/`notion_query_data_source`), 필수 Bearer 토큰(`NOTION_TOKEN`), API 버전 2026-03-11 핀 고정(data source 모델)

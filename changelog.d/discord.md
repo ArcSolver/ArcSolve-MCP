@@ -1,2 +1,0 @@
-- **discord**: Webhook 메시지 전송 MCP 추가 — `discord_send_message`
-- **discord**: 핵심 도구 확장 — Webhook 임베드/편집/삭제(`discord_send_embed`·`discord_edit_message`·`discord_delete_message`) + Bot 토큰 경로(`discord_create_message`·`discord_list_messages`, `DISCORD_BOT_TOKEN`)
