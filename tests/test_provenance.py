@@ -18,6 +18,9 @@ def test_every_service_readme_cites_source():
         readme = PKG_DIR / svc.name / "README.md"
         assert readme.exists(), f"{svc.name}: README.md 없음"
         text = readme.read_text(encoding="utf-8")
-        assert "계약 출처" in text, f"{svc.name}: README에 '계약 출처' 섹션 없음"
+        # 양어 정책(docs/i18n.md): 영어 정본 'Contract sources' 또는 한국어 '계약 출처' 둘 다 허용.
+        assert ("Contract sources" in text) or ("계약 출처" in text), (
+            f"{svc.name}: README에 'Contract sources'/'계약 출처' 섹션 없음"
+        )
         host = svc.docs_url.split("/")[2]
         assert host in text, f"{svc.name}: README에 출처 호스트({host}) 인용 없음"

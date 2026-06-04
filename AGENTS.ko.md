@@ -36,7 +36,7 @@ MCP 서버의 도구를 오케스트레이션**한다(규칙 2-2). 검증된 계
 - **MCP 서비스**는 `arcsolve/services/kakao/`가 정답이다.
 - **Skill**은 `skills/academic-discovery/`가 정답이다 — 여러 학술 출처(arXiv·Crossref·OpenAlex·
   PubMed·Semantic Scholar)를 가로질러 논문을 탐색·교차검증하는 **다중 서비스 오케스트레이션**.
-  *(미니멀 단일 서비스 예시는 후속 — 후보: `skills/wikipedia-lookup/`.)*
+  **미니멀 단일 서비스** 스킬 예시는 `skills/wikipedia-lookup/` 참고.
 
 산문 규칙이 헷갈리면 정답 예시 코드가 최종 기준이다.
 
