@@ -74,6 +74,16 @@ def test_build_region_params_overrides():
     assert p["pageNo"] == 2
 
 
+def test_paging_clamped_to_safe_bounds():
+    # 공유 clamp_paging 적용: 과도 numOfRows는 상한 9999로, 비정상 pageNo(<1)는 1로 클램프.
+    hi = build_realtime_by_region_params(sido_name="서울", service_key="K", num_of_rows=100000)
+    assert hi["numOfRows"] == 9999
+    lo = build_realtime_by_station_params(station_name="종로구", service_key="K", page_no=0)
+    assert lo["pageNo"] == 1
+    fc = build_forecast_params(search_date="2024-01-15", service_key="K", num_of_rows=-5)
+    assert fc["numOfRows"] == 1
+
+
 def test_build_station_params():
     p = build_realtime_by_station_params(station_name="종로구", service_key="K")
     assert p["serviceKey"] == "K"

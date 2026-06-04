@@ -63,6 +63,14 @@ def test_build_realtime_includes_stage2_when_given():
     assert p["pageNo"] == 2
 
 
+def test_paging_clamped_to_safe_bounds():
+    # 공유 clamp_paging 적용(_base_params): 과도 numOfRows는 상한 9999로, pageNo<1은 1로.
+    hi = build_realtime_beds_params(stage1="서울특별시", service_key="K", num_of_rows=100000)
+    assert hi["numOfRows"] == 9999
+    lo = build_list_params(stage1="서울특별시", service_key="K", page_no=0)
+    assert lo["pageNo"] == 1
+
+
 def test_build_severe_and_list_share_shape():
     sev = build_severe_acceptance_params(stage1="부산광역시", service_key="K")
     lst = build_list_params(stage1="부산광역시", service_key="K", stage2="해운대구")

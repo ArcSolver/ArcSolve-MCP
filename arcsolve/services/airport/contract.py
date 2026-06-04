@@ -34,6 +34,8 @@ from typing import Any
 
 from pydantic import BaseModel, field_validator
 
+from arcsolve.services._datagokr import clamp_paging
+
 # ─── base URL / 서비스 경로 상수 ────────────────────────────
 # 인천국제공항공사 기관코드 B551177. 출처: data.go.kr 15140153 + 다수 외부 구현 실호출 URL
 #   (예: http://apis.data.go.kr/B551177/StatusOfPassengerFlightsDeOdp/getPassengerArrivalsDeOdp).
@@ -70,6 +72,11 @@ LANG_KOREAN = "K"
 # 공통 페이지네이션 기본값. 출처: 외부 구현(numOfRows 대량 수집은 999, 기본은 10).
 DEFAULT_NUM_OF_ROWS = 100
 DEFAULT_PAGE_NO = 1
+# numOfRows/pageNo 안전 범위.
+# TODO(provenance): numOfRows 상한이 상세 페이지에 인라인 명시되지 않아(외부 구현은 999까지 관측),
+#   data.go.kr 게이트웨이 통용 상한 9999를 보수적 상한으로 둔다(위반 시 결과코드 10 방지). 하한 1.
+MAX_NUM_OF_ROWS = 9999
+MIN_NUM_OF_ROWS = 1
 
 # 하루 전체를 덮는 시간 범위 기본값(HHMM). 출처: 외부 구현(from_time=0000, to_time=2400).
 DEFAULT_FROM_TIME = "0000"
@@ -111,8 +118,10 @@ def build_flight_params(
     도착(getPassengerArrivalsDeOdp)·출발(getPassengerDeparturesDeOdp)이 같은 파라미터를 쓴다.
     search_day(YYYYMMDD) 미지정 시 상류 기본(당일). from_time/to_time은 HHMM.
     airport_code/flight_id는 선택 필터로, None이면 보내지 않는다.
+    numOfRows/pageNo는 공유 헬퍼로 안전 범위로 클램프한다.
     출처: https://www.data.go.kr/data/15140153/openapi.do + 외부 구현 실호출 params.
     """
+    num_of_rows, page_no = clamp_paging(num_of_rows, page_no, max_rows=MAX_NUM_OF_ROWS)
     params = _base(service_key)
     if search_day:
         params[PARAM_SEARCH_DAY] = search_day

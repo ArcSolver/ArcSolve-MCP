@@ -33,6 +33,7 @@ from __future__ import annotations
 
 import xml.etree.ElementTree as ET
 
+from arcsolve.services._datagokr import clamp_paging
 from arcsolve.xml import safe_fromstring
 
 from pydantic import BaseModel
@@ -108,7 +109,10 @@ CHGER_TYPE_LABELS = {
 
 
 def _clamp(value: int, lo: int, hi: int) -> int:
-    """value를 [lo, hi]로 클램프한다(상류 제약 위반 호출을 사전에 방지)."""
+    """value를 [lo, hi]로 클램프한다(상류 제약 위반 호출을 사전에 방지).
+
+    period(분 단위, 비-페이지 파라미터) 전용. numOfRows/pageNo는 공유 clamp_paging을 쓴다.
+    """
     return max(lo, min(hi, value))
 
 
@@ -124,13 +128,16 @@ def _base_params(
 
     serviceKey는 **Decoding 키 원문**을 넣는다(httpx가 자동 인코딩 → 이중 인코딩 방지).
     zcode(시도)·zscode(시군구)는 빈 값이면 생략한다(미지정 → 전국/시도 전체).
-    numOfRows는 상류 제약 [10, 9999]로 클램프한다.
+    numOfRows/pageNo는 공유 헬퍼로 상류 제약 [10, 9999]·pageNo≥1로 클램프한다.
     출처: https://www.data.go.kr/data/15076352/openapi.do
     """
+    num_of_rows, page_no = clamp_paging(
+        num_of_rows, page_no, max_rows=MAX_NUM_OF_ROWS, min_rows=MIN_NUM_OF_ROWS
+    )
     params: dict[str, str | int] = {
         PARAM_SERVICE_KEY: service_key,
         PARAM_PAGE_NO: page_no,
-        PARAM_NUM_OF_ROWS: _clamp(num_of_rows, MIN_NUM_OF_ROWS, MAX_NUM_OF_ROWS),
+        PARAM_NUM_OF_ROWS: num_of_rows,
     }
     if zcode:
         params[PARAM_ZCODE] = zcode

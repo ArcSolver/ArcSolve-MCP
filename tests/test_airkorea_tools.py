@@ -195,6 +195,22 @@ async def test_unknown_result_code(tools, monkeypatch, recording_http):
     assert "resultCode=77" in out and "WEIRD" in out
 
 
+async def test_canonical_codes_now_mapped(tools, monkeypatch, recording_http):
+    # 감사: 이 서비스가 누락했던 게이트웨이 코드(05/10/11/21)가 이제 canonical 안내로 매핑된다
+    # (알 수 없는 코드 폴백이 아니라 표준 힌트).
+    for code, needle in (
+        ("05", "연결 실패"),
+        ("10", "잘못된 요청 파라미터"),
+        ("11", "필수 요청 파라미터"),
+        ("21", "일시적"),
+    ):
+        http = recording_http(ret=_wrap({"resultCode": code, "resultMsg": "X"}))
+        monkeypatch.setattr(f"{MOD}.get_json", http)
+        out = await tools["airkorea_realtime_by_region"](sidoName="서울")
+        assert needle in out, code
+        assert "resultCode=" not in out, code  # 폴백이 아니라 known 힌트
+
+
 # ─── HTTP 4xx/5xx 매핑(게이트웨이 차단 등) ─────────────────
 
 
