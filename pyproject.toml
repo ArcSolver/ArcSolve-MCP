@@ -1,6 +1,6 @@
 [project]
 name = "arcsolve"
-version = "0.1.0"
+dynamic = ["version"]
 description = "Bundle the public APIs of popular services as MCP tools and Claude Skills, verified against official contracts (FastMCP)."
 readme = "README.md"
 requires-python = ">=3.11"
@@ -38,6 +38,10 @@ Issues = "https://github.com/ArcSolver/ArcSolve-Kit/issues"
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"
+
+[tool.hatch.version]
+# 버전 단일 출처: arcsolve/__init__.py의 __version__ (pyproject와 이중 기록 제거).
+path = "arcsolve/__init__.py"
 
 [tool.hatch.build.targets.wheel]
 packages = ["arcsolve"]

@@ -184,6 +184,29 @@ def test_parse_link_header_empty():
     assert parse_link_header("") == {}
 
 
+async def test_default_user_agent_applied_when_caller_omits():
+    seen = {}
+
+    async def handler(req):
+        seen["ua"] = req.headers.get("user-agent")
+        return httpx.Response(200, json={"ok": True})
+
+    await get_json("https://x", transport=_t(handler))
+    assert seen["ua"].startswith("arcsolve/")  # 코어 기본 UA 주입
+
+
+async def test_caller_user_agent_overrides_default():
+    seen = {}
+
+    async def handler(req):
+        seen["ua"] = req.headers.get("user-agent")
+        return httpx.Response(200, json={"ok": True})
+
+    # 서비스가 명시한 UA(예: NWS/Wikipedia 필수 UA)는 코어 기본값을 덮어쓴다.
+    await get_json("https://x", headers={"User-Agent": "custom/1.0"}, transport=_t(handler))
+    assert seen["ua"] == "custom/1.0"
+
+
 async def test_4xx_raises_upstream_error_with_payload():
     async def handler(req):
         return httpx.Response(401, json={"code": -401, "msg": "bad"})
