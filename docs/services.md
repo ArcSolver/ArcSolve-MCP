@@ -65,8 +65,8 @@
 
 | 도구 | 설명 |
 |------|------|
-| `evcharger_info` | 충전소 정보를 조회한다(GET /getChargerInfo). |
-| `evcharger_status` | 충전기 실시간 상태를 조회한다(GET /getChargerStatus). |
+| `ev_charger_info` | 충전소 정보를 조회한다(GET /getChargerInfo). |
+| `ev_charger_status` | 충전기 실시간 상태를 조회한다(GET /getChargerStatus). |
 
 ## feeds — RSS/Atom/RDF 피드 읽기(임의 피드 URL → 메타·최근 항목)
 공식 문서: https://www.rssboard.org/rss-specification

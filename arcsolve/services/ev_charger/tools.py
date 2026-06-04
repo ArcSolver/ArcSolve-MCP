@@ -155,7 +155,7 @@ def register(mcp: FastMCP) -> None:
     """이 서비스의 도구를 서버에 등록한다."""
 
     @mcp.tool
-    async def evcharger_status(
+    async def ev_charger_status(
         zcode: str | None = None,
         zscode: str | None = None,
         period: int = c.DEFAULT_PERIOD,
@@ -209,7 +209,7 @@ def register(mcp: FastMCP) -> None:
         return "\n".join(lines)
 
     @mcp.tool
-    async def evcharger_info(
+    async def ev_charger_info(
         zcode: str | None = None,
         zscode: str | None = None,
         numOfRows: int = c.DEFAULT_NUM_OF_ROWS,  # noqa: N803 (공식 파라미터명)

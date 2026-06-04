@@ -67,7 +67,7 @@ async def test_status_request_and_output(tools, monkeypatch, recording_http):
     http = recording_http(ret=STATUS_XML)
     monkeypatch.setattr(f"{MOD}.get_text", http)
 
-    out = await tools["evcharger_status"](zcode="11", zscode="11680")
+    out = await tools["ev_charger_status"](zcode="11", zscode="11680")
     assert http.last["url"] == "http://apis.data.go.kr/B552584/EvCharger/getChargerStatus"
     # 서비스키는 쿼리 파라미터(헤더 아님), Decoding 키 원문 그대로(이중 인코딩 방지).
     assert http.last["params"]["serviceKey"] == "DECODED_KEY"
@@ -86,7 +86,7 @@ async def test_status_request_and_output(tools, monkeypatch, recording_http):
 async def test_status_omits_region_when_none(tools, monkeypatch, recording_http):
     http = recording_http(ret=STATUS_XML)
     monkeypatch.setattr(f"{MOD}.get_text", http)
-    out = await tools["evcharger_status"]()
+    out = await tools["ev_charger_status"]()
     assert "zcode" not in http.last["params"]
     assert "zscode" not in http.last["params"]
     assert "전국" in out  # 지역 미지정 → 전국
@@ -97,7 +97,7 @@ async def test_status_missing_key_no_network(monkeypatch, load_tools, recording_
     tools = load_tools(register)
     http = recording_http(ret=STATUS_XML)
     monkeypatch.setattr(f"{MOD}.get_text", http)
-    out = await tools["evcharger_status"](zcode="11")
+    out = await tools["ev_charger_status"](zcode="11")
     assert "EV_CHARGER_SERVICE_KEY" in out
     assert "Decoding" in out  # 이중 인코딩 함정 안내
     assert not http.calls  # HTTP 전에 막힘
@@ -106,14 +106,14 @@ async def test_status_missing_key_no_network(monkeypatch, load_tools, recording_
 async def test_status_empty_items(tools, monkeypatch, recording_http):
     http = recording_http(ret=_envelope("", total=0))
     monkeypatch.setattr(f"{MOD}.get_text", http)
-    out = await tools["evcharger_status"](zcode="50")
+    out = await tools["ev_charger_status"](zcode="50")
     assert "데이터 없음" in out
 
 
 async def test_status_period_clamped(tools, monkeypatch, recording_http):
     http = recording_http(ret=STATUS_XML)
     monkeypatch.setattr(f"{MOD}.get_text", http)
-    await tools["evcharger_status"](period=99)
+    await tools["ev_charger_status"](period=99)
     assert http.last["params"]["period"] == 10  # 최대 10으로 클램프
 
 
@@ -124,7 +124,7 @@ async def test_info_request_and_output(tools, monkeypatch, recording_http):
     http = recording_http(ret=INFO_XML)
     monkeypatch.setattr(f"{MOD}.get_text", http)
 
-    out = await tools["evcharger_info"](zcode="28")
+    out = await tools["ev_charger_info"](zcode="28")
     assert http.last["url"].endswith("/getChargerInfo")
     assert http.last["params"]["zcode"] == "28"
     assert "period" not in http.last["params"]  # period는 status 전용
@@ -145,7 +145,7 @@ async def test_info_unknown_chger_type_preserves_code(tools, monkeypatch, record
     )
     http = recording_http(ret=xml)
     monkeypatch.setattr(f"{MOD}.get_text", http)
-    out = await tools["evcharger_info"](zcode="11")
+    out = await tools["ev_charger_info"](zcode="11")
     assert "타입 99" in out
     assert "99(" not in out  # 미상 코드엔 괄호 라벨 없음
 
@@ -159,7 +159,7 @@ async def test_result_code_30_unregistered_key(tools, monkeypatch, recording_htt
         ret=_envelope("", result_code="30", result_msg="SERVICE_KEY_IS_NOT_REGISTERED_ERROR")
     )
     monkeypatch.setattr(f"{MOD}.get_text", http)
-    out = await tools["evcharger_status"](zcode="11")
+    out = await tools["ev_charger_status"](zcode="11")
     assert "등록되지 않은 서비스키" in out
     assert "Decoding" in out  # 이중 인코딩 힌트
 
@@ -168,7 +168,7 @@ async def test_gateway_cmmmsgheader_error(tools, monkeypatch, recording_http):
     # 게이트웨이 차단은 <header> 없이 cmmMsgHeader로 온다(HTTP 200) — 30으로 매핑.
     http = recording_http(ret=GATEWAY_ERROR_XML)
     monkeypatch.setattr(f"{MOD}.get_text", http)
-    out = await tools["evcharger_info"](zcode="11")
+    out = await tools["ev_charger_info"](zcode="11")
     assert "등록되지 않은 서비스키" in out
 
 
@@ -177,21 +177,21 @@ async def test_result_code_22_traffic_limit(tools, monkeypatch, recording_http):
         ret=_envelope("", result_code="22", result_msg="LIMITED_NUMBER_OF_SERVICE_REQUESTS")
     )
     monkeypatch.setattr(f"{MOD}.get_text", http)
-    out = await tools["evcharger_status"]()
+    out = await tools["ev_charger_status"]()
     assert "요청 제한" in out
 
 
 async def test_result_code_03_no_data(tools, monkeypatch, recording_http):
     http = recording_http(ret=_envelope("", result_code="03", result_msg="NODATA_ERROR"))
     monkeypatch.setattr(f"{MOD}.get_text", http)
-    out = await tools["evcharger_info"](zcode="99")
+    out = await tools["ev_charger_info"](zcode="99")
     assert "데이터 없음" in out
 
 
 async def test_unknown_result_code(tools, monkeypatch, recording_http):
     http = recording_http(ret=_envelope("", result_code="77", result_msg="WEIRD"))
     monkeypatch.setattr(f"{MOD}.get_text", http)
-    out = await tools["evcharger_status"](zcode="11")
+    out = await tools["ev_charger_status"](zcode="11")
     assert "resultCode=77" in out and "WEIRD" in out
 
 
@@ -201,14 +201,14 @@ async def test_unknown_result_code(tools, monkeypatch, recording_http):
 async def test_maps_http_401(tools, monkeypatch, recording_http):
     http = recording_http(exc=UpstreamError(401, {"returnAuthMsg": "SERVICE ACCESS DENIED"}))
     monkeypatch.setattr(f"{MOD}.get_text", http)
-    out = await tools["evcharger_status"](zcode="11")
+    out = await tools["ev_charger_status"](zcode="11")
     assert "401" in out and "EV_CHARGER_SERVICE_KEY" in out
 
 
 async def test_mapped_http_error_does_not_leak_non_dict_detail(tools, monkeypatch, recording_http):
     http = recording_http(exc=UpstreamError(403, "<html><title>403 Forbidden</title></html>"))
     monkeypatch.setattr(f"{MOD}.get_text", http)
-    out = await tools["evcharger_info"](zcode="11")
+    out = await tools["ev_charger_info"](zcode="11")
     assert "403" in out
     assert "<html>" not in out and "<title>" not in out
 
@@ -216,12 +216,12 @@ async def test_mapped_http_error_does_not_leak_non_dict_detail(tools, monkeypatc
 async def test_unmapped_http_error_500(tools, monkeypatch, recording_http):
     http = recording_http(exc=UpstreamError(500, {"resultMsg": "INTERNAL"}))
     monkeypatch.setattr(f"{MOD}.get_text", http)
-    out = await tools["evcharger_status"]()
+    out = await tools["ev_charger_status"]()
     assert "500" in out
 
 
 async def test_maps_xml_parse_error(tools, monkeypatch, recording_http):
     http = recording_http(ret="<response><body><items><item broken")
     monkeypatch.setattr(f"{MOD}.get_text", http)
-    out = await tools["evcharger_status"](zcode="11")
+    out = await tools["ev_charger_status"](zcode="11")
     assert "파싱 실패" in out
