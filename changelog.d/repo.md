@@ -1,2 +1,2 @@
 - **repo**: README 상단 배지(CI · License · Python) 추가, 저장소 public 공개
-- **repo**: `ArcSolve-MCP` → `ArcSolve-Kit`로 리네임(ArcSolve 본제품과 구분, MCP+Skill 아우르는 모음). UA 제품 토큰 `ArcSolve-MCP`·CLI `arcsolve-mcp`·패키지 `arcsolve`는 유지, 레포 URL만 갱신
+- **repo**: `arcsolve` → `ArcSolve-Kit`로 리네임(ArcSolve 본제품과 구분, MCP+Skill 아우르는 모음). UA 제품 토큰 `arcsolve`·CLI `arcsolve`·패키지 `arcsolve`는 유지, 레포 URL만 갱신

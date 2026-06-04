@@ -48,7 +48,7 @@ GET·JSON. 단일 base `B553881/Parking` 아래 3개 오퍼레이션이 **하나
 2. `.env`:
    - `PARKING_SERVICE_KEY=<Decoding 키>`
 
-> 서비스키는 사전발급 쿼리 파라미터 방식 — 인터랙티브 OAuth가 아니므로 `arcsolve-mcp auth parking` 단계는 없다.
+> 서비스키는 사전발급 쿼리 파라미터 방식 — 인터랙티브 OAuth가 아니므로 `arcsolve auth parking` 단계는 없다.
 
 ## 도구
 | 도구 | 설명 |

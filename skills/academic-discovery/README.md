@@ -22,7 +22,7 @@ ArcSolve MCP 서버에서 아래 도구가 노출돼 있어야 한다(`SKILL.md`
 - PubMed — `pubmed_search`, `pubmed_get_summary`, `pubmed_fetch_abstract`
 - Semantic Scholar — `s2_search_papers`, `s2_get_paper`, `s2_search_authors`, `s2_get_author`
 
-> 셋업: `arcsolve-mcp serve arxiv crossref openalex pubmed semanticscholar`
+> 셋업: `arcsolve serve arxiv crossref openalex pubmed semanticscholar`
 > (또는 `ARCSOLVE_SERVICES=arxiv,crossref,openalex,pubmed,semanticscholar`). 전부 읽기 전용이지만
 > OpenAlex/Crossref/S2/PubMed는 식별용 연락처·키를 권장한다 — 각 서비스 README 참고.
 

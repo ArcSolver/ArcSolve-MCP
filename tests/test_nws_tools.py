@@ -118,7 +118,7 @@ async def test_default_user_agent_present(tools, monkeypatch):
     monkeypatch.setattr(f"{MOD}.get_json", http)
     await tools["nws_forecast"](latitude=39.7, longitude=-97.0)
     ua = http.calls[0]["headers"]["User-Agent"]
-    assert "ArcSolve-MCP" in ua
+    assert "arcsolve" in ua
 
 
 async def test_user_agent_override_from_env(monkeypatch, load_tools):

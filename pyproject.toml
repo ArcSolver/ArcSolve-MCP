@@ -1,5 +1,5 @@
 [project]
-name = "arcsolve-mcp"
+name = "arcsolve"
 version = "0.1.0"
 description = "Bundle the public APIs of popular services as MCP tools and Claude Skills, verified against official contracts (FastMCP)."
 readme = "README.md"
@@ -28,7 +28,7 @@ dependencies = [
 dev = ["pytest>=8.0", "pytest-asyncio>=0.23", "ruff>=0.5"]
 
 [project.scripts]
-arcsolve-mcp = "arcsolve.__main__:main"
+arcsolve = "arcsolve.__main__:main"
 
 [project.urls]
 Homepage = "https://github.com/ArcSolver/ArcSolve-Kit"

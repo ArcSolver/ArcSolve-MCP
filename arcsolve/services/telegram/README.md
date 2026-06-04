@@ -37,7 +37,7 @@ Base: `https://api.telegram.org` · 인증: **봇 토큰을 URL 경로에** (`/b
    - `TELEGRAM_BOT_TOKEN=123456:ABC-...` (필수)
    - `TELEGRAM_CHAT_ID=123456789` (선택 — 기본 대상; 도구 인자로 덮어쓸 수 있음)
 
-> 이 서비스는 인터랙티브 OAuth가 아니므로 `arcsolve-mcp auth telegram`이 필요 없다.
+> 이 서비스는 인터랙티브 OAuth가 아니므로 `arcsolve auth telegram`이 필요 없다.
 
 ## 도구
 | 도구 | 설명 |

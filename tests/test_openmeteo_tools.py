@@ -43,7 +43,7 @@ async def test_geocode_request_and_output(tools, monkeypatch, recording_http):
     assert http.last["params"]["count"] == 5
     assert http.last["params"]["language"] == "en"
     # 무인증 — 식별용 User-Agent 헤더만 전송.
-    assert "ArcSolve-MCP" in http.last["headers"]["User-Agent"]
+    assert "arcsolve" in http.last["headers"]["User-Agent"]
     assert "Berlin" in out and "Germany" in out
     assert "52.5244" in out and "13.4105" in out
     assert "Europe/Berlin" in out
@@ -107,7 +107,7 @@ async def test_forecast_request_assembly_passes_variables_verbatim(tools, monkey
     assert http.last["params"]["current"] == "temperature_2m"
     assert http.last["params"]["timezone"] == "auto"
     assert http.last["params"]["forecast_days"] == 1
-    assert "ArcSolve-MCP" in http.last["headers"]["User-Agent"]
+    assert "arcsolve" in http.last["headers"]["User-Agent"]
     # 출력: 헤더 + current + hourly + daily.
     assert "Europe/Berlin" in out
     assert "temperature_2m = 20.1°C" in out

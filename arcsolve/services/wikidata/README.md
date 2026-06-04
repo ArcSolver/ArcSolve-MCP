@@ -43,7 +43,7 @@ WDQS가 특히 엄격). (선택) `WIKIDATA_API_TOKEN`이 있으면 Bearer로 보
 1. 키 발급 단계 없음(무인증).
 2. `.env`(선택): `WIKIDATA_USER_AGENT="(myapp.com, you@example.com)"` — 식별/연락용. `WIKIDATA_API_TOKEN=<토큰>` — 레이트리밋 완화.
 
-> 무인증·필수 User-Agent 방식 — 인터랙티브 OAuth가 아니므로 `arcsolve-mcp auth wikidata` 단계는 없다.
+> 무인증·필수 User-Agent 방식 — 인터랙티브 OAuth가 아니므로 `arcsolve auth wikidata` 단계는 없다.
 
 ## 도구
 | 도구 | 설명 |

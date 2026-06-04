@@ -65,7 +65,7 @@ async def test_search_default_user_agent_present(tools, monkeypatch, recording_h
     http = recording_http(ret={"pages": []})
     monkeypatch.setattr(f"{MOD}.get_json", http)
     await tools["wikipedia_search"](query="x")
-    assert "ArcSolve-MCP" in http.last["headers"]["User-Agent"]
+    assert "arcsolve" in http.last["headers"]["User-Agent"]
 
 
 async def test_search_invalid_lang_no_network(tools, monkeypatch, recording_http):

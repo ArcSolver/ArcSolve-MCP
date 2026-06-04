@@ -78,7 +78,7 @@ Workflow/judgment has no external source, so its **quality is verified by eval**
   separate from pytest CI).
 - `changelog.d/skill-<name>.md` → one-line summary (`skill-` prefix to avoid name clashes
   with services).
-- At the integration stage (not the individual agent), run `arcsolve-mcp catalog` →
+- At the integration stage (not the individual agent), run `arcsolve catalog` →
   regenerates `docs/skills.md`.
 
 ## Skill README template (required)
@@ -100,7 +100,7 @@ redefine contracts).
 This skill needs the following tools exposed by the ArcSolve MCP server (matching `allowed-tools`).
 - `foo_search`, `foo_get` — <service A>
 - `bar_search` — <service B>
-> Setup: `arcsolve-mcp serve <service A> <service B>` (or ARCSOLVE_SERVICES)
+> Setup: `arcsolve serve <service A> <service B>` (or ARCSOLVE_SERVICES)
 
 ## Scope / boundaries
 - Included = ... / Excluded (other skills) = ...
@@ -113,6 +113,6 @@ This skill needs the following tools exposed by the ArcSolve MCP server (matchin
 | Verified API contract | MCP `services/<x>/contract.py` | **code** — skills don't redefine it |
 | Skill body (workflow·triggers) | `skills/<name>/SKILL.md` | one per skill |
 | Skill operating guide | `skills/<name>/README.md` | one per skill |
-| Skill catalog | `docs/skills.md` | **auto-generated** (`arcsolve-mcp catalog`) |
+| Skill catalog | `docs/skills.md` | **auto-generated** (`arcsolve catalog`) |
 | Changelog | `changelog.d/skill-<name>.md` → `CHANGELOG.md` | written as fragments, **assembled** |
 | Shared working rules | `AGENTS.md` | single source of truth for every agent |

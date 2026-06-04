@@ -2,7 +2,7 @@
 
 모든 서비스(kakao, github, ...)는 이 `Service` 하나로 표현된다.
 서버는 서비스의 내부 구현을 모르고, `register`만 호출해 도구를 받는다.
-OAuth가 필요한 서비스는 `make_auth_client`를 노출하면 `arcsolve-mcp auth <name>`이
+OAuth가 필요한 서비스는 `make_auth_client`를 노출하면 `arcsolve auth <name>`이
 코어 수정 없이 동작한다.
 """
 

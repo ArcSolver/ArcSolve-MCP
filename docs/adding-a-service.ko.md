@@ -63,7 +63,7 @@ SERVICE = Service(
 - `tests/test_<name>_tools.py` → 도구 런타임 검증(요청 조립·응답 파싱·에러 매핑). `tests/conftest.py`의
   `FakeMCP`(register가 등록한 `@mcp.tool`을 수집)·`RecordingHTTP`(http 동사 mock) 픽스처를 쓴다(네트워크 없이).
 - `changelog.d/<name>.md` → 한 줄 변경 요약 (예: `- **example**: 도구 X 추가`)
-- 통합 단계(개별 에이전트 아님)에서 `arcsolve-mcp catalog` + `arcsolve-mcp changelog` 실행
+- 통합 단계(개별 에이전트 아님)에서 `arcsolve catalog` + `arcsolve changelog` 실행
 
 ## 서비스 README 템플릿 (필수)
 
@@ -87,7 +87,7 @@ Base: `...` · 인증: `...` · 스코프: `...`
 
 ## 셋업
 1. 키 발급
-2. 인증: `arcsolve-mcp auth <name>`
+2. 인증: `arcsolve auth <name>`
 
 ## 도구
 | 도구 | 설명 |
@@ -108,6 +108,6 @@ Base: `...` · 인증: `...` · 스코프: `...`
 | 계약 레퍼런스(필드·제약) | `contract.py` | **코드** — prose로 중복 금지 |
 | 서비스 운영 가이드 | `services/<name>/README.md` | 서비스당 1개 |
 | 횡단(아키텍처·이 문서) | `docs/` | 서비스 수와 무관하게 고정 |
-| 서비스 카탈로그 | `docs/services.md` | **자동 생성** (`arcsolve-mcp catalog`) |
-| 체인지로그 | `changelog.d/<name>.md` → `CHANGELOG.md` | 조각으로 쓰고 **합본** (`arcsolve-mcp changelog`) |
+| 서비스 카탈로그 | `docs/services.md` | **자동 생성** (`arcsolve catalog`) |
+| 체인지로그 | `changelog.d/<name>.md` → `CHANGELOG.md` | 조각으로 쓰고 **합본** (`arcsolve changelog`) |
 | 공통 작업 규칙 | `AGENTS.md` | 모든 에이전트의 단일 출처 |

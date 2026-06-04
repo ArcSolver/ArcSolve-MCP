@@ -38,7 +38,7 @@
    - `SEOUL_SUBWAY_API_KEY=<실시간 지하철 인증키>`
    - `SEOUL_OPENDATA_API_KEY=<일반 인증키>`
 
-> 인증키는 사전발급 path 세그먼트 방식 — 인터랙티브 OAuth가 아니므로 `arcsolve-mcp auth seoul_transit` 단계는 없다.
+> 인증키는 사전발급 path 세그먼트 방식 — 인터랙티브 OAuth가 아니므로 `arcsolve auth seoul_transit` 단계는 없다.
 
 ## 도구
 | 도구 | 설명 |

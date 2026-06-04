@@ -1,7 +1,7 @@
 """서비스 카탈로그 자동 생성.
 
 ALL_SERVICES와 각 서비스가 등록하는 도구를 introspect해서 docs/services.md를 만든다.
-손으로 갱신하지 않는다 — `arcsolve-mcp catalog`로 재생성한다.
+손으로 갱신하지 않는다 — `arcsolve catalog`로 재생성한다.
 """
 
 from __future__ import annotations
@@ -51,7 +51,7 @@ def render_markdown(catalog: list[dict]) -> str:
     lines = [
         "# 서비스 카탈로그",
         "",
-        "> ⚙️ 자동 생성 — 직접 수정하지 마세요. `arcsolve-mcp catalog`로 재생성됩니다.",
+        "> ⚙️ 자동 생성 — 직접 수정하지 마세요. `arcsolve catalog`로 재생성됩니다.",
         "",
         f"현재 **{len(catalog)}개 서비스 · 총 {total_tools}개 도구**.",
         "",
@@ -91,7 +91,7 @@ def render_skills_markdown(catalog: list[dict]) -> str:
     lines = [
         "# 스킬 카탈로그",
         "",
-        "> ⚙️ 자동 생성 — 직접 수정하지 마세요. `arcsolve-mcp catalog`로 재생성됩니다.",
+        "> ⚙️ 자동 생성 — 직접 수정하지 마세요. `arcsolve catalog`로 재생성됩니다.",
         "",
         f"현재 **{len(catalog)}개 스킬**. 스킬은 실행 중인 MCP 도구를 오케스트레이션한다"
         "(검증된 계약은 MCP 서비스 쪽 단일 출처).",

@@ -41,7 +41,7 @@ def test_constants_match_official():
     assert ACTION_API_URL == "https://www.wikidata.org/w/api.php"
     assert REST_API_BASE == "https://www.wikidata.org/w/rest.php/wikibase/v1"
     assert SPARQL_URL == "https://query.wikidata.org/sparql"
-    assert "ArcSolve-MCP" in DEFAULT_USER_AGENT
+    assert "arcsolve" in DEFAULT_USER_AGENT
     assert "ArcSolver/ArcSolve-Kit" in DEFAULT_USER_AGENT
 
 

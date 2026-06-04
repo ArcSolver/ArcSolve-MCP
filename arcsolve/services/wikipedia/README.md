@@ -47,7 +47,7 @@ Base: `https://{lang}.wikipedia.org` · 인증: 없음(User-Agent 필수, Bearer
 2. `.env`(선택): `WIKIPEDIA_USER_AGENT="(myapp.com, you@example.com)"` — 식별/연락용 User-Agent.
 3. `.env`(선택): `WIKIPEDIA_API_TOKEN=...` — Bearer 토큰(레이트리밋 완화).
 
-> 무인증·필수 User-Agent 방식 — 인터랙티브 OAuth가 아니므로 `arcsolve-mcp auth wikipedia` 단계는 없다.
+> 무인증·필수 User-Agent 방식 — 인터랙티브 OAuth가 아니므로 `arcsolve auth wikipedia` 단계는 없다.
 
 ## 도구
 | 도구 | 설명 |

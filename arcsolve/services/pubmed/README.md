@@ -21,7 +21,7 @@ E-utilities는 도구별로 응답 포맷이 다르다 — esearch/esummary는 *
 | env | 쓰임 | 비고 |
 |---|---|---|
 | `NCBI_API_KEY` | `api_key=<키>` | 선택. 있으면 **10 req/s**, 없으면 **3 req/s** |
-| `NCBI_TOOL` | `tool=<이름>` | 선택·권장(기본 `ArcSolve-MCP`). 공백 없는 문자열 |
+| `NCBI_TOOL` | `tool=<이름>` | 선택·권장(기본 `arcsolve`). 공백 없는 문자열 |
 | `NCBI_EMAIL` | `email=<이메일>` | 선택·권장. 공백 없는 유효 이메일 |
 
 - 키가 없어도 호출은 성공한다(초당 3건 한도). 키는 [NCBI 계정 Settings 페이지](https://www.ncbi.nlm.nih.gov/account/settings/)에서 발급한다.
@@ -47,7 +47,7 @@ E-utilities는 도구별로 응답 포맷이 다르다 — esearch/esummary는 *
 1. (선택) [NCBI 계정 Settings](https://www.ncbi.nlm.nih.gov/account/settings/)에서 API 키 발급.
 2. `.env`(선택): `NCBI_API_KEY=<키>`, `NCBI_EMAIL=<이메일>` — 초당 10건 + 식별.
 
-> 키는 선택 쿼리 파라미터 — 인터랙티브 OAuth가 아니므로 `arcsolve-mcp auth pubmed` 단계는 없다.
+> 키는 선택 쿼리 파라미터 — 인터랙티브 OAuth가 아니므로 `arcsolve auth pubmed` 단계는 없다.
 
 ## 도구
 | 도구 | 설명 |

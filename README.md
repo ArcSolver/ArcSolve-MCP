@@ -91,10 +91,10 @@ uv pip install -e ".[dev]"      # or: pip install -e ".[dev]"
 cp .env.example .env            # fill in KAKAO_REST_API_KEY, etc.
 
 # 3) One-time Kakao auth → store refresh_token
-arcsolve-mcp auth kakao
+arcsolve auth kakao
 
 # 4) Verify locally
-arcsolve-mcp                    # run the stdio MCP server
+arcsolve                    # run the stdio MCP server
 ```
 
 Registering with an MCP host (e.g. Claude Desktop):
@@ -103,7 +103,7 @@ Registering with an MCP host (e.g. Claude Desktop):
 {
   "mcpServers": {
     "arcsolve": {
-      "command": "arcsolve-mcp",
+      "command": "arcsolve",
       "args": ["serve", "kakao"],
       "env": {
         "KAKAO_REST_API_KEY": "...",
@@ -119,10 +119,10 @@ Registering with an MCP host (e.g. Claude Desktop):
 It installs as one package, but you can **pick which services to expose**.
 
 ```bash
-arcsolve-mcp list                 # see available services
-arcsolve-mcp serve kakao          # expose only kakao
-ARCSOLVE_SERVICES=kakao arcsolve-mcp   # select via env var (handy in a host's env)
-arcsolve-mcp                      # all services if unspecified
+arcsolve list                 # see available services
+arcsolve serve kakao          # expose only kakao
+ARCSOLVE_SERVICES=kakao arcsolve   # select via env var (handy in a host's env)
+arcsolve                      # all services if unspecified
 ```
 
 To **embed an individual module in your own MCP server**, call its register function
@@ -157,7 +157,7 @@ cross-checks papers across arXiv · Crossref · OpenAlex · PubMed · Semantic S
 (coverage and citation triangulation that a single search won't surface).
 
 ```bash
-arcsolve-mcp skills    # list available skills
+arcsolve skills    # list available skills
 ```
 
 Adding a new skill: [docs/adding-a-skill.md](docs/adding-a-skill.md).
@@ -169,7 +169,7 @@ Adding a new skill: [docs/adding-a-skill.md](docs/adding-a-skill.md).
 - [Adding a service](docs/adding-a-service.md) — 3 steps + the service README template
 - [Adding a skill](docs/adding-a-skill.md) — SKILL.md + the skill README template
 - [Implementation manifest](docs/providers.md) — bundle of official-doc links (input for parallel work)
-- [Service catalog](docs/services.md) — tool list (auto-generated, `arcsolve-mcp catalog`)
+- [Service catalog](docs/services.md) — tool list (auto-generated, `arcsolve catalog`)
 - [Skill catalog](docs/skills.md) — skill list (auto-generated)
 - [i18n](docs/i18n.md) — bilingual docs convention (English canonical, Korean translation)
 - Per-service guides: `arcsolve/services/<name>/README.md` (e.g. [kakao](arcsolve/services/kakao/README.md))

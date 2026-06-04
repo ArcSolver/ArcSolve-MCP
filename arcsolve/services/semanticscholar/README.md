@@ -42,7 +42,7 @@ Semantic Scholar Academic Graph API **읽기** 래퍼 — 논문(papers)·저자
 1. (선택) [API 키 폼](https://www.semanticscholar.org/product/api#api-key-form)에서 키 신청.
 2. `.env`(선택): `SEMANTICSCHOLAR_API_KEY=<키>` — 전용 풀(1 RPS).
 
-> 키는 선택 헤더 방식 — 인터랙티브 OAuth가 아니므로 `arcsolve-mcp auth semanticscholar` 단계는 없다.
+> 키는 선택 헤더 방식 — 인터랙티브 OAuth가 아니므로 `arcsolve auth semanticscholar` 단계는 없다.
 
 ## 도구
 | 도구 | 설명 |

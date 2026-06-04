@@ -22,7 +22,7 @@ Base: `https://kapi.kakao.com` · 인증: `Authorization: Bearer {token}` · 동
 1. [카카오 개발자 콘솔](https://developers.kakao.com)에서 앱 생성 → **REST API 키** 확인
 2. **카카오 로그인** 활성화 + **Redirect URI** 등록 (`KAKAO_REDIRECT_URI`와 동일하게)
 3. **동의항목**에서 `카카오톡 메시지 전송(talk_message)` 사용 설정
-4. `.env` 작성 후 `arcsolve-mcp auth kakao` 1회 실행
+4. `.env` 작성 후 `arcsolve auth kakao` 1회 실행
 
 ## 도구
 - `kakao_send_text_to_me(text, link_url?, button_title?)` — 텍스트(≤200자), 옵션 링크/버튼

@@ -36,7 +36,7 @@
 2. `.env`:
    - `EGEN_SERVICE_KEY=<Decoding 키>`
 
-> 서비스키는 사전발급 쿼리 파라미터 방식 — 인터랙티브 OAuth가 아니므로 `arcsolve-mcp auth egen` 단계는 없다.
+> 서비스키는 사전발급 쿼리 파라미터 방식 — 인터랙티브 OAuth가 아니므로 `arcsolve auth egen` 단계는 없다.
 
 ## 도구
 | 도구 | 설명 |

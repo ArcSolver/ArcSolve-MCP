@@ -32,7 +32,7 @@ BASE_URL = "https://api.weather.gov"
 # NWS는 User-Agent 헤더가 없으면 403을 준다(라이브 확인). 공식 안내는 "A User Agent is required
 # to identify your application"이며 연락처 포함을 권장한다. 기본값을 상수로 두고 env로 덮어쓴다.
 # 출처: API 안내 ("User Agent ... is required") + 라이브(헤더 없음 → 403).
-DEFAULT_USER_AGENT = "ArcSolve-MCP (github.com/ArcSolver/ArcSolve-Kit)"
+DEFAULT_USER_AGENT = "arcsolve (github.com/ArcSolver/ArcSolve-Kit)"
 
 
 def points_path(latitude: float, longitude: float) -> str:

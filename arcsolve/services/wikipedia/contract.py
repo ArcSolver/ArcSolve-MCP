@@ -49,7 +49,7 @@ ACTION_API_PATH = "/w/api.php"
 # ─── User-Agent (필수) ──────────────────────────────────────
 # Wikimedia는 식별용 User-Agent를 요구한다(약하거나 없으면 403/스로틀). NWS와 동일 패턴으로 기본
 # 식별 문자열을 상수로 두고 env로 덮어쓴다. 출처: Wikimedia User-Agent policy + NWS 동형.
-DEFAULT_USER_AGENT = "ArcSolve-MCP (github.com/ArcSolver/ArcSolve-Kit)"
+DEFAULT_USER_AGENT = "arcsolve (github.com/ArcSolver/ArcSolve-Kit)"
 
 
 def wiki_host(lang: str) -> str:

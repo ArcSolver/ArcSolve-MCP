@@ -1,12 +1,12 @@
 """ArcSolve MCP 엔트리포인트.
 
-  arcsolve-mcp                  # 전체(또는 ARCSOLVE_SERVICES) 서비스로 서버 실행 (stdio)
-  arcsolve-mcp serve kakao      # 지정한 서비스만 노출
-  arcsolve-mcp list             # 사용 가능한 서비스 목록
-  arcsolve-mcp skills           # 사용 가능한 스킬 목록
-  arcsolve-mcp auth kakao       # 카카오 최초 1회 인증 → refresh_token 저장
-  arcsolve-mcp catalog          # docs/services.md + docs/skills.md 재생성 (자동)
-  arcsolve-mcp changelog        # changelog.d/ 조각 → CHANGELOG.md 합본
+  arcsolve                  # 전체(또는 ARCSOLVE_SERVICES) 서비스로 서버 실행 (stdio)
+  arcsolve serve kakao      # 지정한 서비스만 노출
+  arcsolve list             # 사용 가능한 서비스 목록
+  arcsolve skills           # 사용 가능한 스킬 목록
+  arcsolve auth kakao       # 카카오 최초 1회 인증 → refresh_token 저장
+  arcsolve catalog          # docs/services.md + docs/skills.md 재생성 (자동)
+  arcsolve changelog        # changelog.d/ 조각 → CHANGELOG.md 합본
 """
 
 from __future__ import annotations

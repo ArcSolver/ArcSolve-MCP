@@ -4,7 +4,7 @@
 (에이전트는 `CHANGELOG.md` 본체를 직접 건드리지 않는다.)
 
 - 형식: Markdown 불릿. 예) `- **kakao**: 도구 X 추가`
-- 통합 단계에서 `arcsolve-mcp changelog`가 모든 조각을 `CHANGELOG.md`의 `[Unreleased]`로 합본한다.
+- 통합 단계에서 `arcsolve changelog`가 모든 조각을 `CHANGELOG.md`의 `[Unreleased]`로 합본한다.
 - 릴리즈 시: `[Unreleased]`를 버전 섹션으로 옮기고 조각 파일들을 비운다.
 
 이 `README.md`는 합본에서 제외된다.

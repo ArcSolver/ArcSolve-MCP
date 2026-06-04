@@ -52,12 +52,12 @@ async def test_get_text_passes_params_and_headers():
     await get_text(
         "https://x/api/query",
         params={"search_query": "all:electron", "max_results": 5},
-        headers={"User-Agent": "ArcSolve-MCP/arxiv"},
+        headers={"User-Agent": "arcsolve/arxiv"},
         transport=_t(handler),
     )
     assert "search_query=all%3Aelectron" in seen["url"]
     assert "max_results=5" in seen["url"]
-    assert seen["ua"] == "ArcSolve-MCP/arxiv"
+    assert seen["ua"] == "arcsolve/arxiv"
 
 
 async def test_get_text_empty_body_returns_empty_string():

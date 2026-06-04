@@ -42,7 +42,7 @@ names exposed to the model are better, so we do not go multi-level like
 ### Expose only the modules you want
 
 `build_server(services)` or `select_services()` picks what to expose
-(priority: argument > `ARCSOLVE_SERVICES` env var > all). The CLI is `arcsolve-mcp serve kakao`.
+(priority: argument > `ARCSOLVE_SERVICES` env var > all). The CLI is `arcsolve serve kakao`.
 To attach just one module to someone else's server, call `SERVICE.register(mcp)` directly.
 
 The registry uses **lazy, isolated loading**:
@@ -52,7 +52,7 @@ The registry uses **lazy, isolated loading**:
 
 > **Dependency rule:** a service folder uses only the standard library + the shared
 > core. If a heavy SDK is needed, isolate it via optional extras in `pyproject.toml`
-> (`arcsolve-mcp[heavy]`), and **add the dependency at the integration stage** (parallel
+> (`arcsolve[heavy]`), and **add the dependency at the integration stage** (parallel
 > edits to `pyproject.toml`/`uv.lock` by service agents would conflict).
 
 ## Don't confuse "the two OAuths"

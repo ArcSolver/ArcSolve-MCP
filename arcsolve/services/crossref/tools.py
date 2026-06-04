@@ -37,7 +37,7 @@ def _user_agent(mailto: str | None) -> dict[str, str]:
 
     출처: README ("Include a 'mailto:' in your User-Agent header") — polite pool 식별.
     """
-    ua = "ArcSolve-MCP/crossref (https://github.com/ArcSolver/ArcSolve-Kit)"
+    ua = "arcsolve/crossref (https://github.com/ArcSolver/ArcSolve-Kit)"
     if mailto:
         ua += f" (mailto:{mailto})"
     return {"User-Agent": ua}

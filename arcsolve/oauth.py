@@ -86,7 +86,7 @@ class OAuthClient:
         refresh = rec.get("refresh_token") or self.env_refresh_token
         if not refresh:
             raise RuntimeError(
-                f"{self.service}: 인증이 필요합니다. `arcsolve-mcp auth {self.service}`를 실행하세요."
+                f"{self.service}: 인증이 필요합니다. `arcsolve auth {self.service}`를 실행하세요."
             )
         tok = await self._post_token(
             {
