@@ -67,3 +67,6 @@ line-length = 100
 
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
+markers = [
+    "live: 실제 외부 API를 호출하는 라이브 계약 드리프트 점검(ARCSOLVE_LIVE=1, nightly 전용)",
+]
