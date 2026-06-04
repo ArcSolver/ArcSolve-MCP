@@ -23,6 +23,8 @@ from __future__ import annotations
 
 from pydantic import BaseModel
 
+from arcsolve.services._datagokr import clamp_paging
+
 # ─── base URL / 엔드포인트 상수 ─────────────────────────────
 # 출처(base·엔드포인트): https://www.data.go.kr/data/15073861/openapi.do
 BASE_URL = "https://apis.data.go.kr/B552584/ArpltnInforInqireSvc"
@@ -53,6 +55,11 @@ RETURN_TYPE_JSON = "json"
 # 공통 페이지네이션 기본값. 출처: 위 페이지(numOfRows 기본 100, pageNo 기본 1).
 DEFAULT_NUM_OF_ROWS = 100
 DEFAULT_PAGE_NO = 1
+# numOfRows/pageNo 안전 범위. pageNo는 1 이상, numOfRows는 1 이상.
+# TODO(provenance): 상세 페이지에 numOfRows 상한이 인라인 명시되지 않아, data.go.kr 게이트웨이
+#   통용 상한 9999를 보수적 상한으로 둔다(위반 시 결과코드 10 방지 — 과도값 클램프). 하한 1.
+MAX_NUM_OF_ROWS = 9999
+MIN_NUM_OF_ROWS = 1
 
 # 시도별 조회 sidoName 허용값(전국 + 17개 광역시·도).
 # 출처: data.go.kr 기술문서(ArpltnInforInqireSvc 시도별 실시간 측정정보). 라이브에서 통용.
@@ -106,8 +113,10 @@ def build_realtime_by_region_params(
 
     serviceKey는 **Decoding 키 원문**을 넣는다(httpx가 자동 인코딩 → 이중 인코딩 방지).
     returnType=json을 항상 명시한다(기본 XML 회피).
+    numOfRows/pageNo는 공유 헬퍼로 안전 범위로 클램프한다.
     출처: https://www.data.go.kr/data/15073861/openapi.do
     """
+    num_of_rows, page_no = clamp_paging(num_of_rows, page_no, max_rows=MAX_NUM_OF_ROWS)
     return {
         PARAM_SERVICE_KEY: service_key,
         PARAM_RETURN_TYPE: RETURN_TYPE_JSON,
@@ -129,8 +138,10 @@ def build_realtime_by_station_params(
 ) -> dict[str, str | int]:
     """측정소별 실시간 측정정보(getMsrstnAcctoRltmMesureDnsty) 쿼리스트링을 만든다.
 
+    numOfRows/pageNo는 공유 헬퍼로 안전 범위로 클램프한다.
     출처: https://www.data.go.kr/data/15073861/openapi.do
     """
+    num_of_rows, page_no = clamp_paging(num_of_rows, page_no, max_rows=MAX_NUM_OF_ROWS)
     return {
         PARAM_SERVICE_KEY: service_key,
         PARAM_RETURN_TYPE: RETURN_TYPE_JSON,
@@ -153,8 +164,10 @@ def build_forecast_params(
     """대기질 예보통보(getMinuDustFrcstDspth) 쿼리스트링을 만든다.
 
     searchDate는 `YYYY-MM-DD`. informCode(PM10/PM25/O3)는 선택(없으면 전체).
+    numOfRows/pageNo는 공유 헬퍼로 안전 범위로 클램프한다.
     출처: https://www.data.go.kr/data/15073861/openapi.do
     """
+    num_of_rows, page_no = clamp_paging(num_of_rows, page_no, max_rows=MAX_NUM_OF_ROWS)
     params: dict[str, str | int] = {
         PARAM_SERVICE_KEY: service_key,
         PARAM_RETURN_TYPE: RETURN_TYPE_JSON,

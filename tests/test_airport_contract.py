@@ -99,6 +99,13 @@ def test_flight_params_full():
     assert p["pageNo"] == 2
 
 
+def test_paging_clamped_to_safe_bounds():
+    # 공유 clamp_paging 적용: 과도 numOfRows는 상한 9999로, pageNo<1은 1로 클램프.
+    p = build_flight_params(service_key="K", num_of_rows=100000, page_no=0)
+    assert p["numOfRows"] == 9999
+    assert p["pageNo"] == 1
+
+
 # ─── items quirk 정규화 ─────────────────────────────────────
 
 

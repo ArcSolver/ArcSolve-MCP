@@ -27,6 +27,7 @@ from __future__ import annotations
 
 import xml.etree.ElementTree as ET
 
+from arcsolve.services._datagokr import clamp_paging
 from arcsolve.xml import safe_fromstring
 
 from pydantic import BaseModel
@@ -55,6 +56,11 @@ PARAM_PAGE_NO = "pageNo"
 # 공통 페이지네이션 기본값. 출처: 위 페이지(numOfRows/pageNo, data.go.kr 공통 규약).
 DEFAULT_NUM_OF_ROWS = 100
 DEFAULT_PAGE_NO = 1
+# numOfRows/pageNo 안전 범위.
+# TODO(provenance): 상세 페이지에 numOfRows 상한이 인라인 명시되지 않아, data.go.kr 게이트웨이
+#   통용 상한 9999를 보수적 상한으로 둔다(위반 시 결과코드 10 방지 — 과도값 클램프). 하한 1.
+MAX_NUM_OF_ROWS = 9999
+MIN_NUM_OF_ROWS = 1
 
 # 정상 응답 결과코드. 출처: data.go.kr(공통 OpenAPI 에러코드 규약 + 위 페이지 응답 header).
 RESULT_CODE_OK = "00"
@@ -72,8 +78,10 @@ def _base_params(
 
     serviceKey는 **Decoding 키 원문**을 넣는다(httpx가 자동 인코딩 → 이중 인코딩 방지).
     STAGE1은 필수, STAGE2는 빈 값이면 생략한다(시군구 미지정 → 시도 전체).
+    numOfRows/pageNo는 공유 헬퍼로 안전 범위로 클램프한다(세 오퍼레이션 공통).
     출처: https://www.data.go.kr/data/15000563/openapi.do
     """
+    num_of_rows, page_no = clamp_paging(num_of_rows, page_no, max_rows=MAX_NUM_OF_ROWS)
     params: dict[str, str | int] = {
         PARAM_SERVICE_KEY: service_key,
         PARAM_STAGE1: stage1,

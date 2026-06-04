@@ -26,6 +26,7 @@ from xml.etree.ElementTree import ParseError
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 from arcsolve.http import UpstreamError, get_text
+from arcsolve.services import _datagokr
 from arcsolve.services.ev_charger import contract as c
 
 if TYPE_CHECKING:
@@ -49,26 +50,6 @@ _MISSING_KEY = (
     "설정하세요. (발급: https://www.data.go.kr/data/15076352/openapi.do · "
     "⚠️ Encoding/Decoding 2종 중 **Decoding 키(원문)**를 넣으세요 — 이중 인코딩 방지.)"
 )
-
-# data.go.kr 공통 에러코드(서비스키/트래픽 등) → 사람이 읽을 안내.
-# 출처: 공공데이터포털 OpenAPI 공통 에러코드 규약 + 응답 header.resultMsg.
-_RESULT_CODE_HINTS = {
-    "01": "어플리케이션 에러(01): 잠시 후 재시도하세요.",
-    "02": "데이터베이스 에러(02): 잠시 후 재시도하세요.",
-    "03": "데이터 없음(03): 해당 조건의 충전소/충전기 데이터가 없습니다.",
-    "04": "HTTP 에러(04).",
-    "12": "폐기된 서비스(12): 해당 OpenAPI는 더 이상 제공되지 않습니다.",
-    "20": "서비스 접근 거부(20): 서비스키 권한/IP 설정을 확인하세요.",
-    "22": "서비스 요청 제한 초과(22): 일일 트래픽 한도(개발계정 기본 일일 한도)를 초과했습니다.",
-    "30": (
-        "등록되지 않은 서비스키(30): EV_CHARGER_SERVICE_KEY를 확인하세요. "
-        "⚠️ Encoding이 아니라 **Decoding 키(원문)**를 넣어야 합니다(이중 인코딩 방지)."
-    ),
-    "31": "기한 만료 서비스키(31): 활용기간이 만료되었습니다. data.go.kr에서 연장하세요.",
-    "32": "등록되지 않은 IP(32): 서비스키에 허용 IP를 등록하세요.",
-    "99": "기타 에러(99).",
-}
-
 
 def _explain(e: UpstreamError) -> str:
     """HTTP 4xx/5xx(드묾 — 보통 200+봉투 에러)를 사람이 읽을 메시지로 매핑한다.
@@ -94,18 +75,14 @@ def _explain(e: UpstreamError) -> str:
 def _check_header(header: c.Header | None) -> str | None:
     """봉투 header.resultCode를 검사한다. 정상("00")이면 None, 아니면 에러 안내 문자열.
 
+    봉투에서 resultCode/resultMsg를 꺼내는 것은 이 서비스가 책임지고(봉투 구조: XML
+    `header.resultCode` — parse_header가 cmmMsgHeader도 흡수), 코드→안내 해석은 공유 헬퍼
+    (_datagokr.explain_result_code)에 위임한다(canonical 코드표 — 05/10/11/21/33 등 일관 안내).
     출처: https://www.data.go.kr/data/15076352/openapi.do (응답 header.resultCode/resultMsg).
     """
     if header is None or header.resultCode is None:
         return None  # header가 없으면 통과(데이터로 판단)
-    code = header.resultCode
-    if code == c.RESULT_CODE_OK:
-        return None
-    hint = _RESULT_CODE_HINTS.get(code)
-    msg = header.resultMsg or ""
-    if hint:
-        return f"{hint}{(' (' + msg + ')') if msg else ''}"
-    return f"전기차 충전소 응답 오류(resultCode={code}){(': ' + msg) if msg else ''}"
+    return _datagokr.explain_result_code(header.resultCode, header.resultMsg)
 
 
 def _v(value: str | None) -> str:

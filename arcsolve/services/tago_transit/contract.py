@@ -38,6 +38,8 @@ from typing import Any
 
 from pydantic import BaseModel, field_validator
 
+from arcsolve.services._datagokr import clamp_paging
+
 # ─── base URL / 서비스 경로 상수 ────────────────────────────
 # 전국 대중교통 통합 네임스페이스. 출처: 위 6개 data.go.kr 페이지 공통.
 BASE_URL = "https://apis.data.go.kr/1613000"
@@ -91,6 +93,11 @@ TYPE_JSON = "json"
 # 공통 페이지네이션 기본값. 출처: 위 페이지(numOfRows 기본 10, pageNo 기본 1).
 DEFAULT_NUM_OF_ROWS = 100  # 기본은 10이나 실용상 100으로 받는다(상한은 서비스별 상이).
 DEFAULT_PAGE_NO = 1
+# numOfRows/pageNo 안전 범위.
+# TODO(provenance): numOfRows 상한이 서비스별 상이하고 상세 페이지에 인라인 명시되지 않아,
+#   data.go.kr 게이트웨이 통용 상한 9999를 보수적 상한으로 둔다(위반 시 결과코드 10 방지). 하한 1.
+MAX_NUM_OF_ROWS = 9999
+MIN_NUM_OF_ROWS = 1
 
 # 정상 응답 결과코드. 출처: data.go.kr 공통 OpenAPI 에러코드 규약 + 위 페이지 응답 header.
 RESULT_CODE_OK = "00"
@@ -123,8 +130,10 @@ def build_station_search_params(
 ) -> dict[str, str | int]:
     """정류소명 검색(getSttnNoList) 쿼리스트링.
 
+    numOfRows/pageNo는 공유 헬퍼로 안전 범위로 클램프한다.
     출처: https://www.data.go.kr/data/15098534/openapi.do (getSttnNoList — cityCode·nodeNm).
     """
+    num_of_rows, page_no = clamp_paging(num_of_rows, page_no, max_rows=MAX_NUM_OF_ROWS)
     params = _base(service_key)
     params[PARAM_CITY_CODE] = city_code
     params[PARAM_NODE_NM] = node_name
@@ -143,8 +152,10 @@ def build_bus_arrival_params(
 ) -> dict[str, str | int]:
     """정류소별 도착예정정보(getSttnAcctoArvlPrearngeInfoList) 쿼리스트링.
 
+    numOfRows/pageNo는 공유 헬퍼로 안전 범위로 클램프한다.
     출처: https://www.data.go.kr/data/15098530/openapi.do (cityCode·nodeId 필수).
     """
+    num_of_rows, page_no = clamp_paging(num_of_rows, page_no, max_rows=MAX_NUM_OF_ROWS)
     params = _base(service_key)
     params[PARAM_CITY_CODE] = city_code
     params[PARAM_NODE_ID] = node_id
@@ -163,8 +174,10 @@ def build_route_stations_params(
 ) -> dict[str, str | int]:
     """노선별 경유정류소(getRouteAcctoThrghSttnList) 쿼리스트링.
 
+    numOfRows/pageNo는 공유 헬퍼로 안전 범위로 클램프한다.
     출처: https://www.data.go.kr/data/15098529/openapi.do (cityCode·routeId 필수).
     """
+    num_of_rows, page_no = clamp_paging(num_of_rows, page_no, max_rows=MAX_NUM_OF_ROWS)
     params = _base(service_key)
     params[PARAM_CITY_CODE] = city_code
     params[PARAM_ROUTE_ID] = route_id
@@ -189,7 +202,9 @@ def build_terminal_bus_params(
     출처: https://www.data.go.kr/data/15098522/openapi.do ·
           https://www.data.go.kr/data/15098541/openapi.do
           (depTerminalId·arrTerminalId·depPlandTime).
+    numOfRows/pageNo는 공유 헬퍼로 안전 범위로 클램프한다.
     """
+    num_of_rows, page_no = clamp_paging(num_of_rows, page_no, max_rows=MAX_NUM_OF_ROWS)
     params = _base(service_key)
     params[PARAM_DEP_TERMINAL_ID] = dep_terminal_id
     params[PARAM_ARR_TERMINAL_ID] = arr_terminal_id
@@ -213,7 +228,9 @@ def build_train_params(
     depPlaceId/arrPlaceId는 역코드, depPlandTime은 출발일 `YYYYMMDD`.
     출처: https://www.data.go.kr/data/15098552/openapi.do
           (depPlaceId·arrPlaceId·depPlandTime).
+    numOfRows/pageNo는 공유 헬퍼로 안전 범위로 클램프한다.
     """
+    num_of_rows, page_no = clamp_paging(num_of_rows, page_no, max_rows=MAX_NUM_OF_ROWS)
     params = _base(service_key)
     params[PARAM_DEP_PLACE_ID] = dep_station_id
     params[PARAM_ARR_PLACE_ID] = arr_station_id

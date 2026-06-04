@@ -26,6 +26,7 @@ from typing import TYPE_CHECKING, Any
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 from arcsolve.http import UpstreamError, get_json
+from arcsolve.services import _datagokr
 from arcsolve.services.tago_transit import contract as c
 
 if TYPE_CHECKING:
@@ -50,30 +51,6 @@ _MISSING_KEY = (
     "(예: https://www.data.go.kr/data/15098530/openapi.do · "
     "⚠️ Encoding/Decoding 2종 중 **Decoding 키(원문)**를 넣으세요 — 이중 인코딩 방지.)"
 )
-
-# data.go.kr 공통 에러코드(서비스키/트래픽/무데이터 등) → 사람이 읽을 안내.
-# 출처: 공공데이터포털 OpenAPI 공통 에러코드 규약 + 응답 header/cmmMsgHeader.
-_RESULT_CODE_HINTS = {
-    "01": "어플리케이션 에러(01): 잠시 후 재시도하세요.",
-    "02": "데이터베이스 에러(02): 잠시 후 재시도하세요.",
-    "03": "데이터 없음(03): 해당 조건의 운행/도착 데이터가 없습니다.",
-    "04": "HTTP 에러(04).",
-    "05": "서비스 연결 실패(05): 잠시 후 재시도하세요.",
-    "10": "잘못된 요청 파라미터(10): 입력값(도시코드·ID·날짜)을 확인하세요.",
-    "11": "필수 요청 파라미터 누락(11): cityCode/nodeId 등 필수값을 확인하세요.",
-    "12": "폐기된 서비스(12): 해당 OpenAPI는 더 이상 제공되지 않습니다.",
-    "20": "서비스 접근 거부(20): 서비스키 권한/IP 설정을 확인하세요.",
-    "21": "일시적 사용 중지(21): 잠시 후 재시도하세요.",
-    "22": "서비스 요청 제한 초과(22): 일일 트래픽 한도(개발계정)를 초과했습니다.",
-    "30": (
-        "등록되지 않은 서비스키(30): TAGO_SERVICE_KEY를 확인하세요. "
-        "⚠️ Encoding이 아니라 **Decoding 키(원문)**를 넣어야 합니다(이중 인코딩 방지)."
-    ),
-    "31": "기한 만료 서비스키(31): 활용기간이 만료되었습니다. data.go.kr에서 연장하세요.",
-    "32": "등록되지 않은 IP(32): 서비스키에 허용 IP를 등록하세요.",
-    "99": "기타 에러(99).",
-}
-
 
 def _explain_http(e: UpstreamError) -> str:
     """HTTP 4xx/5xx(게이트웨이 차단 등)를 사람이 읽을 메시지로 매핑한다.
@@ -102,10 +79,12 @@ def _explain_http(e: UpstreamError) -> str:
 
 
 def _hint_for_code(code: str, msg: str) -> str:
-    hint = _RESULT_CODE_HINTS.get(code)
-    if hint:
-        return f"{hint}{(' (' + msg + ')') if msg else ''}"
-    return f"TAGO 응답 오류(resultCode={code}){(': ' + msg) if msg else ''}"
+    """비-정상 결과코드를 canonical 안내로 해석한다(공유 _datagokr 위임).
+
+    봉투에서 code/msg를 꺼내는 것은 이 서비스가 책임지고(tago는 `response.header.resultCode` +
+    보조 cmmMsgHeader), 코드표 해석만 공유한다. 호출부가 비-OK 코드만 넘기므로 항상 문자열을 반환.
+    """
+    return _datagokr.explain_result_code(code, msg) or ""
 
 
 def _check_envelope(body: dict, resp: c.Response) -> str | None:

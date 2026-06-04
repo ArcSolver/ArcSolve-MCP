@@ -65,6 +65,13 @@ def test_build_params_pagination_overrides():
     assert p["format"] == "2"
 
 
+def test_paging_clamped_to_safe_bounds():
+    # 공유 clamp_paging 적용: 과도 numOfRows는 상한 9999로, pageNo<1은 1로 클램프.
+    hi = build_params(service_key="K", num_of_rows=100000, page_no=0)
+    assert hi["numOfRows"] == 9999
+    assert hi["pageNo"] == 1
+
+
 # ─── B553881 items quirk 정규화(오퍼레이션명 키 아래) ───────
 
 

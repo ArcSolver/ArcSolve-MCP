@@ -136,6 +136,20 @@ def test_pagination_overrides():
     assert p["pageNo"] == 3
 
 
+def test_paging_clamped_to_safe_bounds():
+    # 공유 clamp_paging 적용(페이지네이션을 받는 모든 빌더): 과도 numOfRows→9999, pageNo<1→1.
+    hi = build_bus_arrival_params(
+        city_code="25", node_id="X", service_key="K", num_of_rows=100000, page_no=0
+    )
+    assert hi["numOfRows"] == 9999
+    assert hi["pageNo"] == 1
+    tr = build_train_params(
+        dep_station_id="A", arr_station_id="B", dep_date="20240115",
+        service_key="K", num_of_rows=0,
+    )
+    assert tr["numOfRows"] == 1  # 하한 1
+
+
 # ─── items quirk 정규화 ─────────────────────────────────────
 
 

@@ -46,6 +46,8 @@ from typing import Any
 
 from pydantic import BaseModel, field_validator
 
+from arcsolve.services._datagokr import clamp_paging
+
 # ─── base URL / 오퍼레이션 경로 상수 ────────────────────────
 # 출처: https://www.data.go.kr/data/15099883/openapi.do (요청주소 `…/Parking/PrkSttusInfo`).
 BASE_URL = "https://apis.data.go.kr/B553881/Parking"
@@ -71,6 +73,11 @@ FORMAT_XML = "1"
 # 공통 페이지네이션 기본값. 출처: 위 페이지(numOfRows 샘플 10, pageNo 샘플 1).
 DEFAULT_NUM_OF_ROWS = 100  # 샘플은 10이나 실용상 100으로 받는다.
 DEFAULT_PAGE_NO = 1
+# numOfRows/pageNo 안전 범위.
+# TODO(provenance): 상세 페이지에 numOfRows 상한이 인라인 명시되지 않아, data.go.kr 게이트웨이
+#   통용 상한 9999를 보수적 상한으로 둔다(위반 시 결과코드 10 방지 — 과도값 클램프). 하한 1.
+MAX_NUM_OF_ROWS = 9999
+MIN_NUM_OF_ROWS = 1
 
 # 정상 응답 결과코드. 출처: 위 페이지 응답(resultCode 샘플 "00", resultMsg "SUCCESS") +
 # data.go.kr 공통 OpenAPI 에러코드 규약.
@@ -87,9 +94,11 @@ def build_params(
 
     세 오퍼레이션(PrkSttusInfo/PrkOprInfo/PrkRealtimeInfo)은 **동일한 4개 필수
     파라미터**만 받는다(주차장관리번호 등 추가 필터 입력 없음 — 전국 목록을 페이지로 받는다).
+    numOfRows/pageNo는 공유 헬퍼로 안전 범위로 클램프한다.
     출처: https://www.data.go.kr/data/15099883/openapi.do (요청변수 serviceKey·pageNo·
     numOfRows·format 4종, 전부 필수).
     """
+    num_of_rows, page_no = clamp_paging(num_of_rows, page_no, max_rows=MAX_NUM_OF_ROWS)
     return {
         PARAM_SERVICE_KEY: service_key,
         PARAM_NUM_OF_ROWS: num_of_rows,
