@@ -400,6 +400,42 @@
 
 ---
 
+## feeds — RSS/Atom/RDF 피드 읽기 (범용 웹 콘텐츠 구독) · 📡 정보수집 번들
+- 상태: `done`
+- 인증: **무인증**(키 없음·env 불필요). 식별용 User-Agent만 전송.
+- 특수성: 피드는 JSON이 아니라 **XML**(RSS 2.0/Atom 1.0/RSS 1.0·RDF) → 코어 **`get_text`**(raw str) + 표준 라이브러리 `xml.etree.ElementTree` 파싱(외부 의존 없음, arxiv와 동형). 포맷은 **루트 엘리먼트로 자동 감지**(`<rss>`/`<feed>`/`<rdf:RDF>`), 요소 탐색은 **로컬명 기반**(네임스페이스 무관)이라 `dc:`/`content:` 확장 흡수. "웹페이지 파싱"을 **스크래핑 없이** 정공법으로 충족.
+- 공식 문서:
+  - RSS 2.0: https://www.rssboard.org/rss-specification
+  - Atom 1.0 (RFC 4287): https://datatracker.ietf.org/doc/html/rfc4287
+  - RSS 1.0 (RDF Site Summary): https://web.resource.org/rss/1.0/spec
+  - Dublin Core elements (dc:creator·dc:date): https://www.dublincore.org/specifications/dublin-core/dcmi-terms/
+- 도구(MVP, GET·읽기):
+  - `feeds_fetch(url, limit?)` — 임의 피드 URL → 채널 메타(제목·링크·설명) + 최근 항목(제목·링크·게시일·요약). limit 기본 20·1..100
+- 정규화: 통일 모델(title·link·published·summary·author·id)로 3포맷 흡수. Atom link는 `rel=alternate`@href·RSS는 `<link>`텍스트·RDF item은 channel 밖 형제(`dc:date`/`dc:creator`). 날짜는 **원본 문자열 보존**(RFC822↔ISO8601 미변환). 요약 HTML은 평문화(태그 제거·엔티티 복원·500자).
+- 스코프(MVP): 포함 = 피드 1건 조회·메타+항목 정규화 / 제외 = 구독관리·증분추적(ETag)·전문 저장·HTML 피드 자동발견·JSON Feed
+- 코어 의존: 기존 **`get_text`** 재사용 + stdlib XML. 무인증이라 헤더 주입 불필요(UA만).
+
+---
+
+## hackernews — Hacker News 읽기 (아이템·랭킹·검색·사용자) · 📡 정보수집 번들
+- 상태: `done`
+- 인증: **무인증**(키 없음·env 불필요).
+- 특수성: 두 공식 API **합성** — 구조적 데이터는 **Firebase**(JSON), 전문 검색은 **Algolia HN Search**(JSON). 랭킹 엔드포인트는 **id 배열만** 주므로 `hn_top`은 상위 N개를 `asyncio.gather`로 병렬 fetch(N+1·상한 50). title/text/about은 HTML이라 평문화.
+- 공식 문서:
+  - Firebase API: https://github.com/HackerNews/API
+  - Algolia HN Search API: https://hn.algolia.com/api
+- 도구(MVP, GET·읽기):
+  - `hn_item(id)` — `/v0/item/{id}.json`(story/job=제목·점수·댓글·작성자·URL·본문, comment=본문·부모)
+  - `hn_top(kind?, limit?)` — `/v0/{top|new|best|ask|show|job}stories.json` → 상위 N 개별 조회. limit 1..50
+  - `hn_search(query, by_date?, tags?, limit?)` — Algolia `/search`(관련도)·`/search_by_date`(최신). tags 문자열 그대로(예: `story`·`ask_hn`·`author_pg`). limit 1..50
+  - `hn_user(id)` — `/v0/user/{id}.json`(karma·가입·about·제출 수)
+- 응답: item(id·type·by·time(unix)·title·url·score·descendants·kids·parent·deleted·dead), user(id·created·karma·about·submitted), Algolia hit(objectID·title·url·author·points·num_comments·created_at·story_text·comment_text). time/created는 unix→`YYYY-MM-DD HH:MM UTC` 표시.
+- 제약: `hn_top` 상한 50(N+1 비용). 삭제(deleted)/죽은(dead) 아이템 방어 처리. 댓글 트리 전체 펼치기·numericFilters·페이지네이션은 비목표(kids id만 노출).
+- 스코프(MVP): 포함 = 아이템·랭킹·검색·사용자 읽기 / 제외 = 글쓰기·투표·로그인·댓글트리 재귀
+- 코어 의존: `get_json`만으로 충분(무인증, 파라미터는 쿼리). 새 코어 동사 불필요.
+
+---
+
 ## 블록 템플릿 (복사해서 새 대상 추가)
 
 ```markdown

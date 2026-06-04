@@ -2,7 +2,7 @@
 
 > ⚙️ 자동 생성 — 직접 수정하지 마세요. `arcsolve-mcp catalog`로 재생성됩니다.
 
-현재 **23개 서비스 · 총 87개 도구**.
+현재 **25개 서비스 · 총 92개 도구**.
 
 ## airkorea — 에어코리아 대기오염정보 읽기(시도·측정소 실시간 측정 + 예보)
 공식 문서: https://www.data.go.kr/data/15073861/openapi.do
@@ -67,6 +67,23 @@
 |------|------|
 | `evcharger_info` | 충전소 정보를 조회한다(GET /getChargerInfo). |
 | `evcharger_status` | 충전기 실시간 상태를 조회한다(GET /getChargerStatus). |
+
+## feeds — RSS/Atom/RDF 피드 읽기(임의 피드 URL → 메타·최근 항목)
+공식 문서: https://www.rssboard.org/rss-specification
+
+| 도구 | 설명 |
+|------|------|
+| `feeds_fetch` | RSS/Atom/RDF 피드를 가져와 메타와 최근 항목을 요약한다. |
+
+## hackernews — Hacker News 읽기(아이템·랭킹·검색·사용자 — Firebase + Algolia)
+공식 문서: https://github.com/HackerNews/API
+
+| 도구 | 설명 |
+|------|------|
+| `hn_item` | Hacker News 아이템(스토리·댓글·잡·폴)을 id로 조회한다(Firebase /v0/item). |
+| `hn_search` | Hacker News를 전문 검색한다(Algolia HN Search). |
+| `hn_top` | Hacker News 프론트페이지 랭킹의 상위 항목을 가져온다(Firebase 랭킹 리스트). |
+| `hn_user` | Hacker News 사용자 프로필을 조회한다(Firebase /v0/user). |
 
 ## kakao — 카카오톡 메시지 — 나에게 보내기
 공식 문서: https://developers.kakao.com/docs/latest/ko/kakaotalk-message/rest-api
