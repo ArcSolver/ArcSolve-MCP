@@ -23,8 +23,13 @@ def test_every_skill_readme_cites_sources_and_tools():
         readme = s.path / "README.md"
         assert readme.exists(), f"{s.name}: README.md 없음"
         text = readme.read_text(encoding="utf-8")
-        assert "계약 출처" in text, f"{s.name}: README에 '계약 출처' 섹션 없음"
-        assert "필요 MCP 도구" in text, f"{s.name}: README에 '필요 MCP 도구' 섹션 없음"
+        # 양어 정책(docs/i18n.md): 영어 정본/한국어 헤더를 모두 허용한다.
+        assert ("Contract sources" in text) or ("계약 출처" in text), (
+            f"{s.name}: README에 'Contract sources'/'계약 출처' 섹션 없음"
+        )
+        assert ("Required MCP tools" in text) or ("필요 MCP 도구" in text), (
+            f"{s.name}: README에 'Required MCP tools'/'필요 MCP 도구' 섹션 없음"
+        )
 
 
 def test_skill_allowed_tools_exist():

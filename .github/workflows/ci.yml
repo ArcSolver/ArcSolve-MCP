@@ -24,8 +24,10 @@ jobs:
       - name: Test
         run: uv run pytest -q
 
-      - name: Catalog & changelog drift
+      - name: Catalog drift
+        # CHANGELOG.md는 의도적으로 제외한다: changelog.d/ 조각은 릴리스(통합) 단계에서만
+        # CHANGELOG.md로 합본된다(AGENTS.md 규칙5 · changelog.d/README.md). 개별 기여 PR은
+        # 조각만 추가하므로 여기서 합본 결과를 강제하면 모든 신규 서비스/스킬 PR이 깨진다.
         run: |
           uv run arcsolve catalog
-          uv run arcsolve changelog
-          git diff --exit-code docs/services.md docs/skills.md CHANGELOG.md
+          git diff --exit-code docs/services.md docs/skills.md

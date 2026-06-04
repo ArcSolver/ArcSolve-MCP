@@ -1,47 +1,39 @@
-"""MCP 배선 스모크 — 모든 서비스의 register(mcp)가 오류 없이 기대 도구 전체를 등록하는지 확인.
+"""MCP 배선 스모크 — 전체 서버를 합성해 모든 서비스의 도구가 충돌·누락 없이 노출되는지 확인.
 
-FakeMCP로 등록만 수행(무거운 FastMCP 서버 빌드 없이). build_server 합성 검증은 test_server_selection 참고.
+서비스는 자동 발견으로 계속 늘어나므로 도구 수/이름을 하드코딩하면 새 서비스마다 테스트를
+손봐야 하고 드리프트가 생긴다. 대신 **불변식**을 검증한다: (1) 모든 서비스가 도구를 ≥1개 등록,
+(2) 서비스 간 도구 이름이 겹치지 않음(collision), (3) 전체 서버 합성이 정확히 그 합집합을
+노출(등록 누락·중복 없음). 이렇게 하면 빈·깨진 서비스, 이름 충돌, import/등록 회귀를
+새 서비스가 늘어도 그대로 잡는다.
 """
 
-from arcsolve.services.discord.tools import register as discord_register
-from arcsolve.services.kakao.tools import register as kakao_register
-from arcsolve.services.line.tools import register as line_register
-from arcsolve.services.openalex.tools import register as openalex_register
-from arcsolve.services.telegram.tools import register as telegram_register
-from arcsolve.services.zotero.tools import register as zotero_register
+from collections import Counter
 
-EXPECTED = {
-    # telegram (6)
-    "telegram_send_message", "telegram_get_me", "telegram_send_photo",
-    "telegram_send_document", "telegram_edit_message_text", "telegram_delete_message",
-    # discord (6)
-    "discord_send_message", "discord_send_embed", "discord_edit_message",
-    "discord_delete_message", "discord_create_message", "discord_list_messages",
-    # line (5)
-    "line_send_text", "line_reply_text", "line_multicast_text",
-    "line_broadcast_text", "line_get_profile",
-    # kakao (2)
-    "kakao_send_text_to_me", "kakao_send_link_to_me",
-    # zotero (8)
-    "zotero_search_items", "zotero_get_item", "zotero_get_item_children",
-    "zotero_list_collections", "zotero_get_collection_items", "zotero_list_tags",
-    "zotero_get_fulltext", "zotero_health",
-    # openalex (4)
-    "openalex_search_works", "openalex_get_work",
-    "openalex_search_authors", "openalex_get_author",
-}
+from fastmcp import FastMCP
+
+from arcsolve.server import build_server
+from arcsolve.services import discover_services
 
 
-def test_all_services_register_expected_tools(load_tools):
-    names: set[str] = set()
-    for register in (
-        telegram_register, discord_register, line_register, kakao_register,
-        zotero_register, openalex_register,
-    ):
-        tools = load_tools(register)
-        # 도구 이름 prefix가 서비스명과 일치하고, 서비스 내 중복이 없어야 한다.
-        assert tools, f"{register.__module__}이 도구를 하나도 등록하지 않음"
-        names |= set(tools)
+async def _tool_names(register) -> list[str]:
+    probe = FastMCP("probe")
+    register(probe)
+    return [t.name for t in await probe.list_tools()]
 
-    assert names == EXPECTED
-    assert len(EXPECTED) == 31  # 카탈로그(6서비스·31도구)와 일치
+
+async def test_full_server_registers_every_service_without_collision():
+    per_service = {svc.name: await _tool_names(svc.register) for svc in discover_services()}
+
+    # (1) 모든 서비스가 도구를 최소 1개 기여해야 한다(빈/깨진 서비스 노출 차단).
+    empty = sorted(name for name, tools in per_service.items() if not tools)
+    assert not empty, f"도구를 등록하지 않은 서비스: {empty}"
+
+    # (2) 서비스 간 도구 이름 충돌이 없어야 한다(prefix 네임스페이스 설계의 핵심 보장).
+    all_names = [t for tools in per_service.values() for t in tools]
+    collisions = sorted(n for n, c in Counter(all_names).items() if c > 1)
+    assert not collisions, f"서비스 간 도구 이름 충돌: {collisions}"
+
+    # (3) 전체 서버 합성이 정확히 각 서비스 도구의 합집합을 노출해야 한다(등록 누락·중복 없음).
+    server = build_server()
+    served = [t.name for t in await server.list_tools()]
+    assert Counter(served) == Counter(all_names)

@@ -39,7 +39,7 @@ import `contract.py`; it **orchestrates the tools of a running ArcSolve MCP serv
 - For a **Skill**, `skills/academic-discovery/` is the canonical answer — a
   **multi-service orchestration** that discovers and cross-checks papers across several
   scholarly sources (arXiv · Crossref · OpenAlex · PubMed · Semantic Scholar).
-  *(A minimal single-service example is coming — candidate: `skills/wikipedia-lookup/`.)*
+  For a **minimal single-service** skill, see `skills/wikipedia-lookup/`.
 
 When the prose rules feel ambiguous, the canonical example code is the final word.
 
