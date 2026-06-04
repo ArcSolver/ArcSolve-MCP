@@ -4,6 +4,8 @@ import httpx
 import pytest
 
 from arcsolve.http import (
+    NetworkError,
+    Retry,
     UpstreamError,
     delete_json,
     get_json,
@@ -215,3 +217,65 @@ async def test_4xx_raises_upstream_error_with_payload():
         await get_json("https://x", transport=_t(handler))
     assert ei.value.status == 401
     assert ei.value.payload["code"] == -401
+
+
+# ── opt-in 재시도/백오프 + 전송계층 에러분류 ──────────────────────────────────
+
+
+async def test_retry_recovers_after_transient_503():
+    calls = {"n": 0}
+
+    async def handler(req):
+        calls["n"] += 1
+        if calls["n"] == 1:
+            return httpx.Response(503, text="busy")
+        return httpx.Response(200, json={"ok": True})
+
+    out = await get_json("https://x", transport=_t(handler), retry=Retry(attempts=2, backoff=0))
+    assert out == {"ok": True}
+    assert calls["n"] == 2  # 503 한 번 + 재시도 성공
+
+
+async def test_retry_honors_retry_after_header():
+    calls = {"n": 0}
+
+    async def handler(req):
+        calls["n"] += 1
+        if calls["n"] == 1:
+            return httpx.Response(429, headers={"Retry-After": "0"}, json={"e": "rate"})
+        return httpx.Response(200, json={"ok": True})
+
+    # backoff=5초지만 Retry-After:0을 우선 존중 → 대기 없이 즉시 재시도(테스트가 빨리 끝남).
+    out = await get_json("https://x", transport=_t(handler), retry=Retry(attempts=3, backoff=5))
+    assert out == {"ok": True}
+    assert calls["n"] == 2
+
+
+async def test_retry_exhausted_raises_upstream_error():
+    async def handler(req):
+        return httpx.Response(503, text="always busy")
+
+    with pytest.raises(UpstreamError) as ei:
+        await get_json("https://x", transport=_t(handler), retry=Retry(attempts=1, backoff=0))
+    assert ei.value.status == 503  # 재시도 소진 후 평소처럼 UpstreamError
+
+
+async def test_transport_error_retried_then_raises_network_error():
+    calls = {"n": 0}
+
+    async def handler(req):
+        calls["n"] += 1
+        raise httpx.ConnectError("connection refused")
+
+    with pytest.raises(NetworkError):
+        await get_json("https://x", transport=_t(handler), retry=Retry(attempts=2, backoff=0))
+    assert calls["n"] == 3  # 최초 1 + 재시도 2
+
+
+async def test_no_retry_propagates_raw_httpx_error_by_default():
+    async def handler(req):
+        raise httpx.ConnectError("connection refused")
+
+    # 기본(retry 미지정)은 원본 httpx 예외 그대로 — 기존 서비스의 `except httpx.ConnectError` 호환.
+    with pytest.raises(httpx.ConnectError):
+        await get_json("https://x", transport=_t(handler))

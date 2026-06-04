@@ -1,0 +1,1 @@
+- core(http): opt-in 재시도/백오프 + 전송계층 에러분류를 코어에 도입. 모든 동사가 `retry=Retry(attempts, statuses=(429,503), backoff, respect_retry_after)`를 받아 레이트리밋·일시장애·전송오류를 지수 백오프(또는 응답 `Retry-After`)로 재시도하고, 소진된 전송오류는 `NetworkError`로 분류. **기본값(retry 미지정)은 기존 동작 그대로** — 재시도 없음, 전송 예외는 원본 httpx 그대로 전파(기존 서비스의 `except httpx.ConnectError` 호환). 20개+ 서비스가 손으로 메우던 429/일시오류 처리를 코어 한 곳에서 옵트인으로 해결할 토대.
