@@ -333,8 +333,8 @@
   - 한국환경공단_전기자동차 충전소 정보 OpenAPI(EvCharger) 상세(base·오퍼레이션·serviceKey/pageNo/numOfRows/period/zcode·getChargerStatus 응답 필드·stat 코드·실시간 5분 갱신): https://www.data.go.kr/data/15076352/openapi.do
   - 전국전기차충전소표준데이터(정보 필드 한글 라벨 교차참조): https://www.data.go.kr/data/15013115/standard.do
 - 도구(MVP, 전부 GET·읽기):
-  - `evcharger_status(zcode?, zscode?, period?, numOfRows?, pageNo?)` ⭐ — `/getChargerStatus` 충전기 실시간 상태(충전중/충전대기/통신이상/운영중지/점검중/상태미확인 + 상태갱신일시). 지역코드 필터.
-  - `evcharger_info(zcode?, zscode?, numOfRows?, pageNo?)` — `/getChargerInfo` 충전소 정보(충전기 타입 코드·주소·위경도·운영기관·이용가능시간). 지역코드 필터.
+  - `ev_charger_status(zcode?, zscode?, period?, numOfRows?, pageNo?)` ⭐ — `/getChargerStatus` 충전기 실시간 상태(충전중/충전대기/통신이상/운영중지/점검중/상태미확인 + 상태갱신일시). 지역코드 필터.
+  - `ev_charger_info(zcode?, zscode?, numOfRows?, pageNo?)` — `/getChargerInfo` 충전소 정보(충전기 타입 코드·주소·위경도·운영기관·이용가능시간). 지역코드 필터.
 - 응답: 봉투 XML `<response><header><resultCode/><resultMsg/></header><body><items><item/>…<totalCount/><pageNo/></body></response>` — 본문 페이지네이션. **`resultCode != "00"`이면 에러**(HTTP 200이라도 봉투로 옴; 게이트웨이 키 차단은 `<header>` 대신 `cmmMsgHeader/returnReasonCode`로 옴 → 30 등 매핑). 상태(`stat`)·타입(`chgerType`)·위경도·플래그(`*Yn`)는 **문자열**·결측 빈 값 → 캐스팅 금지. `stat` 코드: 1통신이상·2충전대기·3충전중·4운영중지·5점검중·9상태미확인(한글 표시).
 - 제약(공식): `zcode`(시도)·`zscode`(시군구)는 **행정구역 지역코드**(zcode=앞 2자리, 선택). `period`(분, status 전용) 기본 5·[1,10] 클램프. `numOfRows` 기본 100·**[10,9999]** 클램프·`pageNo` 기본 1.
 - ⚠️ 실시간 지연: `getChargerStatus`는 "실시간"이지만 상류가 **약 5분 주기** 갱신 → 결과는 수 분 지연된 캐시 스냅샷(`statUpdDt`로 갱신시각 확인). 도구 출력 헤더에 "약 5분 지연(캐시 스냅샷)" 명시.
