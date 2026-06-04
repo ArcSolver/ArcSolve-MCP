@@ -1,0 +1,28 @@
+# Codex PR review — a SOCKET for Codex (Codex for Open Source).
+#
+# Goal: enforce the AGENTS.md Definition-of-Done on every PR (provenance,
+# single-prefix tool naming, shared-core reuse, tests) before a human looks.
+# The review step activates once OPENAI_API_KEY is configured (the grant);
+# until then it is a no-op that leaves a notice (so it never blocks CI).
+name: Codex PR review
+
+on:
+  pull_request:
+
+jobs:
+  review:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Codex Definition-of-Done review (socket — activates with OPENAI_API_KEY)
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+        run: |
+          if [ -z "$OPENAI_API_KEY" ]; then
+            echo "::notice::OPENAI_API_KEY not set — Codex PR review skipped. Socket is ready; the Codex for OSS grant fills it."
+            exit 0
+          fi
+          echo "TODO(codex): apply the AGENTS.md Definition-of-Done checklist to the PR diff and post inline review comments."

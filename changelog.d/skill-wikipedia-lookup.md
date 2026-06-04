@@ -1,0 +1,1 @@
+- **skill: wikipedia-lookup** — 위키백과 단일소스 조회 스킬(검색 → 요약 → 심화 + Wikidata 브리지 안내). `wikipedia` 서비스 도구를 오케스트레이션하는 미니멀 단일서비스 스킬 예시.

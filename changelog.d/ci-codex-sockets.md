@@ -1,0 +1,1 @@
+- **ci: Codex 소켓** — contract-drift 점검 + Codex PR 리뷰 워크플로 스켈레톤 추가. `OPENAI_API_KEY` 미설정 시 no-op(소켓만 준비), Codex for OSS 그랜트가 활성화한다.

@@ -1,10 +1,22 @@
 [project]
 name = "arcsolve-mcp"
 version = "0.1.0"
-description = "ArcSolve-Kit — 인기 서비스를 MCP 서버와 Claude Skill 두 포맷으로 묶는 오픈소스 모음"
+description = "Bundle the public APIs of popular services as MCP tools and Claude Skills, verified against official contracts (FastMCP)."
 readme = "README.md"
 requires-python = ">=3.11"
 license = { text = "Apache-2.0" }
+authors = [{ name = "ArcSolver" }]
+keywords = ["mcp", "model-context-protocol", "fastmcp", "llm", "agent", "tools", "api"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: Apache Software License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Software Development :: Libraries",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+]
 dependencies = [
     "fastmcp>=2.0",
     "httpx>=0.27",
@@ -17,6 +29,11 @@ dev = ["pytest>=8.0", "pytest-asyncio>=0.23", "ruff>=0.5"]
 
 [project.scripts]
 arcsolve-mcp = "arcsolve.__main__:main"
+
+[project.urls]
+Homepage = "https://github.com/ArcSolver/ArcSolve-Kit"
+Repository = "https://github.com/ArcSolver/ArcSolve-Kit"
+Issues = "https://github.com/ArcSolver/ArcSolve-Kit/issues"
 
 [build-system]
 requires = ["hatchling"]

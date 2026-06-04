@@ -1,0 +1,41 @@
+# Contract-drift check — a SOCKET for Codex (Codex for Open Source).
+#
+# Goal: keep each service's contract.py in sync with its official docs.
+#   - Deterministic guard (runs today): provenance tests ensure every service
+#     declares a docs_url and cites official-doc sources in its README.
+#   - Deep drift review (the socket): Codex re-reads each contract.py against its
+#     official documentation and opens a fix when an upstream API changed. This step
+#     activates once OPENAI_API_KEY is configured (the grant); until then it is a no-op.
+name: Contract drift
+
+on:
+  schedule:
+    - cron: "0 6 * * 1"   # weekly, Monday 06:00 UTC
+  workflow_dispatch:
+
+jobs:
+  drift:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install deps
+        run: uv sync --extra dev
+
+      - name: Provenance guard (deterministic — runs today)
+        run: uv run pytest -q -k provenance
+
+      - name: Codex contract-fidelity review (socket — activates with OPENAI_API_KEY)
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+        run: |
+          if [ -z "$OPENAI_API_KEY" ]; then
+            echo "::notice::OPENAI_API_KEY not set — deep contract-drift review skipped. Socket is ready; the Codex for OSS grant fills it."
+            exit 0
+          fi
+          echo "TODO(codex): diff each arcsolve/services/*/contract.py against its docs_url (official documentation); open an issue/PR on drift."
