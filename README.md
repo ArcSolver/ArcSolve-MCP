@@ -1,5 +1,7 @@
 # ArcSolve-Kit
 
+<!-- mcp-name: io.github.ArcSolver/arcsolve -->
+
 > **English** · [한국어](README.ko.md)
 
 [![CI](https://github.com/ArcSolver/ArcSolve-Kit/actions/workflows/ci.yml/badge.svg)](https://github.com/ArcSolver/ArcSolve-Kit/actions/workflows/ci.yml)
@@ -84,27 +86,34 @@ and the code itself proves this is an "official-API-contract-based, self-built c
 ## Quick start
 
 ```bash
-# 1) Install
-uv pip install -e ".[dev]"      # or: pip install -e ".[dev]"
+# Run without installing — uvx fetches from PyPI on demand (recommended)
+uvx arcsolve                    # all services, stdio MCP server
+uvx arcsolve serve kakao        # expose only kakao
+uvx arcsolve list               # see available services
 
-# 2) Credentials (see .env.example)
-cp .env.example .env            # fill in KAKAO_REST_API_KEY, etc.
+# Or install the CLI globally
+uv tool install arcsolve        # or: pipx install arcsolve  ·  pip install arcsolve
+arcsolve
 
-# 3) One-time Kakao auth → store refresh_token
-arcsolve auth kakao
-
-# 4) Verify locally
-arcsolve                    # run the stdio MCP server
+# From source (development)
+uv pip install -e ".[dev]"
 ```
 
-Registering with an MCP host (e.g. Claude Desktop):
+Then provide credentials and authenticate as needed:
+
+```bash
+cp .env.example .env            # fill in KAKAO_REST_API_KEY, etc. (see .env.example)
+arcsolve auth kakao             # one-time OAuth → stores refresh_token (0600)
+```
+
+Registering with an MCP host (e.g. Claude Desktop) — no pre-install with `uvx`:
 
 ```json
 {
   "mcpServers": {
     "arcsolve": {
-      "command": "arcsolve",
-      "args": ["serve", "kakao"],
+      "command": "uvx",
+      "args": ["arcsolve", "serve", "kakao"],
       "env": {
         "KAKAO_REST_API_KEY": "...",
         "KAKAO_REFRESH_TOKEN": "..."
@@ -113,6 +122,8 @@ Registering with an MCP host (e.g. Claude Desktop):
   }
 }
 ```
+
+> If you installed the CLI globally, use `"command": "arcsolve"` and drop `"arcsolve"` from `args`.
 
 ## Use only the modules you want
 

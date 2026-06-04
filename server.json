@@ -1,0 +1,22 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+  "name": "io.github.ArcSolver/arcsolve",
+  "description": "Public APIs of popular services as MCP tools, verified against official contracts (25+ services).",
+  "version": "0.1.0",
+  "repository": {
+    "url": "https://github.com/ArcSolver/ArcSolve-Kit",
+    "source": "github"
+  },
+  "packages": [
+    {
+      "registryType": "pypi",
+      "registryBaseUrl": "https://pypi.org",
+      "identifier": "arcsolve",
+      "version": "0.1.0",
+      "runtimeHint": "uvx",
+      "transport": {
+        "type": "stdio"
+      }
+    }
+  ]
+}

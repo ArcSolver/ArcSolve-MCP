@@ -6,7 +6,8 @@
   arcsolve skills           # 사용 가능한 스킬 목록
   arcsolve auth kakao       # 카카오 최초 1회 인증 → refresh_token 저장
   arcsolve catalog          # docs/services.md + docs/skills.md 재생성 (자동)
-  arcsolve changelog        # changelog.d/ 조각 → CHANGELOG.md 합본
+  arcsolve changelog        # changelog.d/ 조각 → CHANGELOG.md [Unreleased] 합본
+  arcsolve release 0.2.0    # 릴리스 컷: __version__ 갱신 + 조각을 버전 섹션으로 확정
 """
 
 from __future__ import annotations
@@ -84,6 +85,40 @@ def _changelog() -> None:
     print(f"체인지로그 합본: {path}")
 
 
+def _release(version: str | None) -> None:
+    import datetime
+
+    from arcsolve.changelog import (
+        cut_release,
+        set_init_version,
+        set_server_json_version,
+        validate_version,
+    )
+
+    if not version:
+        raise SystemExit("사용법: arcsolve release <version>  (예: arcsolve release 0.2.0)")
+    try:
+        validate_version(version)
+    except ValueError as e:
+        raise SystemExit(str(e))
+    today = datetime.date.today().isoformat()
+    set_init_version(version)
+    synced = set_server_json_version(version)
+    try:
+        consumed = cut_release(version, today)
+    except ValueError as e:
+        raise SystemExit(str(e))
+    print(f"릴리스 v{version} 컷 완료 (날짜 {today}).")
+    print(f"  · arcsolve/__init__.py __version__ = {version}")
+    if synced:
+        print(f"  · server.json version = {version}")
+    print(f"  · CHANGELOG.md [Unreleased] → [{version}] (조각 {len(consumed)}개 소비·삭제)")
+    print("다음 단계(검토 후):")
+    print("  uv run arcsolve catalog   # 카탈로그 동기화 확인")
+    print(f"  git add -A && git commit -m 'release: v{version}'")
+    print(f"  git tag v{version} && git push origin main --tags   # release.yml이 PyPI에 게시")
+
+
 def _serve(names: list[str]) -> None:
     try:
         server = build_server(names or None)
@@ -101,6 +136,8 @@ def main() -> None:
         _catalog()
     elif cmd == "changelog":
         _changelog()
+    elif cmd == "release":
+        _release(argv[1] if len(argv) > 1 else None)
     elif cmd == "list":
         from arcsolve.services import available
 
@@ -114,7 +151,8 @@ def main() -> None:
         _serve(argv[1:])
     else:
         raise SystemExit(
-            f"알 수 없는 명령: {cmd} (serve | list | skills | auth | catalog | changelog)"
+            f"알 수 없는 명령: {cmd} "
+            "(serve | list | skills | auth | catalog | changelog | release)"
         )
 
 
